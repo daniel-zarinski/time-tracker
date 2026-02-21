@@ -12,10 +12,10 @@
   },
   "iconLibrary": "lucide",
   "aliases": {
-    "components": "apps/renderer/src/components",
-    "utils": "apps/renderer/src/lib/utils",
-    "ui": "apps/renderer/src/components/ui",
-    "lib": "apps/renderer/src/lib",
+    "components": "libs/ui/src/components",
+    "utils": "libs/ui/src/lib/utils",
+    "ui": "libs/ui/src/components/ui",
+    "lib": "libs/ui/src/lib",
     "hooks": "apps/renderer/src/hooks"
   }
 }

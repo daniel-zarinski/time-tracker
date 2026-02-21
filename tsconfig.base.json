@@ -16,6 +16,10 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
-    "customConditions": ["time-tracker"]
+    "customConditions": ["time-tracker"],
+    "baseUrl": ".",
+    "paths": {
+      "@time-tracker/ui": ["libs/ui/src/index.ts"]
+    }
   }
 }
