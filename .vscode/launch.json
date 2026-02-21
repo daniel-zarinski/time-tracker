@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Attach to Electron (hot reload)",
+      "type": "node",
+      "request": "attach",
+      "port": 5858,
+      "timeout": 30000,
+      "restart": true,
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/apps/desktop/**/*.js"]
+    },
+    {
+      "name": "Launch Electron (debug)",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron",
+      "args": ["${workspaceFolder}/dist/apps/desktop/main.js"],
+      "preLaunchTask": "build:main",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/apps/desktop/**/*.js"]
+    }
+  ]
+}

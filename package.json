@@ -11,7 +11,8 @@
     "nxe:test:frontend": "nx test renderer",
     "nxe:test:backend": "nx test desktop",
     "nxe:package:app": "nx run desktop:make --prepackgeOnly",
-    "nxe:make:app": "nx run desktop:make"
+    "nxe:make:app": "nx run desktop:make",
+    "serve:main": "nx serve --inspect=inspect-brk desktop"
   },
   "private": true,
   "devDependencies": {

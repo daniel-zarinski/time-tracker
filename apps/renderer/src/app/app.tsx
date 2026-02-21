@@ -1,50 +1,41 @@
-// Uncomment this line to use CSS modules
-// import styles from './app.module.css';
-import NxWelcome from './nx-welcome';
-
 import { Route, Routes, Link } from 'react-router-dom';
 
 export function App() {
   return (
-    <div>
-      <NxWelcome title="renderer" />
+    <div className="min-h-screen bg-gray-100 text-gray-900">
+      <header className="bg-white shadow">
+        <div className="mx-auto max-w-7xl px-4 py-4">
+          <h1 className="text-xl font-bold">Time Tracker</h1>
+        </div>
+      </header>
 
-      {/* START: routes */}
-      {/* These routes and navigation have been generated for you */}
-      {/* Feel free to move and update them to fit your needs */}
-      <br />
-      <hr />
-      <br />
-      <div role="navigation">
-        <ul>
+      <nav className="mx-auto max-w-7xl px-4 py-2">
+        <ul className="flex gap-4">
           <li>
-            <Link to="/">Home</Link>
+            <Link to="/" className="text-blue-600 hover:underline">
+              Home
+            </Link>
           </li>
           <li>
-            <Link to="/page-2">Page 2</Link>
+            <Link to="/about" className="text-blue-600 hover:underline">
+              About
+            </Link>
           </li>
         </ul>
-      </div>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <div>
-              This is the generated root route.{' '}
-              <Link to="/page-2">Click here for page 2.</Link>
-            </div>
-          }
-        />
-        <Route
-          path="/page-2"
-          element={
-            <div>
-              <Link to="/">Click here to go back to root page.</Link>
-            </div>
-          }
-        />
-      </Routes>
-      {/* END: routes */}
+      </nav>
+
+      <main className="mx-auto max-w-7xl px-4 py-6">
+        <Routes>
+          <Route
+            path="/"
+            element={<p>Welcome to Time Tracker.</p>}
+          />
+          <Route
+            path="/about"
+            element={<p>About Time Tracker.</p>}
+          />
+        </Routes>
+      </main>
     </div>
   );
 }

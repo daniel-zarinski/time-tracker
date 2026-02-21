@@ -6,69 +6,56 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **time-tracker** — An Electron desktop application built with an Nx monorepo using the [nx-electron](https://github.com/bennymeg/nx-electron) plugin.
 
-**Status:** Project initialization in progress.
-
 ## Tech Stack
 
-- **Monorepo:** Nx (integrated monorepo style)
-- **Desktop:** Electron via `nx-electron` plugin
+- **Monorepo:** Nx 22 (integrated monorepo style)
+- **Desktop:** Electron via `nx-electron` 22
 - **Bundler:** Webpack (required by nx-electron)
-- **Frontend:** TBD (React, Angular, or other — to be chosen during `create-nx-workspace`)
+- **Frontend:** React 19 with React Router 6 (`HashRouter`)
+- **Styling:** Tailwind CSS v4
+- **Testing:** Jest
+- **Linting:** ESLint 9
 
-## Project Setup (from scratch)
+## Apps
 
-The workspace must be initialized with these steps in order:
-
-```bash
-# 1. Create Nx workspace (integrated monorepo, webpack bundler)
-npx create-nx-workspace@21 time-tracker
-
-# 2. Install nx-electron plugin (major version must match Nx major version)
-npm install -D nx-electron
-
-# 3. Generate the Electron app (requires an existing frontend project)
-nx g nx-electron:app <electron-app-name> --frontendProject=<frontend-app-name>
-```
-
-**Critical:** nx-electron major version must match Nx major version (e.g., Nx 21.x requires nx-electron 21.x).
+| App | Path | Description |
+|-----|------|-------------|
+| `renderer` | `apps/renderer/` | React frontend rendered inside Electron BrowserWindow |
+| `desktop` | `apps/desktop/` | Electron main process — windows, IPC, native APIs |
 
 ## Nx Commands
 
-All commands use the `nx` CLI. Replace `<app>` with the actual project name.
-
 | Task | Command |
 |------|---------|
-| Serve frontend | `nx serve <frontend-app>` |
-| Serve electron | `nx serve <electron-app>` |
-| Build frontend | `nx build <frontend-app>` |
-| Build electron | `nx build <electron-app>` |
-| Test frontend | `nx test <frontend-app>` |
-| Test electron | `nx test <electron-app>` |
-| Lint | `nx lint <app>` |
-| Package electron | `nx run <electron-app>:package` |
-| Make installer | `nx run <electron-app>:make` |
-| Run single test file | `nx test <app> --testFile=<path>` |
+| Serve frontend | `nx serve renderer` |
+| Serve electron | `nx serve desktop` |
+| Build frontend | `nx build renderer` |
+| Build electron | `nx build desktop` |
+| Test frontend | `nx test renderer` |
+| Lint | `nx lint renderer` / `nx lint desktop` |
+| Package electron | `nx run desktop:package` |
+| Make installer | `nx run desktop:make` |
 | Run affected tests | `nx affected --target=test` |
 | Dependency graph | `nx graph` |
 
-**Dev workflow:** Run `nx serve <frontend-app>` and `nx serve <electron-app>` in separate terminals simultaneously.
+**Dev workflow:** Run `nx serve renderer` and `nx serve desktop` in separate terminals simultaneously.
 
-**Before packaging:** Build both frontend and electron apps first.
+**Before packaging:** Build both `renderer` and `desktop` first.
 
 ## Architecture
 
-This is an Nx integrated monorepo with (at minimum) two projects:
+This is an Nx integrated monorepo with two apps:
 
-- **Frontend app** — The UI rendered inside the Electron BrowserWindow (webpack-bundled)
-- **Electron app** — The main process that creates windows, handles IPC, and manages native functionality
+- **`renderer`** — The React UI rendered inside the Electron BrowserWindow (webpack-bundled)
+- **`desktop`** — The main process that creates windows, handles IPC, and manages native functionality
 
-Frontend routing must use hash strategy (`HashRouter` in React, `useHash: true` in Angular) and `baseHref` must be set to `"./"` for Electron file:// protocol compatibility.
+Frontend routing uses `HashRouter` and `baseHref` is set to `"./"` for Electron `file://` protocol compatibility.
 
 ### IPC Pattern
 
-Electron's main process and renderer (frontend) communicate via IPC:
-- **Main process** (`electron-app`): Uses `ipcMain.handle()` / `ipcMain.on()`
-- **Renderer** (`frontend-app`): Uses `ipcRenderer.invoke()` / `ipcRenderer.send()` via a preload script
+Electron's main process and renderer communicate via IPC:
+- **Main process** (`desktop`): Uses `ipcMain.handle()` / `ipcMain.on()`
+- **Renderer** (`renderer`): Uses `ipcRenderer.invoke()` / `ipcRenderer.send()` via a preload script
 
 ## Documentation
 
@@ -84,3 +71,27 @@ Research documentation lives in `docs/research/<package-name>/`. All research do
 - Project names, file names, and directories use kebab-case
 - Nx generators should be used to scaffold new libraries and apps (`nx g @nx/react:lib`, etc.)
 - Shared code goes in Nx libraries under `libs/`
+
+<!-- nx configuration start-->
+<!-- Leave the start & end comments to automatically receive updates. -->
+
+# General Guidelines for working with Nx
+
+- For navigating/exploring the workspace, invoke the `nx-workspace` skill first - it has patterns for querying projects, targets, and dependencies
+- When running tasks (for example build, lint, test, e2e, etc.), always prefer running the task through `nx` (i.e. `nx run`, `nx run-many`, `nx affected`) instead of using the underlying tooling directly
+- Prefix nx commands with the workspace's package manager (e.g., `pnpm nx build`, `npm exec nx test`) - avoids using globally installed CLI
+- You have access to the Nx MCP server and its tools, use them to help the user
+- For Nx plugin best practices, check `node_modules/@nx/<plugin>/PLUGIN.md`. Not all plugins have this file - proceed without it if unavailable.
+- NEVER guess CLI flags - always check nx_docs or `--help` first when unsure
+
+## Scaffolding & Generators
+
+- For scaffolding tasks (creating apps, libs, project structure, setup), ALWAYS invoke the `nx-generate` skill FIRST before exploring or calling MCP tools
+
+## When to use nx_docs
+
+- USE for: advanced config options, unfamiliar flags, migration guides, plugin configuration, edge cases
+- DON'T USE for: basic generator syntax (`nx g @nx/react:app`), standard commands, things you already know
+- The `nx-generate` skill handles generator discovery internally - don't call nx_docs just to look up generator syntax
+
+<!-- nx configuration end-->
