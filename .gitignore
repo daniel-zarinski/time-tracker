@@ -44,6 +44,3 @@ Thumbs.db
 .github/instructions/nx.instructions.md
 
 test-output
-
-# Claude Code MCP config (developer-local)
-.mcp.json
