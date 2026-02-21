@@ -45,6 +45,12 @@
       "options": {
         "targetName": "test"
       }
+    },
+    {
+      "plugin": "@nx/eslint/plugin",
+      "options": {
+        "targetName": "lint"
+      }
     }
   ],
   "targetDefaults": {
@@ -66,7 +72,6 @@
       "application": {
         "babel": true,
         "style": "css",
-        "linter": "none",
         "bundler": "webpack"
       },
       "component": {
@@ -74,10 +79,8 @@
       },
       "library": {
         "style": "css",
-        "linter": "none",
         "unitTestRunner": "none"
       }
     }
-  },
-  "defaultProject": "desktop"
+  }
 }

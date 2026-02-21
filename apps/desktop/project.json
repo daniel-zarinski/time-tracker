@@ -51,12 +51,6 @@
         "sourcePath": "dist/apps",
         "outputPath": "dist/executables"
       }
-    },
-    "lint": {
-      "executor": "@nx/eslint:lint",
-      "options": {
-        "lintFilePatterns": ["apps/desktop/**/*.ts"]
-      }
     }
   }
 }
