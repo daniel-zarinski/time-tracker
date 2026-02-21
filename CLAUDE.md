@@ -70,6 +70,15 @@ Electron's main process and renderer (frontend) communicate via IPC:
 - **Main process** (`electron-app`): Uses `ipcMain.handle()` / `ipcMain.on()`
 - **Renderer** (`frontend-app`): Uses `ipcRenderer.invoke()` / `ipcRenderer.send()` via a preload script
 
+## Documentation
+
+Research documentation lives in `docs/research/<package-name>/`. All research docs must follow the template at [`docs/research/template.md`](docs/research/template.md), which defines:
+
+- YAML frontmatter schema (title, source URLs, dates, status, tags)
+- `_index.md` format (one per package folder, read-first entry point)
+- Topic file format (one focused concept per file)
+- Rules: max ~200 lines/file, mandatory sources and dates, kebab-case naming
+
 ## Conventions
 
 - Project names, file names, and directories use kebab-case
