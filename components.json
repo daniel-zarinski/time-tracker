@@ -13,7 +13,7 @@
   "iconLibrary": "lucide",
   "aliases": {
     "components": "libs/ui/src/components",
-    "utils": "libs/ui/src/lib/utils",
+    "utils": "@time-tracker/utils",
     "ui": "libs/ui/src/components/ui",
     "lib": "libs/ui/src/lib",
     "hooks": "apps/renderer/src/hooks"

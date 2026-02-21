@@ -19,7 +19,8 @@
     "customConditions": ["time-tracker"],
     "baseUrl": ".",
     "paths": {
-      "@time-tracker/ui": ["libs/ui/src/index.ts"]
+      "@time-tracker/ui": ["libs/ui/src/index.ts"],
+      "@time-tracker/utils": ["libs/utils/src/index.ts"]
     }
   }
 }
