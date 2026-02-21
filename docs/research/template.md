@@ -125,3 +125,4 @@ Additional subtopics as needed.
 6. **No duplicate content** — If two packages share a concept, pick one location and cross-reference.
 7. **Code examples use fenced blocks** with language identifier (` ```typescript `, ` ```bash `, etc.).
 8. **Folder structure** — `docs/research/<package-name>/` with kebab-case folder and file names.
+9. **Always use markdown links for file references** — Never use bare backtick file names. Always link to the file: `[setup.md](setup.md)` not `` `setup.md` ``. This applies everywhere: the File Index table, the "How It All Fits Together" narrative, the "Depends On" column, and any cross-references in topic files. Clickable links are essential for navigation.
