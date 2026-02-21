@@ -12,7 +12,7 @@
     "test:desktop": "nx test desktop",
     "package": "nx run desktop:package",
     "make": "nx run desktop:make",
-    "serve:main": "nx serve --inspect=inspect-brk desktop"
+    "dev": "nx run-many --targets=serve --projects=renderer,desktop --parallel"
   },
   "private": true,
   "devDependencies": {
