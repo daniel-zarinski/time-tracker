@@ -1,3 +1,4 @@
+import { getClient, PrismaClient } from '@time-tracker/database';
 import type {
   JiraConfig,
   JiraConfigInput,
@@ -42,12 +43,14 @@ const ISSUE_FIELDS =
 
 export class JiraService {
   private client: JiraClient;
+  private prisma: PrismaClient;
 
   constructor(config: JiraConfig) {
     const baseUrl = normalizeBaseUrl(config.baseUrl);
     const authHeader = `Basic ${Buffer.from(
       `${config.email}:${config.token}`
     ).toString('base64')}`;
+    this.prisma = getClient();
 
     this.client = new JiraClient({
       baseUrl,
@@ -63,7 +66,12 @@ export class JiraService {
 
   async fetchProjects(): Promise<JiraProject[]> {
     const data = await this.client.getProjects();
-    return data.map((p: JiraRawProject) => ({ key: p.key, name: p.name }));
+    const projects = data.map((p: JiraRawProject) => ({
+      key: p.key,
+      name: p.name,
+    }));
+
+    return projects;
   }
 
   private mapRawIssueToJiraIssue(raw: JiraRawIssue): JiraIssue {
@@ -85,13 +93,36 @@ export class JiraService {
     };
   }
 
+  private async upsertJiraIssue(issue: JiraIssue): Promise<void> {
+    await this.prisma.jiraIssue
+      .upsert({
+        where: { key: issue.key },
+        update: {
+          summary: issue.summary,
+          status: issue.status,
+          issueType: issue.issueType,
+          priority: issue.priority,
+          epicKey: issue.epicKey ?? undefined,
+        },
+        create: {
+          key: issue.key,
+          summary: issue.summary,
+          status: issue.status,
+          issueType: issue.issueType,
+          priority: issue.priority,
+          epicKey: issue.epicKey ?? undefined,
+        },
+      })
+      .catch((error) => {
+        console.error('Error upserting Jira issue', error);
+      });
+  }
+
   async fetchIssue(key: string): Promise<JiraIssue | null> {
-    try {
-      const data = await this.client.getIssue(key, ISSUE_FIELDS);
-      return this.mapRawIssueToJiraIssue(data);
-    } catch {
-      return null;
-    }
+    const data = await this.client.getIssue(key, ISSUE_FIELDS);
+    const issue = this.mapRawIssueToJiraIssue(data);
+    await this.upsertJiraIssue(issue);
+    return issue;
   }
 
   private buildSearchJql(options?: {
@@ -147,6 +178,9 @@ export class JiraService {
         allIssues.push(this.mapRawIssueToJiraIssue(raw));
       }
     }
+
+    await Promise.all(allIssues.map((i) => this.upsertJiraIssue(i)));
+
     return allIssues;
   }
 

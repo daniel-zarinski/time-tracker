@@ -40,6 +40,8 @@ nx test renderer
 
 ### Database (Prisma + SQLite)
 
+Copy `.env.example` to `.env` at the project root. The `DATABASE_URL` is used by Prisma CLI commands.
+
 ```bash
 nx run database:migrate-dev    # Create & apply a new migration
 nx run database:migrate-deploy # Apply pending migrations (production)

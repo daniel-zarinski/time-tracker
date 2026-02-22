@@ -1,14 +1,18 @@
 import { join } from 'path';
 
 /**
- * Returns a Prisma-compatible `file:` database URL
- * pointing to `<userDataPath>/<filename>`.
+ * Returns a Prisma-compatible `file:` database URL.
+ * - With userDataPath: production DB at `<userDataPath>/<filename>`.
+ * - Without userDataPath: dev DB at `libs/database/prisma/dev.db` (shares CLI migrations).
  */
 export function getDatabaseUrl(
-  userDataPath: string,
+  userDataPath?: string,
   filename = 'time-tracker.db'
 ): string {
-  return `file:${join(userDataPath, filename)}`;
+  if (userDataPath) {
+    return `file:${join(userDataPath, filename)}`;
+  }
+  return `file:${join(process.cwd(), 'libs/database/prisma/dev.db')}`;
 }
 
 /**
