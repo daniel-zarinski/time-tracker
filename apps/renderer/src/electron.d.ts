@@ -7,22 +7,15 @@ import type {
 } from '@time-tracker/jira';
 
 interface ElectronJira {
-  testConnection: (config: JiraConfigInput) => Promise<JiraMyselfResponse>;
-  fetchProjects: (config: JiraConfigInput) => Promise<JiraProject[]>;
-  fetchIssue: (config: JiraConfigInput, key: string) => Promise<JiraIssue | null>;
+  testConnection: (config?: JiraConfigInput) => Promise<JiraMyselfResponse>;
+  fetchProjects: () => Promise<JiraProject[]>;
+  fetchIssue: (key: string) => Promise<JiraIssue | null>;
   fetchIssues: (
-    config: JiraConfigInput,
     options?: { project?: string; assigneeCurrentUser?: boolean }
   ) => Promise<JiraIssue[]>;
-  fetchMyIssues: (
-    config: JiraConfigInput,
-    project?: string
-  ) => Promise<JiraIssue[]>;
-  fetchStatuses: (config: JiraConfigInput) => Promise<JiraStatusInfo[]>;
-  fetchStatusesForKeys: (
-    config: JiraConfigInput,
-    keys: string[]
-  ) => Promise<Record<string, string>>;
+  fetchMyIssues: (project?: string) => Promise<JiraIssue[]>;
+  fetchStatuses: () => Promise<JiraStatusInfo[]>;
+  fetchStatusesForKeys: (keys: string[]) => Promise<Record<string, string>>;
 }
 
 declare global {

@@ -1,3 +1,157 @@
-export const TasksTab = () => {
-  return <div>TasksTab</div>;
-};
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import {
+  Button,
+  ScrollArea,
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyContent,
+  EmptyMedia,
+  JiraIssueCard,
+} from '@time-tracker/ui';
+import { Settings, AlertCircle, Inbox } from 'lucide-react';
+import { useAppStore } from '../store';
+
+export function TasksTab() {
+  const setActiveTab = useAppStore.use.setActiveTab();
+  const [project, setProject] = useState<string>('all');
+
+  const projectsQuery = useQuery({
+    queryKey: ['jira', 'projects'],
+    queryFn: () => window.electron.jira.fetchProjects(),
+    retry: false,
+  });
+
+  const issuesQuery = useQuery({
+    queryKey: ['jira', 'my-issues', project],
+    queryFn: () =>
+      window.electron.jira.fetchMyIssues(
+        project === 'all' || !project ? undefined : project
+      ),
+    retry: false,
+  });
+
+  const isConfigError =
+    issuesQuery.isError &&
+    (issuesQuery.error as { message?: string })?.message?.includes(
+      'not configured'
+    );
+
+  if (isConfigError) {
+    return (
+      <Empty className="w-full max-w-md mx-auto">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <Settings />
+          </EmptyMedia>
+          <EmptyTitle>Jira not configured</EmptyTitle>
+          <EmptyDescription>
+            Connect your Jira account in Settings to fetch tasks.
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <Button onClick={() => setActiveTab('settings')} variant="default">
+            Open Settings
+          </Button>
+        </EmptyContent>
+      </Empty>
+    );
+  }
+
+  if (issuesQuery.isError) {
+    return (
+      <Empty className="w-full max-w-md mx-auto">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <AlertCircle />
+          </EmptyMedia>
+          <EmptyTitle>Failed to fetch tasks</EmptyTitle>
+          <EmptyDescription>
+            {(issuesQuery.error as { message?: string })?.message ??
+              'Something went wrong'}
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <Button
+            variant="outline"
+            onClick={() => issuesQuery.refetch()}
+            disabled={issuesQuery.isRefetching}
+          >
+            Retry
+          </Button>
+        </EmptyContent>
+      </Empty>
+    );
+  }
+
+  if (issuesQuery.isLoading || issuesQuery.isFetching) {
+    return (
+      <Empty className="w-full max-w-md mx-auto">
+        <EmptyHeader>
+          <EmptyTitle>Loading tasks…</EmptyTitle>
+        </EmptyHeader>
+      </Empty>
+    );
+  }
+
+  const issues = issuesQuery.data ?? [];
+
+  async function handleOpenInJira(issueKey: string) {
+    const config = await window.electron.store.getJiraConfig();
+    if (config?.domain) {
+      const url = `https://${config.domain}.atlassian.net/browse/${issueKey}`;
+      await window.electron.openExternal(url);
+    }
+  }
+
+  if (issues.length === 0) {
+    return (
+      <Empty className="w-full max-w-md mx-auto">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <Inbox />
+          </EmptyMedia>
+          <EmptyTitle>No tasks</EmptyTitle>
+          <EmptyDescription>No tasks assigned to you.</EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+    );
+  }
+
+  return (
+    <div className="w-full max-w-2xl mx-auto p-4 flex flex-col gap-4">
+      {projectsQuery.data && projectsQuery.data.length > 1 && (
+        <div className="flex items-center gap-2">
+          <label htmlFor="project-filter" className="text-sm font-medium">
+            Project
+          </label>
+          <select
+            id="project-filter"
+            value={project}
+            onChange={(e) => setProject(e.target.value)}
+            className="rounded-md border border-input bg-background px-3 py-1.5 text-sm"
+          >
+            <option value="all">All projects</option>
+            {projectsQuery.data.map((p) => (
+              <option key={p.key} value={p.key}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      <ScrollArea className="h-[calc(100vh-12rem)]">
+        <ul className="flex flex-col gap-2 pr-4">
+          {issues.map((issue) => (
+            <li key={issue.key}>
+              <JiraIssueCard issue={issue} onOpenInJira={handleOpenInJira} />
+            </li>
+          ))}
+        </ul>
+      </ScrollArea>
+    </div>
+  );
+}

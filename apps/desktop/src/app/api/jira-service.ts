@@ -13,6 +13,7 @@ import type {
   JiraStatusRaw,
 } from '@time-tracker/jira';
 import { JiraApiError } from '@time-tracker/jira';
+import { getJiraConfig } from '../store/config-store';
 
 function getStatusCategoryKey(
   cat: string | { key?: string } | undefined
@@ -166,20 +167,20 @@ class JiraService {
     }
   }
 
-  private async buildSearchJql(options?: {
+  private buildSearchJql(options?: {
     project?: string;
     assigneeCurrentUser?: boolean;
-  }): Promise<string> {
-    let whereClause: string;
-    if (options?.project) {
-      whereClause = `project = ${options.project}`;
-    } else {
-      const projects = await this.fetchProjects();
-      whereClause =
-        projects.length > 0
-          ? `project in (${projects.map((p) => p.key).join(', ')})`
-          : '';
-    }
+  }): string {
+    let whereClause = '';
+    // if (options?.project) {
+    //   whereClause = `project = ${options.project}`;
+    // } else {
+    //   const projects = await this.fetchProjects();
+    //   whereClause =
+    //     projects.length > 0
+    //       ? `project in (${projects.map((p) => p.key).join(', ')})`
+    //       : '';
+    // }
     if (options?.assigneeCurrentUser) {
       whereClause = whereClause
         ? `(${whereClause}) AND assignee = currentUser()`
@@ -223,7 +224,7 @@ class JiraService {
     project?: string;
     assigneeCurrentUser?: boolean;
   }): Promise<JiraIssue[]> {
-    const jql = await this.buildSearchJql(options);
+    const jql = this.buildSearchJql(options);
     const allIssues: JiraIssue[] = [];
     for await (const page of this.fetchSearchPages(jql)) {
       for (const raw of page) {
@@ -301,12 +302,19 @@ function serializeError(err: unknown): {
   };
 }
 
+function resolveConfig(input?: JiraConfigInput): JiraConfig {
+  const raw = input ?? getJiraConfig();
+  if (!raw) throw new JiraApiError('Jira is not configured');
+  const config = toJiraConfig(raw);
+  validateConfig(config);
+  return config;
+}
+
 export function bootstrapJiraEvents(): void {
   ipcMain.handle(
     'jira:test-connection',
-    async (_event, input: JiraConfigInput): Promise<JiraMyselfResponse> => {
-      const config = toJiraConfig(input);
-      validateConfig(config);
+    async (_event, input?: JiraConfigInput): Promise<JiraMyselfResponse> => {
+      const config = resolveConfig(input);
       try {
         const service = new JiraService(config);
         return service.testConnection();
@@ -316,29 +324,20 @@ export function bootstrapJiraEvents(): void {
     }
   );
 
-  ipcMain.handle(
-    'jira:fetch-projects',
-    async (_event, input: JiraConfigInput): Promise<JiraProject[]> => {
-      const config = toJiraConfig(input);
-      validateConfig(config);
-      try {
-        const service = new JiraService(config);
-        return service.fetchProjects();
-      } catch (err) {
-        throw serializeError(err);
-      }
+  ipcMain.handle('jira:fetch-projects', async (): Promise<JiraProject[]> => {
+    const config = resolveConfig();
+    try {
+      const service = new JiraService(config);
+      return service.fetchProjects();
+    } catch (err) {
+      throw serializeError(err);
     }
-  );
+  });
 
   ipcMain.handle(
     'jira:fetch-issue',
-    async (
-      _event,
-      input: JiraConfigInput,
-      key: string
-    ): Promise<JiraIssue | null> => {
-      const config = toJiraConfig(input);
-      validateConfig(config);
+    async (_event, key: string): Promise<JiraIssue | null> => {
+      const config = resolveConfig();
       try {
         const service = new JiraService(config);
         return service.fetchIssue(key);
@@ -352,11 +351,9 @@ export function bootstrapJiraEvents(): void {
     'jira:fetch-issues',
     async (
       _event,
-      input: JiraConfigInput,
       options?: { project?: string; assigneeCurrentUser?: boolean }
     ): Promise<JiraIssue[]> => {
-      const config = toJiraConfig(input);
-      validateConfig(config);
+      const config = resolveConfig();
       try {
         const service = new JiraService(config);
         return service.fetchIssues(options);
@@ -368,13 +365,8 @@ export function bootstrapJiraEvents(): void {
 
   ipcMain.handle(
     'jira:fetch-my-issues',
-    async (
-      _event,
-      input: JiraConfigInput,
-      project?: string
-    ): Promise<JiraIssue[]> => {
-      const config = toJiraConfig(input);
-      validateConfig(config);
+    async (_event, project?: string): Promise<JiraIssue[]> => {
+      const config = resolveConfig();
       try {
         const service = new JiraService(config);
         return service.fetchMyIssues(project);
@@ -384,29 +376,20 @@ export function bootstrapJiraEvents(): void {
     }
   );
 
-  ipcMain.handle(
-    'jira:fetch-statuses',
-    async (_event, input: JiraConfigInput): Promise<JiraStatusInfo[]> => {
-      const config = toJiraConfig(input);
-      validateConfig(config);
-      try {
-        const service = new JiraService(config);
-        return service.fetchStatuses();
-      } catch (err) {
-        throw serializeError(err);
-      }
+  ipcMain.handle('jira:fetch-statuses', async (): Promise<JiraStatusInfo[]> => {
+    const config = resolveConfig();
+    try {
+      const service = new JiraService(config);
+      return service.fetchStatuses();
+    } catch (err) {
+      throw serializeError(err);
     }
-  );
+  });
 
   ipcMain.handle(
     'jira:fetch-statuses-for-keys',
-    async (
-      _event,
-      input: JiraConfigInput,
-      keys: string[]
-    ): Promise<Record<string, string>> => {
-      const config = toJiraConfig(input);
-      validateConfig(config);
+    async (_event, keys: string[]): Promise<Record<string, string>> => {
+      const config = resolveConfig();
       try {
         const service = new JiraService(config);
         return service.fetchStatusesForKeys(keys);
