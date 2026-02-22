@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { HashRouter } from 'react-router-dom';
-import { ThemeProvider } from '@time-tracker/ui';
+import { ThemeProvider, Toaster } from '@time-tracker/ui';
 
 import App from './app/app';
 
@@ -13,6 +13,7 @@ root.render(
     <HashRouter>
       <ThemeProvider>
         <App />
+        <Toaster />
       </ThemeProvider>
     </HashRouter>
   </StrictMode>

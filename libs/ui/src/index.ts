@@ -1,6 +1,10 @@
 export { ThemeProvider } from './components/theme-provider';
 export * from './components/ui/button';
 export * from './components/ui/card';
+export * from './components/ui/field';
+export * from './components/ui/input';
+export * from './components/ui/input-group';
+export * from './components/ui/label';
 export * from './components/ui/resizable';
 export * from './components/ui/scroll-area';
 export * from './components/ui/separator';

@@ -1,6 +1,7 @@
 import { ipcMain, net } from 'electron';
 import type {
   JiraConfig,
+  JiraConfigInput,
   JiraMyselfResponse,
   JiraProject,
   JiraIssue,
@@ -23,6 +24,20 @@ function getStatusCategoryKey(
 
 function normalizeBaseUrl(url: string): string {
   return url.replace(/\/$/, '');
+}
+
+export function toJiraConfig(input: JiraConfigInput): JiraConfig {
+  const d = input.domain
+    .trim()
+    .toLowerCase()
+    .replace(/\.atlassian\.net$/i, '');
+  if (!d) throw new JiraApiError('Jira domain is required');
+  const baseUrl = `https://${d}.atlassian.net`;
+  return {
+    baseUrl,
+    email: input.email,
+    token: input.token,
+  };
 }
 
 function validateConfig(config: JiraConfig): void {
@@ -278,7 +293,8 @@ function serializeError(err: unknown): {
   statusCode?: number;
 } {
   if (err instanceof JiraApiError) {
-    return { message: err.message, statusCode: err.statusCode };
+    const e = err;
+    return { message: e.message, statusCode: e.statusCode };
   }
   return {
     message: err instanceof Error ? err.message : String(err),
@@ -288,7 +304,8 @@ function serializeError(err: unknown): {
 export function bootstrapJiraEvents(): void {
   ipcMain.handle(
     'jira:test-connection',
-    async (_event, config: JiraConfig): Promise<JiraMyselfResponse> => {
+    async (_event, input: JiraConfigInput): Promise<JiraMyselfResponse> => {
+      const config = toJiraConfig(input);
       validateConfig(config);
       try {
         const service = new JiraService(config);
@@ -301,7 +318,8 @@ export function bootstrapJiraEvents(): void {
 
   ipcMain.handle(
     'jira:fetch-projects',
-    async (_event, config: JiraConfig): Promise<JiraProject[]> => {
+    async (_event, input: JiraConfigInput): Promise<JiraProject[]> => {
+      const config = toJiraConfig(input);
       validateConfig(config);
       try {
         const service = new JiraService(config);
@@ -316,9 +334,10 @@ export function bootstrapJiraEvents(): void {
     'jira:fetch-issue',
     async (
       _event,
-      config: JiraConfig,
+      input: JiraConfigInput,
       key: string
     ): Promise<JiraIssue | null> => {
+      const config = toJiraConfig(input);
       validateConfig(config);
       try {
         const service = new JiraService(config);
@@ -333,9 +352,10 @@ export function bootstrapJiraEvents(): void {
     'jira:fetch-issues',
     async (
       _event,
-      config: JiraConfig,
+      input: JiraConfigInput,
       options?: { project?: string; assigneeCurrentUser?: boolean }
     ): Promise<JiraIssue[]> => {
+      const config = toJiraConfig(input);
       validateConfig(config);
       try {
         const service = new JiraService(config);
@@ -350,9 +370,10 @@ export function bootstrapJiraEvents(): void {
     'jira:fetch-my-issues',
     async (
       _event,
-      config: JiraConfig,
+      input: JiraConfigInput,
       project?: string
     ): Promise<JiraIssue[]> => {
+      const config = toJiraConfig(input);
       validateConfig(config);
       try {
         const service = new JiraService(config);
@@ -365,7 +386,8 @@ export function bootstrapJiraEvents(): void {
 
   ipcMain.handle(
     'jira:fetch-statuses',
-    async (_event, config: JiraConfig): Promise<JiraStatusInfo[]> => {
+    async (_event, input: JiraConfigInput): Promise<JiraStatusInfo[]> => {
+      const config = toJiraConfig(input);
       validateConfig(config);
       try {
         const service = new JiraService(config);
@@ -380,9 +402,10 @@ export function bootstrapJiraEvents(): void {
     'jira:fetch-statuses-for-keys',
     async (
       _event,
-      config: JiraConfig,
+      input: JiraConfigInput,
       keys: string[]
     ): Promise<Record<string, string>> => {
+      const config = toJiraConfig(input);
       validateConfig(config);
       try {
         const service = new JiraService(config);

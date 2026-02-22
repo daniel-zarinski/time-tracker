@@ -4,8 +4,10 @@
   "license": "MIT",
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
+    "build": "nx run-many --target=build --all",
     "build:renderer": "nx build renderer",
     "build:desktop": "nx build desktop",
+    "build:ui": "nx typecheck ui",
     "serve:renderer": "nx serve renderer",
     "serve:desktop": "nx serve desktop",
     "test:renderer": "nx test renderer",
@@ -68,6 +70,7 @@
     "@tanstack/react-query": "^5.90.21",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "electron-store": "^11.0.2",
     "lucide-react": "^0.575.0",
     "radix-ui": "^1.4.3",
     "react": "^19.0.0",

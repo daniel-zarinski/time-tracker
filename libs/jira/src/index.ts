@@ -4,6 +4,13 @@ export interface JiraConfig {
   token: string;
 }
 
+/** Domain-based config for storage and IPC (baseUrl is inferred in API layer). */
+export interface JiraConfigInput {
+  domain: string;
+  email: string;
+  token: string;
+}
+
 export interface JiraMyselfResponse {
   displayName: string;
   emailAddress: string;

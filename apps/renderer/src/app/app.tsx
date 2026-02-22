@@ -27,7 +27,7 @@ export function App() {
           </TabsList>
         </header>
         <Separator />
-        <main className="mx-auto max-w-7xl px-4">
+        <main>
           <TabsContent value="home">
             <HomeTab />
           </TabsContent>

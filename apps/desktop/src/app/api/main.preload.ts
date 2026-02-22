@@ -2,7 +2,19 @@ import { contextBridge, ipcRenderer } from 'electron';
 
 contextBridge.exposeInMainWorld('electron', {
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
+  openExternal: (url: string) => ipcRenderer.invoke('shell:open-external', url),
   platform: process.platform,
+  store: {
+    get: (key: string) => ipcRenderer.invoke('store:get', key),
+    set: (key: string, value: unknown) =>
+      ipcRenderer.invoke('store:set', key, value),
+    getJiraConfig: () => ipcRenderer.invoke('store:get-jira-config'),
+    setJiraConfig: (config: {
+      domain: string;
+      email: string;
+      token: string;
+    }) => ipcRenderer.invoke('store:set-jira-config', config),
+  },
   jira: {
     testConnection: (config: unknown) =>
       ipcRenderer.invoke('jira:test-connection', config),
