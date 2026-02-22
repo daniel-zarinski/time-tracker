@@ -4,6 +4,9 @@ contextBridge.exposeInMainWorld('electron', {
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
   openExternal: (url: string) => ipcRenderer.invoke('shell:open-external', url),
   platform: process.platform,
+  cache: {
+    clearCache: () => ipcRenderer.invoke('cache:clear'),
+  },
   store: {
     get: (key: string) => ipcRenderer.invoke('store:get', key),
     set: (key: string, value: unknown) =>

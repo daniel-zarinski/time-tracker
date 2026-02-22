@@ -24,9 +24,7 @@ function isCacheEntry<T>(raw: unknown): raw is CacheEntry<T> {
   if (!raw || typeof raw !== 'object') return false;
   const obj = raw as Record<string, unknown>;
   return (
-    'data' in obj &&
-    'fetchedAt' in obj &&
-    typeof obj.fetchedAt === 'number'
+    'data' in obj && 'fetchedAt' in obj && typeof obj.fetchedAt === 'number'
   );
 }
 
@@ -53,4 +51,12 @@ export function setCached<T>(key: string, data: T): void {
     fetchedAt: Date.now(),
   };
   cacheStore.set(key, entry);
+}
+
+/**
+ * Clears all cached data (Jira projects, issues, etc.).
+ * Does not affect the config store (credentials).
+ */
+export function clearCache(): void {
+  cacheStore.clear();
 }

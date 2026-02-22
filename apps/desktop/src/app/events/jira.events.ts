@@ -142,7 +142,7 @@ export function bootstrapJiraEvents(): void {
       const config = resolveConfig();
       try {
         const service = new JiraService(config);
-        const issues = await service.fetchMyIssues(project);
+        const issues = await service.fetchMyIssues(normalizedProject);
         if (useCache) setCached(CACHE_KEY_JIRA_ISSUES, issues);
         return issues;
       } catch (err) {

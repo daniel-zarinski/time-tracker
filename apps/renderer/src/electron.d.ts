@@ -26,12 +26,17 @@ interface ElectronStore {
   setJiraConfig: (config: JiraConfigInput) => Promise<void>;
 }
 
+interface ElectronCache {
+  clearCache: () => Promise<void>;
+}
+
 declare global {
   interface Window {
     electron: {
       getAppVersion: () => Promise<string>;
       openExternal: (url: string) => Promise<void>;
       platform: string;
+      cache: ElectronCache;
       store: ElectronStore;
       jira: ElectronJira;
     };

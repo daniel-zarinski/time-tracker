@@ -19,7 +19,7 @@ import {
   InputGroupText,
   toast,
 } from '@time-tracker/ui';
-import { Globe } from 'lucide-react';
+import { Database, Globe, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const JIRA_TOAST_ID = 'jira-settings';
@@ -31,6 +31,7 @@ export function SettingsTab() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
+  const [isClearingCache, setIsClearingCache] = useState(false);
 
   useEffect(() => {
     window.electron.store
@@ -74,6 +75,19 @@ export function SettingsTab() {
         .unwrap();
     } finally {
       setIsTesting(false);
+    }
+  }
+
+  async function handleClearCache() {
+    setIsClearingCache(true);
+    try {
+      await window.electron.cache.clearCache();
+      toast.success('Cache cleared', {
+        id: JIRA_TOAST_ID,
+        position: 'bottom-center',
+      });
+    } finally {
+      setIsClearingCache(false);
     }
   }
 
@@ -177,6 +191,44 @@ export function SettingsTab() {
               </FieldSet>
             </FieldGroup>
           </form>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-4">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-md bg-muted">
+              <Database className="h-4 w-4" />
+            </div>
+            <CardTitle className="text-base font-semibold">
+              Local data
+            </CardTitle>
+          </div>
+          <CardDescription className="text-xs">
+            Manage data stored locally on this device.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <FieldGroup>
+            <FieldSet className="gap-3">
+              <FieldLegend>Cache</FieldLegend>
+              <FieldDescription>
+                Cached Jira projects and issues. Clear to force a fresh fetch.
+              </FieldDescription>
+              <Field orientation="horizontal">
+                <Button
+                  variant="outline"
+                  type="button"
+                  size="sm"
+                  disabled={isClearingCache}
+                  onClick={handleClearCache}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Clear cache
+                </Button>
+              </Field>
+            </FieldSet>
+          </FieldGroup>
         </CardContent>
       </Card>
     </div>
