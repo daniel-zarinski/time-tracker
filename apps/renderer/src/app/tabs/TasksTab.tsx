@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Button,
@@ -16,20 +15,10 @@ import { useAppStore } from '../store';
 
 export function TasksTab() {
   const setActiveTab = useAppStore.use.setActiveTab();
-  const [project, setProject] = useState<string>('all');
-
-  const projectsQuery = useQuery({
-    queryKey: ['jira', 'projects'],
-    queryFn: () => window.electron.jira.fetchProjects(),
-    retry: false,
-  });
 
   const issuesQuery = useQuery({
-    queryKey: ['jira', 'my-issues', project],
-    queryFn: () =>
-      window.electron.jira.fetchMyIssues(
-        project === 'all' || !project ? undefined : project
-      ),
+    queryKey: ['jira', 'my-issues'],
+    queryFn: () => window.electron.jira.fetchMyIssues(),
     retry: false,
   });
 
@@ -122,28 +111,7 @@ export function TasksTab() {
 
   return (
     <div className="w-full max-w-2xl mx-auto p-4 flex flex-col gap-4">
-      {projectsQuery.data && projectsQuery.data.length > 1 && (
-        <div className="flex items-center gap-2">
-          <label htmlFor="project-filter" className="text-sm font-medium">
-            Project
-          </label>
-          <select
-            id="project-filter"
-            value={project}
-            onChange={(e) => setProject(e.target.value)}
-            className="rounded-md border border-input bg-background px-3 py-1.5 text-sm"
-          >
-            <option value="all">All projects</option>
-            {projectsQuery.data.map((p) => (
-              <option key={p.key} value={p.key}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-
-      <ScrollArea className="h-[calc(100vh-12rem)]">
+      <ScrollArea className="h-[calc(100vh-8rem)]">
         <ul className="flex flex-col gap-2 pr-4">
           {issues.map((issue) => (
             <li key={issue.key}>
