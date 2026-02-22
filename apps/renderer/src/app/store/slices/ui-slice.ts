@@ -1,6 +1,6 @@
 import { StateCreator } from 'zustand';
 
-export type TabValue = 'home' | 'tasks' | 'settings';
+export type TabValue = 'home' | 'jira-issues' | 'settings';
 
 export interface UiSlice {
   activeTab: TabValue;

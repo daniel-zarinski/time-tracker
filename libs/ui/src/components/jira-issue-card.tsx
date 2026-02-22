@@ -1,23 +1,13 @@
 import { useState } from 'react';
 import { Button } from './ui/button';
-import { Card, CardHeader, CardContent } from './ui/card';
+import { Card, CardHeader, CardContent, CardFooter } from './ui/card';
 import { Badge } from './ui/badge';
 import {
   Collapsible,
   CollapsibleTrigger,
   CollapsibleContent,
 } from './ui/collapsible';
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from './ui/dropdown-menu';
-import {
-  ChevronDownIcon,
-  ExternalLinkIcon,
-  MoreHorizontal,
-} from 'lucide-react';
+import { ChevronDownIcon, ExternalLinkIcon } from 'lucide-react';
 import { cn } from '@time-tracker/utils';
 import type { JiraIssue } from '@time-tracker/jira';
 
@@ -88,26 +78,6 @@ export function JiraIssueCard({ issue, onOpenInJira }: JiraIssueCardProps) {
               </div>
             </div>
           </CollapsibleTrigger>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 shrink-0 rounded-(--radius)"
-                aria-label="More"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleOpenInJira}>
-                <ExternalLinkIcon className="h-4 w-4" />
-                Open in Jira
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </CardHeader>
 
         <CollapsibleContent>
@@ -143,6 +113,20 @@ export function JiraIssueCard({ issue, onOpenInJira }: JiraIssueCardProps) {
                 </Badge>
               </div>
             </div>
+
+            <CardFooter className="flex justify-end border-t border-muted-foreground/5 px-3 pt-2 pb-0">
+              <div className="inline-flex rounded-(--radius) overflow-hidden [&>*:not(:first-child)]:-ml-px">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-none first:rounded-l-(--radius) last:rounded-r-(--radius)"
+                  onClick={handleOpenInJira}
+                >
+                  <ExternalLinkIcon className="h-4 w-4" />
+                  Open in Jira
+                </Button>
+              </div>
+            </CardFooter>
           </CardContent>
         </CollapsibleContent>
       </Collapsible>

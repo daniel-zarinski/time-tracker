@@ -13,7 +13,7 @@ import {
 import { Settings, AlertCircle, Inbox } from 'lucide-react';
 import { useAppStore } from '../store';
 
-export function TasksTab() {
+export function JiraIssuesTab() {
   const setActiveTab = useAppStore.use.setActiveTab();
 
   const issuesQuery = useQuery({
@@ -37,7 +37,7 @@ export function TasksTab() {
           </EmptyMedia>
           <EmptyTitle>Jira not configured</EmptyTitle>
           <EmptyDescription>
-            Connect your Jira account in Settings to fetch tasks.
+            Connect your Jira account in Settings to fetch Jira issues.
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
@@ -56,7 +56,7 @@ export function TasksTab() {
           <EmptyMedia variant="icon">
             <AlertCircle />
           </EmptyMedia>
-          <EmptyTitle>Failed to fetch tasks</EmptyTitle>
+          <EmptyTitle>Failed to fetch Jira issues</EmptyTitle>
           <EmptyDescription>
             {(issuesQuery.error as { message?: string })?.message ??
               'Something went wrong'}
@@ -79,7 +79,7 @@ export function TasksTab() {
     return (
       <Empty className="w-full max-w-md mx-auto">
         <EmptyHeader>
-          <EmptyTitle>Loading tasks…</EmptyTitle>
+          <EmptyTitle>Loading Jira issues…</EmptyTitle>
         </EmptyHeader>
       </Empty>
     );
@@ -102,8 +102,8 @@ export function TasksTab() {
           <EmptyMedia variant="icon">
             <Inbox />
           </EmptyMedia>
-          <EmptyTitle>No tasks</EmptyTitle>
-          <EmptyDescription>No tasks assigned to you.</EmptyDescription>
+          <EmptyTitle>No Jira issues</EmptyTitle>
+          <EmptyDescription>No Jira issues assigned to you.</EmptyDescription>
         </EmptyHeader>
       </Empty>
     );

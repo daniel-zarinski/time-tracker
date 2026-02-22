@@ -6,7 +6,7 @@ import {
   Separator,
 } from '@time-tracker/ui';
 
-import { HomeTab, SettingsTab, TasksTab } from './tabs';
+import { HomeTab, SettingsTab, JiraIssuesTab } from './tabs';
 import { useAppStore, TabValue } from './store';
 
 export function App() {
@@ -22,7 +22,7 @@ export function App() {
         <header className="flex items-center justify-center pt-2">
           <TabsList className="gap-2">
             <TabsTrigger value="home">Home</TabsTrigger>
-            <TabsTrigger value="tasks">Tasks</TabsTrigger>
+            <TabsTrigger value="jira-issues">Jira Issues</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
         </header>
@@ -32,8 +32,8 @@ export function App() {
             <HomeTab />
           </TabsContent>
 
-          <TabsContent value="tasks">
-            <TasksTab />
+          <TabsContent value="jira-issues">
+            <JiraIssuesTab />
           </TabsContent>
 
           <TabsContent value="settings">
