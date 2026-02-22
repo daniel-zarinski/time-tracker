@@ -18,8 +18,41 @@ import type { JiraIssue } from '@time-tracker/jira';
 import { Settings, AlertCircle, Inbox } from 'lucide-react';
 import { useAppStore } from '../store';
 
+const OTHER_STATUSES = [
+  'DEV COMPLETED',
+  'Done',
+  'Inactive',
+  'Cancelled',
+] as const;
+
+const OTHER_STATUS_SET = new Set(OTHER_STATUSES);
+
+const STATUS_ORDER = [
+  'In Progress',
+  'Code Review',
+  'New',
+  'To Do',
+  'Other',
+] as const;
+
 function toTabValue(status: string) {
-  return status.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  return status
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '');
+}
+
+function sortStatuses(statuses: string[]): string[] {
+  const normalized = (s: string) => s.toLowerCase().trim();
+  const orderMap = new Map(STATUS_ORDER.map((s, i) => [normalized(s), i]));
+  return [...statuses].sort((a, b) => {
+    const aNorm = normalized(a);
+    const bNorm = normalized(b);
+    const aIdx = orderMap.get(aNorm) ?? STATUS_ORDER.length;
+    const bIdx = orderMap.get(bNorm) ?? STATUS_ORDER.length;
+    if (aIdx !== bIdx) return aIdx - bIdx;
+    return a.localeCompare(b);
+  });
 }
 
 export function JiraIssuesTab() {
@@ -98,13 +131,18 @@ export function JiraIssuesTab() {
   const groupedByStatus = issues.reduce<Record<string, JiraIssue[]>>(
     (acc, issue) => {
       const status = issue.status || 'Unknown';
-      if (!acc[status]) acc[status] = [];
-      acc[status].push(issue);
+      const displayStatus = OTHER_STATUS_SET.has(
+        status as (typeof OTHER_STATUSES)[number]
+      )
+        ? 'Other'
+        : status;
+      if (!acc[displayStatus]) acc[displayStatus] = [];
+      acc[displayStatus].push(issue);
       return acc;
     },
     {}
   );
-  const statuses = Object.keys(groupedByStatus).sort();
+  const statuses = sortStatuses(Object.keys(groupedByStatus));
 
   async function handleOpenInJira(issueKey: string) {
     const config = await window.electron.store.getJiraConfig();
