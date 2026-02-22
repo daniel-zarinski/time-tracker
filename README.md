@@ -38,6 +38,18 @@ nx build desktop
 nx test renderer
 ```
 
+### Database (Prisma + SQLite)
+
+```bash
+nx run database:migrate-dev    # Create & apply a new migration
+nx run database:migrate-deploy # Apply pending migrations (production)
+nx run database:push           # Push schema changes without a migration file
+nx run database:generate       # Regenerate Prisma client (runs automatically on build)
+nx run database:studio         # Open Prisma Studio GUI
+```
+
+Schema lives at `libs/database/prisma/schema.prisma`. After editing models, run `prisma-migrate-dev` to generate a migration.
+
 ### Package / Distribute
 
 ```bash

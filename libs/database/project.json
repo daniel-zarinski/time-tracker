@@ -1,0 +1,48 @@
+{
+  "name": "database",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/database/src",
+  "projectType": "library",
+  "targets": {
+    "generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma generate",
+        "cwd": "libs/database"
+      }
+    },
+    "migrate-dev": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["generate"],
+      "options": {
+        "command": "prisma migrate dev",
+        "cwd": "libs/database",
+        "envFile": "libs/database/.env"
+      }
+    },
+    "migrate-deploy": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma migrate deploy",
+        "cwd": "libs/database"
+      }
+    },
+    "push": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["generate"],
+      "options": {
+        "command": "prisma db push",
+        "cwd": "libs/database",
+        "envFile": "libs/database/.env"
+      }
+    },
+    "studio": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma studio",
+        "cwd": "libs/database",
+        "envFile": "libs/database/.env"
+      }
+    }
+  }
+}

@@ -6,13 +6,14 @@
   "targets": {
     "build": {
       "executor": "nx-electron:build",
+      "dependsOn": ["database:generate"],
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/desktop",
         "main": "apps/desktop/src/main.ts",
         "tsConfig": "apps/desktop/tsconfig.app.json",
         "assets": ["apps/desktop/src/assets"],
-        "externalDependencies": ["electron", "electron-store"]
+        "externalDependencies": ["electron", "electron-store", "@prisma/client", ".prisma/client", "@prisma/adapter-better-sqlite3", "better-sqlite3"]
       },
       "configurations": {
         "production": {

@@ -1,0 +1,22 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native"]
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model JiraIssue {
+  id String @id @default(uuid())
+  key String @unique
+  summary String
+  status String
+  issueType String
+  priority String
+  epicKey String?
+  parentIssueId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

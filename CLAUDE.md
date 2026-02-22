@@ -37,6 +37,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | Make installer | `nx run desktop:make` |
 | Run affected tests | `nx affected --target=test` |
 | Dependency graph | `nx graph` |
+| Generate Prisma client | `nx run database:generate` |
+| Create migration | `nx run database:migrate-dev` |
+| Apply migrations (prod) | `nx run database:migrate-deploy` |
+| Push schema (no migration) | `nx run database:push` |
+| Open Prisma Studio | `nx run database:studio` |
 
 **Dev workflow:** Run `nx serve renderer` and `nx serve desktop` in separate terminals simultaneously.
 

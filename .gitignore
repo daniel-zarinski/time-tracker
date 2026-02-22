@@ -46,3 +46,8 @@ Thumbs.db
 test-output
 
 vite.config.*.timestamp*
+
+# Prisma
+libs/database/.env
+libs/database/prisma/*.db
+libs/database/prisma/*.db-journal

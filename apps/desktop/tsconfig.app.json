@@ -17,6 +17,9 @@
   "references": [
     {
       "path": "../../libs/jira/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/database/tsconfig.lib.json"
     }
   ]
 }

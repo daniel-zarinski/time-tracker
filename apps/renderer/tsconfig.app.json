@@ -6,7 +6,8 @@
     "esModuleInterop": false,
     "allowSyntheticDefaultImports": true,
     "strict": true,
-    "types": ["node", "vite/client"]
+    "types": ["node", "vite/client"],
+    "lib": ["es2022", "DOM"]
   },
   "exclude": [
     "out-tsc",

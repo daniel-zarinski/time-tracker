@@ -32,6 +32,7 @@ export function SettingsTab() {
   const [isSaving, setIsSaving] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
   const [isClearingCache, setIsClearingCache] = useState(false);
+  const [isDeletingDatabase, setIsDeletingDatabase] = useState(false);
 
   useEffect(() => {
     window.electron.store
@@ -88,6 +89,19 @@ export function SettingsTab() {
       });
     } finally {
       setIsClearingCache(false);
+    }
+  }
+
+  async function handleDeleteDatabase() {
+    setIsDeletingDatabase(true);
+    try {
+      await new Promise((r) => setTimeout(r, 500));
+      toast.info('Delete database not yet implemented', {
+        id: JIRA_TOAST_ID,
+        position: 'bottom-center',
+      });
+    } finally {
+      setIsDeletingDatabase(false);
     }
   }
 
@@ -225,6 +239,28 @@ export function SettingsTab() {
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
                   Clear cache
+                </Button>
+              </Field>
+            </FieldSet>
+
+            <FieldSeparator />
+
+            <FieldSet className="gap-3">
+              <FieldLegend>Database</FieldLegend>
+              <FieldDescription>
+                Time entries and other persisted data. Deleting cannot be
+                undone.
+              </FieldDescription>
+              <Field orientation="horizontal">
+                <Button
+                  variant="destructive"
+                  type="button"
+                  size="sm"
+                  disabled={isDeletingDatabase}
+                  onClick={handleDeleteDatabase}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete database
                 </Button>
               </Field>
             </FieldSet>
