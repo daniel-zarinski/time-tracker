@@ -7,6 +7,14 @@ module.exports = {
     path: join(__dirname, 'dist'),
     clean: true,
   },
+  watchOptions: {
+    ignored: /node_modules/,
+    aggregateTimeout: 300,
+  },
+  snapshot: {
+    managedPaths: [join(__dirname, '../../node_modules')],
+    immutablePaths: [],
+  },
   devServer: {
     port: 4200,
     historyApiFallback: {

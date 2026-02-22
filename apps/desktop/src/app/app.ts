@@ -1,5 +1,5 @@
 import { BrowserWindow, shell, screen } from 'electron';
-import { rendererAppName, rendererAppPort } from './constants';
+import { rendererAppName, rendererAppPort, WINDOW } from './constants';
 import { environment } from '../environments/environment';
 import { join } from 'path';
 import { format } from 'url';
@@ -62,13 +62,17 @@ export default class App {
 
   private static initMainWindow() {
     const workAreaSize = screen.getPrimaryDisplay().workAreaSize;
-    const width = Math.min(1280, workAreaSize.width || 1280);
-    const height = Math.min(720, workAreaSize.height || 720);
+    const width = Math.min(WINDOW.defaultWidth, workAreaSize.width || WINDOW.defaultWidth);
+    const height = Math.min(WINDOW.defaultHeight, workAreaSize.height || WINDOW.defaultHeight);
 
     // Create the browser window.
     App.mainWindow = new BrowserWindow({
-      width: width,
-      height: height,
+      width,
+      height,
+      minWidth: WINDOW.minWidth,
+      minHeight: WINDOW.minHeight,
+      maxWidth: WINDOW.maxWidth,
+      maxHeight: WINDOW.maxHeight,
       show: false,
       webPreferences: {
         contextIsolation: true,
