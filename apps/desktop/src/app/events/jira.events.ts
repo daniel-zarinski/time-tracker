@@ -44,8 +44,7 @@ function serializeError(err: unknown): {
   statusCode?: number;
 } {
   if (err instanceof JiraApiError) {
-    const e = err;
-    return { message: e.message, statusCode: e.statusCode };
+    return { message: err.message, statusCode: err.statusCode };
   }
   return {
     message: err instanceof Error ? err.message : String(err),

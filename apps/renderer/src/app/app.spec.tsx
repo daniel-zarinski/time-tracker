@@ -13,12 +13,12 @@ describe('App', () => {
     expect(baseElement).toBeTruthy();
   });
 
-  it('should display the app title', () => {
+  it('should display the app tabs', () => {
     const { getByText } = render(
       <MemoryRouter>
         <App />
       </MemoryRouter>
     );
-    expect(getByText('Time Tracker')).toBeTruthy();
+    expect(getByText('Home')).toBeTruthy();
   });
 });

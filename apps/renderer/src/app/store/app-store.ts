@@ -32,7 +32,7 @@ export const useAppStore = createSelectors(
           },
         }
       ),
-      { enabled: process.env.NODE_ENV === 'development', name: 'AppStore' }
+      { enabled: import.meta.env.DEV, name: 'AppStore' }
     )
   )
 );
