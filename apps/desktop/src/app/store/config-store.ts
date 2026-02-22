@@ -7,7 +7,7 @@
 import Store from 'electron-store';
 import type { JiraConfigInput } from '@time-tracker/jira';
 
-const JIRA_CONFIG_KEY = 'jira.config';
+const JIRA_CONFIG_KEY = 'jira.config' as const;
 
 const schema = {
   [JIRA_CONFIG_KEY]: {
@@ -36,9 +36,10 @@ function domainFromBaseUrl(baseUrl: string): string {
   }
 }
 
-function resolveDomain(
-  raw: { domain?: string; baseUrl?: string }
-): string | undefined {
+function resolveDomain(raw: {
+  domain?: string;
+  baseUrl?: string;
+}): string | undefined {
   if (typeof raw.domain === 'string' && raw.domain.trim()) {
     return raw.domain.trim();
   }
