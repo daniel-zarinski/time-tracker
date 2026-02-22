@@ -1,4 +1,3 @@
-import { net } from 'electron';
 import type {
   JiraConfig,
   JiraConfigInput,
@@ -8,11 +7,9 @@ import type {
   JiraStatusInfo,
   JiraRawProject,
   JiraRawIssue,
-  JiraSearchResponse,
-  JiraStatusSearchResponse,
   JiraStatusRaw,
 } from '@time-tracker/jira';
-import { JiraApiError } from '@time-tracker/jira';
+import { JiraApiError, JiraClient } from '@time-tracker/jira';
 
 function getStatusCategoryKey(
   cat: string | { key?: string } | undefined
@@ -40,85 +37,33 @@ export function toJiraConfig(input: JiraConfigInput): JiraConfig {
   };
 }
 
-export class JiraService {
-  private baseUrl: string;
-  private authHeader: string;
+const ISSUE_FIELDS =
+  'summary,status,issuetype,priority,parent,customfield_10014';
 
-  private static readonly REQUEST_TIMEOUT_MS = 30_000;
+export class JiraService {
+  private client: JiraClient;
 
   constructor(config: JiraConfig) {
-    this.baseUrl = normalizeBaseUrl(config.baseUrl);
-    this.authHeader = `Basic ${Buffer.from(
+    const baseUrl = normalizeBaseUrl(config.baseUrl);
+    const authHeader = `Basic ${Buffer.from(
       `${config.email}:${config.token}`
     ).toString('base64')}`;
-  }
 
-  private async request<T>(
-    path: string,
-    params?: Record<string, string>
-  ): Promise<T> {
-    const url = new URL(`${this.baseUrl}${path}`);
-    if (params) {
-      for (const [k, v] of Object.entries(params)) {
-        url.searchParams.set(k, v);
-      }
-    }
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(
-      () => controller.abort(),
-      JiraService.REQUEST_TIMEOUT_MS
-    );
-
-    let response: Response;
-    try {
-      response = await net.fetch(url.toString(), {
-        signal: controller.signal,
-        headers: {
-          Authorization: this.authHeader,
-          Accept: 'application/json',
-        },
-      });
-    } catch (err) {
-      const message =
-        (err as Error).name === 'AbortError'
-          ? `Request timed out after ${JiraService.REQUEST_TIMEOUT_MS / 1000}s`
-          : (err as Error).message;
-      throw new JiraApiError(
-        `Failed to connect to ${this.baseUrl}: ${message}`
-      );
-    } finally {
-      clearTimeout(timeoutId);
-    }
-
-    if (!response.ok) {
-      let detail = '';
-      try {
-        const body = (await response.json()) as {
-          errorMessages?: string[];
-          message?: string;
-        };
-        detail = body.errorMessages?.join(', ') || body.message || '';
-      } catch {
-        /* ignore parse errors */
-      }
-      throw new JiraApiError(
-        detail || `Jira API error: ${response.status} ${response.statusText}`,
-        response.status
-      );
-    }
-
-    return response.json() as Promise<T>;
+    this.client = new JiraClient({
+      baseUrl,
+      headers: {
+        Authorization: authHeader,
+      },
+    });
   }
 
   async testConnection(): Promise<JiraMyselfResponse> {
-    const data = await this.request<JiraMyselfResponse>('/rest/api/3/myself');
-    return data;
+    return this.client.getMyself();
   }
 
   async fetchProjects(): Promise<JiraProject[]> {
-    const data = await this.request<JiraRawProject[]>('/rest/api/3/project');
-    return data.map((p) => ({ key: p.key, name: p.name }));
+    const data = await this.client.getProjects();
+    return data.map((p: JiraRawProject) => ({ key: p.key, name: p.name }));
   }
 
   private mapRawIssueToJiraIssue(raw: JiraRawIssue): JiraIssue {
@@ -142,12 +87,7 @@ export class JiraService {
 
   async fetchIssue(key: string): Promise<JiraIssue | null> {
     try {
-      const data = await this.request<JiraRawIssue>(
-        `/rest/api/3/issue/${encodeURIComponent(key)}`,
-        {
-          fields: 'summary,status,issuetype,priority,parent,customfield_10014',
-        }
-      );
+      const data = await this.client.getIssue(key, ISSUE_FIELDS);
       return this.mapRawIssueToJiraIssue(data);
     } catch {
       return null;
@@ -159,15 +99,6 @@ export class JiraService {
     assigneeCurrentUser?: boolean;
   }): string {
     let whereClause = '';
-    // if (options?.project) {
-    //   whereClause = `project = ${options.project}`;
-    // } else {
-    //   const projects = await this.fetchProjects();
-    //   whereClause =
-    //     projects.length > 0
-    //       ? `project in (${projects.map((p) => p.key).join(', ')})`
-    //       : '';
-    // }
     if (options?.assigneeCurrentUser) {
       whereClause = whereClause
         ? `(${whereClause}) AND assignee = currentUser()`
@@ -181,7 +112,6 @@ export class JiraService {
   private async *fetchSearchPages(
     jql: string
   ): AsyncGenerator<JiraRawIssue[], void, unknown> {
-    const fields = 'summary,status,issuetype,priority,parent,customfield_10014';
     const maxResults = '50';
     const MAX_PAGES = 20;
     let nextPageToken: string | undefined;
@@ -189,13 +119,12 @@ export class JiraService {
     let issues: JiraRawIssue[] = [];
 
     do {
-      const params: Record<string, string> = { jql, fields, maxResults };
-      if (nextPageToken) params.nextPageToken = nextPageToken;
-
-      const data = await this.request<JiraSearchResponse>(
-        '/rest/api/3/search/jql',
-        params
-      );
+      const data = await this.client.searchJql({
+        jql,
+        fields: ISSUE_FIELDS,
+        maxResults,
+        ...(nextPageToken && { nextPageToken }),
+      });
       issues = data.issues ?? [];
       yield issues;
 
@@ -235,10 +164,10 @@ export class JiraService {
     let hasMore = true;
 
     while (hasMore) {
-      const data = await this.request<JiraStatusSearchResponse>(
-        '/rest/api/3/statuses/search',
-        { startAt: String(startAt), maxResults: String(maxResults) }
-      );
+      const data = await this.client.getStatuses({
+        startAt: String(startAt),
+        maxResults: String(maxResults),
+      });
       const values = data.values ?? [];
       for (const s of values as JiraStatusRaw[]) {
         all.push({
@@ -260,14 +189,11 @@ export class JiraService {
     if (unique.length === 0) return result;
 
     const jql = `key in (${unique.map((k) => `"${k}"`).join(', ')})`;
-    const data = await this.request<JiraSearchResponse>(
-      '/rest/api/3/search/jql',
-      {
-        jql,
-        fields: 'status',
-        maxResults: String(Math.min(unique.length, 100)),
-      }
-    );
+    const data = await this.client.searchJql({
+      jql,
+      fields: 'status',
+      maxResults: String(Math.min(unique.length, 100)),
+    });
 
     for (const issue of data.issues ?? []) {
       result[issue.key] = issue.fields?.status?.name ?? 'Unknown';
