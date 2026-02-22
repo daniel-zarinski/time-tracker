@@ -35,14 +35,15 @@ export function JiraIssueCard({ issue, onOpenInJira }: JiraIssueCardProps) {
       className={cn(
         'transition-all duration-200 border rounded-(--radius) shadow-none overflow-hidden',
         'border-border bg-card/30 hover:bg-card/40 hover:border-primary/20',
+        'py-0',
         showDetails && 'border-primary/25 bg-card/45'
       )}
     >
       <Collapsible open={showDetails} onOpenChange={setShowDetails}>
-        <CardHeader className="px-3 flex flex-row items-center gap-3 space-y-0 py-2">
+        <CardHeader className="px-3 flex flex-row items-center gap-3 space-y-0">
           <CollapsibleTrigger asChild>
             <div
-              className="flex flex-1 min-w-0 cursor-pointer items-center gap-3 select-none rounded-sm -m-1 p-1 transition-colors"
+              className="flex flex-1 min-w-0 cursor-pointer items-center gap-3 select-none rounded-sm -m-1 p-1 transition-colors py-8"
               aria-label={showDetails ? 'Collapse' : 'Expand'}
             >
               <ChevronDownIcon

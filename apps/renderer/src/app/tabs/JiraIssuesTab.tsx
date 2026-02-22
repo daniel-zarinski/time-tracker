@@ -9,9 +9,18 @@ import {
   EmptyContent,
   EmptyMedia,
   JiraIssueCard,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
 } from '@time-tracker/ui';
+import type { JiraIssue } from '@time-tracker/jira';
 import { Settings, AlertCircle, Inbox } from 'lucide-react';
 import { useAppStore } from '../store';
+
+function toTabValue(status: string) {
+  return status.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+}
 
 export function JiraIssuesTab() {
   const setActiveTab = useAppStore.use.setActiveTab();
@@ -86,6 +95,16 @@ export function JiraIssuesTab() {
   }
 
   const issues = issuesQuery.data ?? [];
+  const groupedByStatus = issues.reduce<Record<string, JiraIssue[]>>(
+    (acc, issue) => {
+      const status = issue.status || 'Unknown';
+      if (!acc[status]) acc[status] = [];
+      acc[status].push(issue);
+      return acc;
+    },
+    {}
+  );
+  const statuses = Object.keys(groupedByStatus).sort();
 
   async function handleOpenInJira(issueKey: string) {
     const config = await window.electron.store.getJiraConfig();
@@ -111,15 +130,35 @@ export function JiraIssuesTab() {
 
   return (
     <div className="w-full max-w-2xl mx-auto p-4 flex flex-col gap-4">
-      <ScrollArea className="h-[calc(100vh-8rem)]">
-        <ul className="flex flex-col gap-2 pr-4">
-          {issues.map((issue) => (
-            <li key={issue.key}>
-              <JiraIssueCard issue={issue} onOpenInJira={handleOpenInJira} />
-            </li>
-          ))}
-        </ul>
-      </ScrollArea>
+      <Tabs defaultValue={toTabValue(statuses[0])}>
+        <ScrollArea className="w-full pb-2" orientation="horizontal">
+          <div className="flex min-w-max">
+            <TabsList variant="line">
+              {statuses.map((status) => (
+                <TabsTrigger key={status} value={toTabValue(status)}>
+                  {status}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
+        </ScrollArea>
+        {statuses.map((status) => (
+          <TabsContent key={status} value={toTabValue(status)}>
+            <ScrollArea className="h-[calc(100vh-8rem)]">
+              <ul className="flex flex-col gap-2 pr-4">
+                {groupedByStatus[status].map((issue) => (
+                  <li key={issue.key}>
+                    <JiraIssueCard
+                      issue={issue}
+                      onOpenInJira={handleOpenInJira}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </ScrollArea>
+          </TabsContent>
+        ))}
+      </Tabs>
     </div>
   );
 }

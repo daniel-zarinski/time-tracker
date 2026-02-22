@@ -5,11 +5,19 @@ import { ScrollArea as ScrollAreaPrimitive } from "radix-ui"
 
 import { cn } from "@time-tracker/utils"
 
+type ScrollAreaOrientation = "vertical" | "horizontal" | "both";
+
 function ScrollArea({
   className,
   children,
+  orientation = "vertical",
   ...props
-}: React.ComponentProps<typeof ScrollAreaPrimitive.Root>) {
+}: React.ComponentProps<typeof ScrollAreaPrimitive.Root> & {
+  orientation?: ScrollAreaOrientation;
+}) {
+  const showVertical = orientation === "vertical" || orientation === "both";
+  const showHorizontal = orientation === "horizontal" || orientation === "both";
+
   return (
     <ScrollAreaPrimitive.Root
       data-slot="scroll-area"
@@ -22,10 +30,11 @@ function ScrollArea({
       >
         {children}
       </ScrollAreaPrimitive.Viewport>
-      <ScrollBar />
+      {showVertical && <ScrollBar orientation="vertical" />}
+      {showHorizontal && <ScrollBar orientation="horizontal" />}
       <ScrollAreaPrimitive.Corner />
     </ScrollAreaPrimitive.Root>
-  )
+  );
 }
 
 function ScrollBar({
