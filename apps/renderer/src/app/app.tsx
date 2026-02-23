@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Home, ListTodo, Search, Settings } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 import {
   Button,
@@ -11,43 +11,13 @@ import {
 
 import { HomeTab, SettingsTab, JiraIssuesTab, MainTabList } from './tabs';
 import { useAppStore, TabValue } from './store';
+import { useAppCommands } from './use-app-commands';
 
 export function App() {
   const activeTab = useAppStore.use.activeTab();
   const setActiveTab = useAppStore.use.setActiveTab();
   const [commandOpen, setCommandOpen] = React.useState(false);
-
-  const commands = React.useMemo(
-    () => [
-      {
-        heading: 'Navigation',
-        items: [
-          {
-            id: 'home',
-            label: 'Home',
-            icon: Home,
-            shortcutKey: '1',
-            onSelect: () => setActiveTab('home'),
-          },
-          {
-            id: 'jira',
-            label: 'Jira Issues',
-            icon: ListTodo,
-            shortcutKey: '2',
-            onSelect: () => setActiveTab('jira-issues'),
-          },
-          {
-            id: 'settings',
-            label: 'Settings',
-            icon: Settings,
-            shortcutKey: '3',
-            onSelect: () => setActiveTab('settings'),
-          },
-        ],
-      },
-    ],
-    [setActiveTab]
-  );
+  const { commands } = useAppCommands();
 
   return (
     <div className="min-h-screen text-foreground">

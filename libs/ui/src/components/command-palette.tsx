@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { defaultFilter, useCommandState } from 'cmdk';
 
 import { cn } from '@time-tracker/utils';
 import {
@@ -19,6 +20,8 @@ export interface CommandPaletteItem {
   icon?: React.ComponentType<{ className?: string }>;
   /** Key to listen for with mod (Cmd/Ctrl). When pressed, triggers onSelect. Also shown in the list (e.g. "1" → "⌘1"). */
   shortcutKey?: string;
+  /** Optional keywords to match against when filtering (e.g. Jira key "PROJ-123"). */
+  keywords?: string[];
   disabled?: boolean;
   onSelect: () => void;
 }
@@ -26,6 +29,8 @@ export interface CommandPaletteItem {
 export interface CommandPaletteGroup {
   heading?: string;
   items: CommandPaletteItem[];
+  /** When set, limits visible items when search is empty. When user types, all matching items are shown. */
+  maxItems?: number;
 }
 
 interface CommandPaletteProps
@@ -55,6 +60,70 @@ interface CommandPaletteProps
 
   /** Empty state message when search has no results */
   emptyMessage?: string;
+}
+
+function filterItem(item: CommandPaletteItem, search: string): boolean {
+  const score = defaultFilter(item.label, search, item.keywords);
+  return score > 0;
+}
+
+function getVisibleItems(
+  group: CommandPaletteGroup,
+  search: string
+): CommandPaletteItem[] {
+  const trimmed = search.trim().toLowerCase();
+  if (trimmed) {
+    return group.items.filter((item) => filterItem(item, trimmed));
+  }
+  if (group.maxItems != null) {
+    return group.items.slice(0, group.maxItems);
+  }
+  return group.items;
+}
+
+interface CommandGroupsRendererProps {
+  commands: CommandPaletteGroup[];
+  onClose: () => void;
+}
+
+function CommandGroupsRenderer({
+  commands,
+  onClose,
+}: CommandGroupsRendererProps) {
+  const search = useCommandState((state) => state.search);
+  return (
+    <>
+      {commands.map((group, groupIndex) => {
+        const items = getVisibleItems(group, search);
+        if (items.length === 0) return null;
+        return (
+          <CommandGroup key={groupIndex} heading={group.heading}>
+            {items.map((item) => {
+              const Icon = item.icon;
+
+              return (
+                <CommandItem
+                  key={item.id}
+                  value={item.label}
+                  disabled={item.disabled}
+                  onSelect={() => {
+                    item.onSelect();
+                    onClose();
+                  }}
+                >
+                  {Icon && <Icon />}
+                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                  {item.shortcutKey && (
+                    <CommandShortcut>⌘{item.shortcutKey}</CommandShortcut>
+                  )}
+                </CommandItem>
+              );
+            })}
+          </CommandGroup>
+        );
+      })}
+    </>
+  );
 }
 
 function parseShortcut(shortcut: string): { mod: boolean; key: string } | null {
@@ -147,35 +216,16 @@ function CommandPalette({
         description={description}
         className={className}
         showCloseButton={showCloseButton}
+        shouldFilter={false}
         {...rest}
       >
         <CommandInput placeholder={placeholder} />
         <CommandList>
           <CommandEmpty>{emptyMessage}</CommandEmpty>
-          {commands.map((group, groupIndex) => (
-            <CommandGroup key={groupIndex} heading={group.heading}>
-              {group.items.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <CommandItem
-                    key={item.id}
-                    value={item.label}
-                    disabled={item.disabled}
-                    onSelect={() => {
-                      item.onSelect();
-                      onOpenChange?.(false);
-                    }}
-                  >
-                    {Icon && <Icon />}
-                    <span>{item.label}</span>
-                    {item.shortcutKey && (
-                      <CommandShortcut>⌘{item.shortcutKey}</CommandShortcut>
-                    )}
-                  </CommandItem>
-                );
-              })}
-            </CommandGroup>
-          ))}
+          <CommandGroupsRenderer
+            commands={commands}
+            onClose={() => onOpenChange?.(false)}
+          />
         </CommandList>
       </CommandDialog>
     </>
