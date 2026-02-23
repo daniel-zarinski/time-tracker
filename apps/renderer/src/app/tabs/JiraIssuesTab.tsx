@@ -58,10 +58,6 @@ function sortStatuses(statuses: string[]): string[] {
 export function JiraIssuesTab() {
   const setActiveTab = useAppStore.use.setActiveTab();
 
-  const configQuery = useQuery({
-    queryKey: ['jira', 'config'],
-    queryFn: () => window.store.getJiraConfig(),
-  });
   const getIssuesQuery = useQuery({
     queryKey: ['jira', 'my-issues'],
     queryFn: () => window.jira.getJiraIssues(),
@@ -155,15 +151,6 @@ export function JiraIssuesTab() {
   );
   const statuses = sortStatuses(Object.keys(groupedByStatus));
 
-  async function handleOpenInJira(issueKey: string) {
-    const config =
-      configQuery.data ?? (await configQuery.refetch()).data;
-    if (config?.domain) {
-      const url = `https://${config.domain}.atlassian.net/browse/${issueKey}`;
-      await window.electron.openExternal(url);
-    }
-  }
-
   if (issues.length === 0) {
     return (
       <Empty className="w-full max-w-md mx-auto">
@@ -210,7 +197,9 @@ export function JiraIssuesTab() {
                   <li key={issue.key}>
                     <JiraIssueCard
                       issue={issue}
-                      onOpenInJira={handleOpenInJira}
+                      onOpenInJira={(key) =>
+                      window.electron.openJiraExternal(key)
+                    }
                     />
                   </li>
                 ))}
