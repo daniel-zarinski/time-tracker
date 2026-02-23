@@ -14,10 +14,15 @@ import type { JiraIssueWithParent } from '@time-tracker/database';
 export interface JiraIssueCardProps {
   issue: JiraIssueWithParent;
   onOpenInJira?: (issueKey: string) => void | Promise<void>;
+  defaultExpanded?: boolean;
 }
 
-export function JiraIssueCard({ issue, onOpenInJira }: JiraIssueCardProps) {
-  const [showDetails, setShowDetails] = useState(false);
+export function JiraIssueCard({
+  issue,
+  onOpenInJira,
+  defaultExpanded,
+}: JiraIssueCardProps) {
+  const [showDetails, setShowDetails] = useState(defaultExpanded ?? false);
 
   async function handleOpenInJira() {
     await onOpenInJira?.(issue.key);

@@ -4,6 +4,9 @@ import { Search } from 'lucide-react';
 import {
   Button,
   CommandPalette,
+  Dialog,
+  DialogContent,
+  JiraIssueCard,
   Tabs,
   TabsContent,
   Separator,
@@ -16,6 +19,8 @@ import { useAppCommands } from './use-app-commands';
 export function App() {
   const activeTab = useAppStore.use.activeTab();
   const setActiveTab = useAppStore.use.setActiveTab();
+  const selectedIssue = useAppStore.use.selectedIssue();
+  const setSelectedIssue = useAppStore.use.setSelectedIssue();
   const [commandOpen, setCommandOpen] = React.useState(false);
   const { commands } = useAppCommands();
 
@@ -31,7 +36,7 @@ export function App() {
         >
           <div className="flex-1" aria-hidden />
           <MainTabList />
-          <div className="flex flex-1 justify-end">
+          <div className="flex min-w-0 flex-1 justify-end pr-2">
             <CommandPalette
               open={commandOpen}
               onOpenChange={setCommandOpen}
@@ -39,7 +44,7 @@ export function App() {
               placeholder="Type a command..."
               emptyMessage="No results found."
               trigger={
-                <Button variant="ghost" size="icon" className="mr-2">
+                <Button variant="ghost" size="icon">
                   <Search />
                 </Button>
               }
@@ -64,6 +69,24 @@ export function App() {
           </TabsContent>
         </main>
       </Tabs>
+
+      <Dialog
+        open={!!selectedIssue}
+        onOpenChange={(open) => !open && setSelectedIssue(null)}
+      >
+        <DialogContent
+          className="p-0 border-0 shadow-none gap-0 mx-auto max-w-md"
+          showCloseButton
+        >
+          {selectedIssue && (
+            <JiraIssueCard
+              issue={selectedIssue}
+              defaultExpanded
+              onOpenInJira={(key) => window.electron.openJiraExternal(key)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
