@@ -4,6 +4,8 @@
  */
 
 import { app, ipcMain, shell } from 'electron';
+import { existsSync, unlinkSync } from 'fs';
+import { getDatabasePath, disconnect } from '@time-tracker/database';
 import { environment } from '../../environments/environment';
 import { clearCache } from '../store/cache-store';
 import {
@@ -21,9 +23,30 @@ export default class ElectronEvents {
 ipcMain.handle('shell:open-external', (_, url: string) =>
   shell.openExternal(url)
 );
+ipcMain.handle('shell:show-item-in-folder', (_, path: string) =>
+  shell.showItemInFolder(path)
+);
+
+ipcMain.handle('database:get-path', () =>
+  app.isPackaged
+    ? getDatabasePath(app.getPath('userData'))
+    : getDatabasePath()
+);
+
+ipcMain.handle('database:delete', async () => {
+  await disconnect();
+  const path = app.isPackaged
+    ? getDatabasePath(app.getPath('userData'))
+    : getDatabasePath();
+  if (existsSync(path)) {
+    unlinkSync(path);
+    return { success: true };
+  }
+  return { success: false, error: 'Database file not found' };
+});
 
 // Retrieve app version
-ipcMain.handle('get-app-version', (event) => {
+ipcMain.handle('get-app-version', () => {
   console.log(`Fetching application version... [v${environment.version}]`);
 
   return environment.version;

@@ -3,7 +3,13 @@ import { contextBridge, ipcRenderer } from 'electron';
 contextBridge.exposeInMainWorld('electron', {
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
   openExternal: (url: string) => ipcRenderer.invoke('shell:open-external', url),
+  showItemInFolder: (path: string) =>
+    ipcRenderer.invoke('shell:show-item-in-folder', path),
   platform: process.platform,
+  database: {
+    getPath: () => ipcRenderer.invoke('database:get-path'),
+    delete: () => ipcRenderer.invoke('database:delete'),
+  },
   cache: {
     clearCache: () => ipcRenderer.invoke('cache:clear'),
   },
@@ -31,5 +37,6 @@ contextBridge.exposeInMainWorld('electron', {
     fetchStatuses: () => ipcRenderer.invoke('jira:fetch-statuses'),
     fetchStatusesForKeys: (keys: string[]) =>
       ipcRenderer.invoke('jira:fetch-statuses-for-keys', keys),
+    getJiraIssues: () => ipcRenderer.invoke('jira:get-issues'),
   },
 });

@@ -8,6 +8,7 @@ import type {
   JiraStatusInfo,
 } from '@time-tracker/jira';
 import { JiraApiError } from '@time-tracker/jira';
+import { getClient, getJiraIssues } from '@time-tracker/database';
 import { JiraService, toJiraConfig } from '../api/jira-service';
 import { getJiraConfig } from '../store/config-store';
 import {
@@ -172,4 +173,20 @@ export function bootstrapJiraEvents(): void {
       }
     }
   );
+
+  ipcMain.handle('jira:get-issues', async (): Promise<JiraIssue[]> => {
+    const prisma = getClient();
+    const rows = await getJiraIssues(prisma);
+    return rows.map((row) => ({
+      key: row.key,
+      summary: row.summary,
+      status: row.status,
+      issueType: row.issueType,
+      priority: row.priority,
+      epicKey: row.epicKey,
+      epicSummary: row.parent?.summary ?? null,
+      parentIssueType: row.parent?.issueType ?? null,
+      assigneeEmail: row.assigneeEmail,
+    }));
+  });
 }

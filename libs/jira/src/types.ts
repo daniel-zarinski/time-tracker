@@ -34,6 +34,11 @@ export interface JiraIssueFields {
   status: { name: string };
   issuetype: { name: string };
   priority: { name: string };
+  assignee?: {
+    accountId?: string;
+    displayName?: string;
+    emailAddress?: string;
+  } | null;
   parent?: {
     key: string;
     fields: { summary: string; issuetype?: { name: string } };
@@ -55,6 +60,7 @@ export interface JiraIssue {
   epicKey: string | null;
   epicSummary: string | null;
   parentIssueType: string | null;
+  assigneeEmail: string | null;
 }
 
 export interface JiraSearchResponse {

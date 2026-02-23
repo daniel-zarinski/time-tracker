@@ -17,6 +17,7 @@ interface ElectronJira {
   fetchMyIssues: (project?: string) => Promise<JiraIssue[]>;
   fetchStatuses: () => Promise<JiraStatusInfo[]>;
   fetchStatusesForKeys: (keys: string[]) => Promise<Record<string, string>>;
+  getJiraIssues: () => Promise<JiraIssue[]>;
 }
 
 interface ElectronStore {
@@ -30,12 +31,19 @@ interface ElectronCache {
   clearCache: () => Promise<void>;
 }
 
+interface ElectronDatabase {
+  getPath: () => Promise<string>;
+  delete: () => Promise<{ success: boolean; error?: string }>;
+}
+
 declare global {
   interface Window {
     electron: {
       getAppVersion: () => Promise<string>;
       openExternal: (url: string) => Promise<void>;
+      showItemInFolder: (path: string) => Promise<void>;
       platform: string;
+      database: ElectronDatabase;
       cache: ElectronCache;
       store: ElectronStore;
       jira: ElectronJira;

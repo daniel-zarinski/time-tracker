@@ -19,7 +19,7 @@ import {
   InputGroupText,
   toast,
 } from '@time-tracker/ui';
-import { Database, Globe, Trash2 } from 'lucide-react';
+import { Database, FolderOpen, Globe, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const JIRA_TOAST_ID = 'jira-settings';
@@ -33,6 +33,7 @@ export function SettingsTab() {
   const [isTesting, setIsTesting] = useState(false);
   const [isClearingCache, setIsClearingCache] = useState(false);
   const [isDeletingDatabase, setIsDeletingDatabase] = useState(false);
+  const [dbPath, setDbPath] = useState<string | null>(null);
 
   useEffect(() => {
     window.electron.store
@@ -45,6 +46,10 @@ export function SettingsTab() {
         }
       })
       .finally(() => setIsLoading(false));
+  }, []);
+
+  useEffect(() => {
+    window.electron.database.getPath().then(setDbPath);
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -93,10 +98,29 @@ export function SettingsTab() {
   }
 
   async function handleDeleteDatabase() {
+    if (
+      !window.confirm(
+        'Delete all time entries and persisted data? This cannot be undone.'
+      )
+    ) {
+      return;
+    }
     setIsDeletingDatabase(true);
     try {
-      await new Promise((r) => setTimeout(r, 500));
-      toast.info('Delete database not yet implemented', {
+      const result = await window.electron.database.delete();
+      if (result.success) {
+        toast.success('Database deleted. Restart the app to continue.', {
+          id: JIRA_TOAST_ID,
+          position: 'bottom-center',
+        });
+      } else {
+        toast.error(result.error ?? 'Failed to delete database', {
+          id: JIRA_TOAST_ID,
+          position: 'bottom-center',
+        });
+      }
+    } catch (err) {
+      toast.error('Failed to delete database', {
         id: JIRA_TOAST_ID,
         position: 'bottom-center',
       });
@@ -251,6 +275,27 @@ export function SettingsTab() {
                 Time entries and other persisted data. Deleting cannot be
                 undone.
               </FieldDescription>
+              {dbPath && (
+                <Field>
+                  <FieldLabel>Location</FieldLabel>
+                  <pre className="text-xs font-mono text-muted-foreground bg-muted rounded-md p-2 w-full min-w-0 max-w-full overflow-hidden break-all whitespace-pre-wrap">
+                    {dbPath}
+                  </pre>
+                  <Field orientation="horizontal">
+                    <Button
+                      variant="outline"
+                      type="button"
+                      size="sm"
+                      onClick={() =>
+                        window.electron.showItemInFolder(dbPath)
+                      }
+                    >
+                      <FolderOpen className="h-4 w-4 mr-2" />
+                      Show in folder
+                    </Button>
+                  </Field>
+                </Field>
+              )}
               <Field orientation="horizontal">
                 <Button
                   variant="destructive"

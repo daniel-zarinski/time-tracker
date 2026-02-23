@@ -8,15 +8,23 @@ datasource db {
 }
 
 model JiraIssue {
-  id String @id @default(uuid())
-  key String @unique
-  summary String
-  status String
-  issueType String
-  priority String
-  epicKey String?
-  parentIssueId String?
+  id            String  @id @default(uuid())
+  key           String  @unique
+  summary       String
+  status        String
+  issueType     String  @map("issue_type")
+  assigneeEmail String? @map("assignee_email")
+  priority      String
+  epicKey       String? @map("epic_key")
+  parentIssueId String? @unique
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  parent   JiraIssue?  @relation("ParentIssue", fields: [parentIssueId], references: [id])
+  children JiraIssue[] @relation("ParentIssue")
+
+  @@index([parentIssueId])
+  @@index([key])
+  @@map("jira_issue")
 }

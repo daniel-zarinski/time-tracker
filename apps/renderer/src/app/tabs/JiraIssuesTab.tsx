@@ -60,7 +60,7 @@ export function JiraIssuesTab() {
 
   const issuesQuery = useQuery({
     queryKey: ['jira', 'my-issues'],
-    queryFn: () => window.electron.jira.fetchMyIssues(),
+    queryFn: () => window.electron.jira.getJiraIssues(),
     retry: false,
   });
 
@@ -182,7 +182,7 @@ export function JiraIssuesTab() {
         </ScrollArea>
         {statuses.map((status) => (
           <TabsContent key={status} value={toTabValue(status)}>
-            <ScrollArea className="h-[calc(100vh-8rem)]">
+            <ScrollArea className="h-[calc(100vh-10rem)]">
               <ul className="flex flex-col gap-2 pr-4">
                 {groupedByStatus[status].map((issue) => (
                   <li key={issue.key}>

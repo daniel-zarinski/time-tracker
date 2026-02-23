@@ -1,4 +1,9 @@
-import { getClient, PrismaClient } from '@time-tracker/database';
+import {
+  getClient,
+  getJiraIssues,
+  PrismaClient,
+  upsertJiraIssue,
+} from '@time-tracker/database';
 import type {
   JiraConfig,
   JiraConfigInput,
@@ -39,7 +44,7 @@ export function toJiraConfig(input: JiraConfigInput): JiraConfig {
 }
 
 const ISSUE_FIELDS =
-  'summary,status,issuetype,priority,parent,customfield_10014';
+  'summary,status,issuetype,priority,assignee,parent,customfield_10014';
 
 export class JiraService {
   private client: JiraClient;
@@ -81,6 +86,7 @@ export class JiraService {
       parent?.key ?? (typeof epicLink === 'string' ? epicLink : null);
     const epicSummary = parent?.fields?.summary ?? null;
     const parentIssueType = parent?.fields?.issuetype?.name ?? null;
+    const assigneeEmail = raw.fields?.assignee?.emailAddress ?? null;
     return {
       key: raw.key,
       summary: raw.fields?.summary ?? '',
@@ -90,38 +96,14 @@ export class JiraService {
       epicKey,
       epicSummary,
       parentIssueType,
+      assigneeEmail,
     };
-  }
-
-  private async upsertJiraIssue(issue: JiraIssue): Promise<void> {
-    await this.prisma.jiraIssue
-      .upsert({
-        where: { key: issue.key },
-        update: {
-          summary: issue.summary,
-          status: issue.status,
-          issueType: issue.issueType,
-          priority: issue.priority,
-          epicKey: issue.epicKey ?? undefined,
-        },
-        create: {
-          key: issue.key,
-          summary: issue.summary,
-          status: issue.status,
-          issueType: issue.issueType,
-          priority: issue.priority,
-          epicKey: issue.epicKey ?? undefined,
-        },
-      })
-      .catch((error) => {
-        console.error('Error upserting Jira issue', error);
-      });
   }
 
   async fetchIssue(key: string): Promise<JiraIssue | null> {
     const data = await this.client.getIssue(key, ISSUE_FIELDS);
     const issue = this.mapRawIssueToJiraIssue(data);
-    await this.upsertJiraIssue(issue);
+    await upsertJiraIssue(this.prisma, issue);
     return issue;
   }
 
@@ -179,7 +161,9 @@ export class JiraService {
       }
     }
 
-    await Promise.all(allIssues.map((i) => this.upsertJiraIssue(i)));
+    await Promise.all(
+      allIssues.map((i) => upsertJiraIssue(this.prisma, i))
+    );
 
     return allIssues;
   }
@@ -189,6 +173,21 @@ export class JiraService {
       project: project === 'all' || !project ? undefined : project,
       assigneeCurrentUser: true,
     });
+  }
+
+  async getJiraIssues(): Promise<JiraIssue[]> {
+    const rows = await getJiraIssues(this.prisma);
+    return rows.map((row) => ({
+      key: row.key,
+      summary: row.summary,
+      status: row.status,
+      issueType: row.issueType,
+      priority: row.priority,
+      epicKey: row.epicKey,
+      epicSummary: row.parent?.summary ?? null,
+      parentIssueType: row.parent?.issueType ?? null,
+      assigneeEmail: row.assigneeEmail,
+    }));
   }
 
   async fetchStatuses(): Promise<JiraStatusInfo[]> {
