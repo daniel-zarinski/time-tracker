@@ -40,6 +40,7 @@ export interface JiraApi {
 export interface ElectronApi {
   getAppVersion: () => Promise<string>;
   openExternal: (url: string) => Promise<void>;
+  openJiraExternal: (issueKey: string) => Promise<void>;
   showItemInFolder: (path: string) => Promise<void>;
   platform: string;
 }
