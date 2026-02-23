@@ -75,14 +75,6 @@ export function JiraIssueCard({
                   {issue.summary ?? ''}
                 </span>
               </div>
-              <div className="flex shrink-0 items-center gap-1.5">
-                <Badge
-                  variant="outline"
-                  className="text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70"
-                >
-                  {issue.priority ?? ''}
-                </Badge>
-              </div>
             </div>
           </CollapsibleTrigger>
         </CardHeader>
@@ -128,6 +120,17 @@ export function JiraIssueCard({
                   className="text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70"
                 >
                   {issue.status ?? 'Unknown'}
+                </Badge>
+              </div>
+              <div className="flex items-center gap-1.5 pt-2 border-t border-muted-foreground/5">
+                <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium">
+                  Priority
+                </span>
+                <Badge
+                  variant="outline"
+                  className="text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70"
+                >
+                  {issue.priority ?? ''}
                 </Badge>
               </div>
             </div>
