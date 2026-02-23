@@ -7,25 +7,31 @@ import {
   CollapsibleTrigger,
   CollapsibleContent,
 } from './ui/collapsible';
-import { ChevronDownIcon, ExternalLinkIcon } from 'lucide-react';
+import { ChevronDownIcon, ExternalLinkIcon, TimerIcon } from 'lucide-react';
 import { cn } from '@time-tracker/utils';
 import type { JiraIssueWithParent } from '@time-tracker/database';
 
 export interface JiraIssueCardProps {
   issue: JiraIssueWithParent;
   onOpenInJira?: (issueKey: string) => void | Promise<void>;
+  onTrackTime?: (issueKey: string) => void | Promise<void>;
   defaultExpanded?: boolean;
 }
 
 export function JiraIssueCard({
   issue,
-  onOpenInJira,
   defaultExpanded,
+  onOpenInJira,
+  onTrackTime,
 }: JiraIssueCardProps) {
   const [showDetails, setShowDetails] = useState(defaultExpanded ?? false);
 
   async function handleOpenInJira() {
     await onOpenInJira?.(issue.key);
+  }
+
+  async function handleTrackTime() {
+    await onTrackTime?.(issue.key);
   }
 
   const parentIssueType = issue.parent?.issueType ?? '';
@@ -125,21 +131,19 @@ export function JiraIssueCard({
                 </Badge>
               </div>
             </div>
-
-            <CardFooter className="flex justify-end border-t border-muted-foreground/5 px-3 pt-2 pb-0">
-              <div className="inline-flex rounded-(--radius) overflow-hidden [&>*:not(:first-child)]:-ml-px">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-none first:rounded-l-(--radius) last:rounded-r-(--radius)"
-                  onClick={handleOpenInJira}
-                >
-                  <ExternalLinkIcon className="h-4 w-4" />
-                  Open in Jira
-                </Button>
-              </div>
-            </CardFooter>
           </CardContent>
+
+          <CardFooter className="flex justify-center px-3 pb-2 gap-6">
+            <Button size="sm" onClick={handleTrackTime} className="flex-1">
+              <TimerIcon className="h-4 w-4" />
+              Track Time
+            </Button>
+
+            <Button variant="outline" size="sm" onClick={handleOpenInJira}>
+              <ExternalLinkIcon className="h-4 w-4" />
+              Open in Jira
+            </Button>
+          </CardFooter>
         </CollapsibleContent>
       </Collapsible>
     </Card>
