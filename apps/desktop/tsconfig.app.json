@@ -20,6 +20,9 @@
     },
     {
       "path": "../../libs/database/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/utils/tsconfig.lib.json"
     }
   ]
 }

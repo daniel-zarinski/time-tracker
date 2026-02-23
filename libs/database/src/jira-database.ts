@@ -74,6 +74,17 @@ export async function getJiraIssues(
   });
 }
 
+export async function getJiraIssuesByEmail(
+  prisma: PrismaClient,
+  email: string
+): Promise<JiraIssueWithParent[]> {
+  return prisma.jiraIssue.findMany({
+    where: { assigneeEmail: email },
+    include: { parent: true },
+    orderBy: { updatedAt: 'desc' },
+  });
+}
+
 export async function getJiraIssuesUnsynced(
   prisma: PrismaClient
 ): Promise<JiraIssueWithParent[]> {

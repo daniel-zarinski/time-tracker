@@ -33,24 +33,6 @@ ipcMain.handle('shell:show-item-in-folder', (_, path: string) =>
   shell.showItemInFolder(path)
 );
 
-ipcMain.handle('database:get-path', () =>
-  app.isPackaged
-    ? getDatabasePath(app.getPath('userData'))
-    : getDatabasePath()
-);
-
-ipcMain.handle('database:delete', async () => {
-  await disconnect();
-  const path = app.isPackaged
-    ? getDatabasePath(app.getPath('userData'))
-    : getDatabasePath();
-  if (existsSync(path)) {
-    unlinkSync(path);
-    return { success: true };
-  }
-  return { success: false, error: 'Database file not found' };
-});
-
 // Retrieve app version
 ipcMain.handle('get-app-version', () => {
   console.log(`Fetching application version... [v${environment.version}]`);

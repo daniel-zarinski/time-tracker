@@ -12,7 +12,7 @@ model TimeEntry {
   issueKey         String     @map("issue_key") // Should this be optional?
   timeSpentSeconds Int?       @map("time_spent_seconds") // When nullable it means currently being tracked
   startedAt        DateTime   @map("started_at")
-  description      String     @default("")
+  description      String?
   syncStatus       SyncStatus @default(LOCAL) @map("sync_status")
   syncError        String?    @map("sync_error")
   worklogId        String?    @unique @map("worklog_id")
@@ -44,9 +44,8 @@ model JiraIssue {
   updatedAt DateTime  @updatedAt @map("updated_at")
   syncedAt  DateTime? @map("synced_at")
 
-  parent   JiraIssue?  @relation("ParentIssue", fields: [parentIssueKey], references: [key])
-  children JiraIssue[] @relation("ParentIssue")
-
+  parent      JiraIssue?  @relation("ParentIssue", fields: [parentIssueKey], references: [key])
+  children    JiraIssue[] @relation("ParentIssue")
   worklogs    Worklog[]
   timeEntries TimeEntry[]
 

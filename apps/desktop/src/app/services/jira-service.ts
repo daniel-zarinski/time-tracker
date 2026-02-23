@@ -15,6 +15,8 @@ import type {
   JiraStatusRaw,
 } from '@time-tracker/jira';
 import { JiraApiError, JiraClient } from '@time-tracker/jira';
+import { getJiraIssuesUnsynced } from '@time-tracker/database';
+import { getJiraConfig } from '../store/config-store';
 
 function getStatusCategoryKey(
   cat: string | { key?: string } | undefined
@@ -40,6 +42,26 @@ export function toJiraConfig(input: JiraConfigInput): JiraConfig {
     email: input.email,
     token: input.token,
   };
+}
+
+export function validateConfig(config: JiraConfig): void {
+  if (!config?.baseUrl?.trim()) {
+    throw new JiraApiError('Jira base URL is required');
+  }
+  if (!config?.email?.trim()) {
+    throw new JiraApiError('Jira email is required');
+  }
+  if (!config?.token?.trim()) {
+    throw new JiraApiError('Jira API token is required');
+  }
+}
+
+export function resolveConfig(input?: JiraConfigInput): JiraConfig {
+  const raw = input ?? getJiraConfig();
+  if (!raw) throw new JiraApiError('Jira is not configured');
+  const config = toJiraConfig(raw);
+  validateConfig(config);
+  return config;
 }
 
 const ISSUE_FIELDS =
@@ -102,7 +124,7 @@ export class JiraService {
   async fetchIssue(key: string): Promise<JiraIssue | null> {
     const data = await this.client.getIssue(key, ISSUE_FIELDS);
     const issue = this.mapRawIssueToJiraIssue(data);
-    await upsertJiraIssue(this.prisma, issue);
+    await upsertJiraIssue(this.prisma, issue); // TODO: Remove this
     return issue;
   }
 
@@ -214,5 +236,19 @@ export class JiraService {
       result[issue.key] = issue.fields?.status?.name ?? 'Unknown';
     }
     return result;
+  }
+
+  async fetchMissingIssues() {
+    console.log('Fetching missing issues');
+    const issues = await getJiraIssuesUnsynced(this.prisma);
+    console.log(`Found ${issues.length} missing issues`);
+
+    for (const issue of issues) {
+      console.log(`Fetching issue ${issue.key}`);
+      await this.fetchIssue(issue.key).catch((err) => {
+        console.error(`Error fetching issue ${issue.key}: ${err}`);
+      });
+    }
+    console.log('Done fetching missing issues');
   }
 }

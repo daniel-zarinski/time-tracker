@@ -20,7 +20,7 @@ import {
   InputGroupText,
   toast,
 } from '@time-tracker/ui';
-import { Database, FolderOpen, Globe, Trash2 } from 'lucide-react';
+import { Database, FolderOpen, Globe, RefreshCw, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const JIRA_TOAST_ID = 'jira-settings';
@@ -52,6 +52,10 @@ export function SettingsTab() {
   const testMutation = useMutation({
     mutationFn: (config: { domain: string; email: string; token: string }) =>
       window.jira.testConnection(config),
+  });
+
+  const fetchMissingIssuesMutation = useMutation({
+    mutationFn: () => window.jira.fetchMissingIssues(),
   });
 
   const deleteMutation = useMutation({
@@ -97,15 +101,12 @@ export function SettingsTab() {
     if (!domain.trim() || !email || !token) return;
     try {
       await toast
-        .promise(
-          testMutation.mutateAsync({ domain, email, token }),
-          {
-            id: JIRA_TOAST_ID,
-            loading: 'Testing connection…',
-            success: 'Connected',
-            error: 'Connection failed',
-          }
-        )
+        .promise(testMutation.mutateAsync({ domain, email, token }), {
+          id: JIRA_TOAST_ID,
+          loading: 'Testing connection…',
+          success: 'Connected',
+          error: 'Connection failed',
+        })
         .unwrap();
     } catch {
       // Toast handles error display
@@ -115,7 +116,7 @@ export function SettingsTab() {
   async function handleDeleteDatabase() {
     if (
       !window.confirm(
-        'Delete all time entries and persisted data? This cannot be undone.',
+        'Delete all time entries and persisted data? This cannot be undone.'
       )
     ) {
       return;
@@ -198,7 +199,7 @@ export function SettingsTab() {
                       className="inline h-auto p-0 font-normal align-baseline ml-1 text-primary underline underline-offset-4 hover:text-primary/80"
                       onClick={() =>
                         window.electron.openExternal(
-                          'https://id.atlassian.com/manage-profile/security/api-tokens',
+                          'https://id.atlassian.com/manage-profile/security/api-tokens'
                         )
                       }
                     >
@@ -225,6 +226,46 @@ export function SettingsTab() {
               </FieldSet>
             </FieldGroup>
           </form>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-4">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-md bg-muted">
+              <RefreshCw className="h-4 w-4" />
+            </div>
+            <CardTitle className="text-base font-semibold">
+              Manual actions
+            </CardTitle>
+          </div>
+          <CardDescription className="text-xs">
+            Run sync and maintenance tasks on demand.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <FieldGroup>
+            <FieldSet className="gap-3">
+              <FieldLegend>Sync Jira</FieldLegend>
+              <FieldDescription>
+                Fetch issues from Jira that are not yet in your local database.
+              </FieldDescription>
+              <Field orientation="horizontal">
+                <Button
+                  variant="outline"
+                  type="button"
+                  size="sm"
+                  onClick={() => fetchMissingIssuesMutation.mutateAsync()}
+                  disabled={fetchMissingIssuesMutation.isPending}
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  {fetchMissingIssuesMutation.isPending
+                    ? 'Syncing…'
+                    : 'Sync missing issues'}
+                </Button>
+              </Field>
+            </FieldSet>
+          </FieldGroup>
         </CardContent>
       </Card>
 

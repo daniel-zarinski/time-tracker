@@ -11,6 +11,8 @@ import type { JiraIssueWithParent } from '@time-tracker/database';
 export interface DatabaseApi {
   getPath: () => Promise<string>;
   delete: () => Promise<{ success: boolean; error?: string }>;
+  getMyJiraIssues: () => Promise<JiraIssueWithParent[]>;
+  getAllJiraIssues: () => Promise<JiraIssueWithParent[]>;
 }
 
 /** Store IPC API exposed to the renderer */
@@ -33,7 +35,7 @@ export interface JiraApi {
   fetchMyIssues: (project?: string) => Promise<JiraIssue[]>;
   fetchStatuses: () => Promise<JiraStatusInfo[]>;
   fetchStatusesForKeys: (keys: string[]) => Promise<Record<string, string>>;
-  getJiraIssues: () => Promise<JiraIssueWithParent[]>;
+  fetchMissingIssues: () => Promise<void>;
 }
 
 /** Shell / app IPC API exposed to the renderer */

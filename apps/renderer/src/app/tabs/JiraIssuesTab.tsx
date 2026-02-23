@@ -60,7 +60,7 @@ export function JiraIssuesTab() {
 
   const getIssuesQuery = useQuery({
     queryKey: ['jira', 'my-issues'],
-    queryFn: () => window.jira.getJiraIssues(),
+    queryFn: () => window.database.getMyJiraIssues(),
     retry: false,
   });
   const fetchMyIssuesQuery = useMutation({
@@ -198,8 +198,8 @@ export function JiraIssuesTab() {
                     <JiraIssueCard
                       issue={issue}
                       onOpenInJira={(key) =>
-                      window.electron.openJiraExternal(key)
-                    }
+                        window.electron.openJiraExternal(key)
+                      }
                     />
                   </li>
                 ))}

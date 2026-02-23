@@ -1,36 +1,14 @@
-import { ipcMain } from 'electron';
 import type {
-  JiraConfig,
   JiraConfigInput,
+  JiraIssue,
   JiraMyselfResponse,
   JiraProject,
-  JiraIssue,
   JiraStatusInfo,
 } from '@time-tracker/jira';
 import { JiraApiError } from '@time-tracker/jira';
-import { getClient, getJiraIssues } from '@time-tracker/database';
-import { JiraService, toJiraConfig } from '../services';
-import { getJiraConfig } from '../store/config-store';
-
-function validateConfig(config: JiraConfig): void {
-  if (!config?.baseUrl?.trim()) {
-    throw new JiraApiError('Jira base URL is required');
-  }
-  if (!config?.email?.trim()) {
-    throw new JiraApiError('Jira email is required');
-  }
-  if (!config?.token?.trim()) {
-    throw new JiraApiError('Jira API token is required');
-  }
-}
-
-function resolveConfig(input?: JiraConfigInput): JiraConfig {
-  const raw = input ?? getJiraConfig();
-  if (!raw) throw new JiraApiError('Jira is not configured');
-  const config = toJiraConfig(raw);
-  validateConfig(config);
-  return config;
-}
+import { ipcMain } from 'electron';
+import { JiraService } from '../services';
+import { resolveConfig } from '../services/jira-service';
 
 function serializeError(err: unknown): {
   message: string;
@@ -135,9 +113,11 @@ export function bootstrapJiraEvents(): void {
     }
   );
 
-  ipcMain.handle('jira:get-issues', async () => {
+  ipcMain.handle('jira:fetch-missing-issues', async () => {
+    const config = resolveConfig();
     try {
-      return getJiraIssues(getClient());
+      const service = new JiraService(config);
+      return service.fetchMissingIssues();
     } catch (err) {
       throw serializeError(err);
     }

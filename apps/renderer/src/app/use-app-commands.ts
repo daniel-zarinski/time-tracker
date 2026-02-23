@@ -16,7 +16,7 @@ export function useAppCommands(): {
 
   const getIssuesQuery = useQuery({
     queryKey: ['jira', 'my-issues'],
-    queryFn: () => window.jira.getJiraIssues(),
+    queryFn: () => window.database.getMyJiraIssues(),
     retry: false,
   });
 
