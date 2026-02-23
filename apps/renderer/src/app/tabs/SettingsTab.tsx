@@ -31,7 +31,6 @@ export function SettingsTab() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
-  const [isClearingCache, setIsClearingCache] = useState(false);
   const [isDeletingDatabase, setIsDeletingDatabase] = useState(false);
   const [dbPath, setDbPath] = useState<string | null>(null);
 
@@ -81,19 +80,6 @@ export function SettingsTab() {
         .unwrap();
     } finally {
       setIsTesting(false);
-    }
-  }
-
-  async function handleClearCache() {
-    setIsClearingCache(true);
-    try {
-      await window.electron.cache.clearCache();
-      toast.success('Cache cleared', {
-        id: JIRA_TOAST_ID,
-        position: 'bottom-center',
-      });
-    } finally {
-      setIsClearingCache(false);
     }
   }
 
@@ -248,27 +234,6 @@ export function SettingsTab() {
         </CardHeader>
         <CardContent>
           <FieldGroup>
-            <FieldSet className="gap-3">
-              <FieldLegend>Cache</FieldLegend>
-              <FieldDescription>
-                Cached Jira projects and issues. Clear to force a fresh fetch.
-              </FieldDescription>
-              <Field orientation="horizontal">
-                <Button
-                  variant="outline"
-                  type="button"
-                  size="sm"
-                  disabled={isClearingCache}
-                  onClick={handleClearCache}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Clear cache
-                </Button>
-              </Field>
-            </FieldSet>
-
-            <FieldSeparator />
-
             <FieldSet className="gap-3">
               <FieldLegend>Database</FieldLegend>
               <FieldDescription>

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   Button,
   ScrollArea,
@@ -58,15 +58,22 @@ function sortStatuses(statuses: string[]): string[] {
 export function JiraIssuesTab() {
   const setActiveTab = useAppStore.use.setActiveTab();
 
-  const issuesQuery = useQuery({
+  const getIssuesQuery = useQuery({
     queryKey: ['jira', 'my-issues'],
     queryFn: () => window.electron.jira.getJiraIssues(),
     retry: false,
   });
+  const fetchMyIssuesQuery = useMutation({
+    mutationKey: ['jira', 'fetch-my-issues'],
+    mutationFn: () => window.electron.jira.fetchMyIssues(),
+    onSuccess: () => {
+      getIssuesQuery.refetch();
+    },
+  });
 
   const isConfigError =
-    issuesQuery.isError &&
-    (issuesQuery.error as { message?: string })?.message?.includes(
+    getIssuesQuery.isError &&
+    (getIssuesQuery.error as { message?: string })?.message?.includes(
       'not configured'
     );
 
@@ -91,7 +98,7 @@ export function JiraIssuesTab() {
     );
   }
 
-  if (issuesQuery.isError) {
+  if (getIssuesQuery.isError) {
     return (
       <Empty className="w-full max-w-md mx-auto">
         <EmptyHeader>
@@ -100,15 +107,15 @@ export function JiraIssuesTab() {
           </EmptyMedia>
           <EmptyTitle>Failed to fetch Jira issues</EmptyTitle>
           <EmptyDescription>
-            {(issuesQuery.error as { message?: string })?.message ??
+            {(getIssuesQuery.error as { message?: string })?.message ??
               'Something went wrong'}
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
           <Button
             variant="outline"
-            onClick={() => issuesQuery.refetch()}
-            disabled={issuesQuery.isRefetching}
+            onClick={() => getIssuesQuery.refetch()}
+            disabled={getIssuesQuery.isRefetching}
           >
             Retry
           </Button>
@@ -117,7 +124,7 @@ export function JiraIssuesTab() {
     );
   }
 
-  if (issuesQuery.isLoading || issuesQuery.isFetching) {
+  if (getIssuesQuery.isLoading || getIssuesQuery.isFetching) {
     return (
       <Empty className="w-full max-w-md mx-auto">
         <EmptyHeader>
@@ -127,7 +134,7 @@ export function JiraIssuesTab() {
     );
   }
 
-  const issues = issuesQuery.data ?? [];
+  const issues = getIssuesQuery.data ?? [];
   const groupedByStatus = issues.reduce<Record<string, JiraIssue[]>>(
     (acc, issue) => {
       const status = issue.status || 'Unknown';
@@ -162,6 +169,16 @@ export function JiraIssuesTab() {
           <EmptyTitle>No Jira issues</EmptyTitle>
           <EmptyDescription>No Jira issues assigned to you.</EmptyDescription>
         </EmptyHeader>
+
+        <EmptyContent>
+          <Button
+            variant="outline"
+            onClick={() => fetchMyIssuesQuery.mutate()}
+            disabled={fetchMyIssuesQuery.isPending}
+          >
+            Fetch issues
+          </Button>
+        </EmptyContent>
       </Empty>
     );
   }

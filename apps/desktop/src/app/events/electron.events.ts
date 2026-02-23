@@ -7,7 +7,6 @@ import { app, ipcMain, shell } from 'electron';
 import { existsSync, unlinkSync } from 'fs';
 import { getDatabasePath, disconnect } from '@time-tracker/database';
 import { environment } from '../../environments/environment';
-import { clearCache } from '../store/cache-store';
 import {
   configStore,
   getJiraConfig,
@@ -65,5 +64,3 @@ ipcMain.handle('store:set', (_, key: string, value: unknown) =>
 );
 ipcMain.handle('store:get-jira-config', () => getJiraConfig());
 ipcMain.handle('store:set-jira-config', (_, config) => setJiraConfig(config));
-
-ipcMain.handle('cache:clear', () => clearCache());

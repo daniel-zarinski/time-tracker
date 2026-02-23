@@ -11,14 +11,6 @@ import { JiraApiError } from '@time-tracker/jira';
 import { getClient, getJiraIssues } from '@time-tracker/database';
 import { JiraService, toJiraConfig } from '../api/jira-service';
 import { getJiraConfig } from '../store/config-store';
-import {
-  getCached,
-  setCached,
-  CACHE_KEY_JIRA_PROJECTS,
-  CACHE_KEY_JIRA_ISSUES,
-  CACHE_TTL_JIRA_PROJECTS_MS,
-  CACHE_TTL_JIRA_ISSUES_MS,
-} from '../store/cache-store';
 
 function validateConfig(config: JiraConfig): void {
   if (!config?.baseUrl?.trim()) {
@@ -67,18 +59,10 @@ export function bootstrapJiraEvents(): void {
   );
 
   ipcMain.handle('jira:fetch-projects', async (): Promise<JiraProject[]> => {
-    const cached = getCached<JiraProject[]>(
-      CACHE_KEY_JIRA_PROJECTS,
-      CACHE_TTL_JIRA_PROJECTS_MS
-    );
-    if (cached !== undefined) return cached;
-
     const config = resolveConfig();
     try {
       const service = new JiraService(config);
-      const projects = await service.fetchProjects();
-      setCached(CACHE_KEY_JIRA_PROJECTS, projects);
-      return projects;
+      return service.fetchProjects();
     } catch (err) {
       throw serializeError(err);
     }
@@ -103,21 +87,10 @@ export function bootstrapJiraEvents(): void {
       _event,
       options?: { project?: string; assigneeCurrentUser?: boolean }
     ): Promise<JiraIssue[]> => {
-      const useCache = !options?.project;
-      if (useCache) {
-        const cached = getCached<JiraIssue[]>(
-          CACHE_KEY_JIRA_ISSUES,
-          CACHE_TTL_JIRA_ISSUES_MS
-        );
-        if (cached !== undefined) return cached;
-      }
-
       const config = resolveConfig();
       try {
         const service = new JiraService(config);
-        const issues = await service.fetchIssues(options);
-        if (useCache) setCached(CACHE_KEY_JIRA_ISSUES, issues);
-        return issues;
+        return service.fetchIssues(options);
       } catch (err) {
         throw serializeError(err);
       }
@@ -129,22 +102,10 @@ export function bootstrapJiraEvents(): void {
     async (_event, project?: string): Promise<JiraIssue[]> => {
       const normalizedProject =
         project === 'all' || !project ? undefined : project;
-      const useCache = !normalizedProject;
-
-      if (useCache) {
-        const cached = getCached<JiraIssue[]>(
-          CACHE_KEY_JIRA_ISSUES,
-          CACHE_TTL_JIRA_ISSUES_MS
-        );
-        if (cached !== undefined) return cached;
-      }
-
       const config = resolveConfig();
       try {
         const service = new JiraService(config);
-        const issues = await service.fetchMyIssues(normalizedProject);
-        if (useCache) setCached(CACHE_KEY_JIRA_ISSUES, issues);
-        return issues;
+        return service.fetchMyIssues(normalizedProject);
       } catch (err) {
         throw serializeError(err);
       }
@@ -179,10 +140,10 @@ export function bootstrapJiraEvents(): void {
     const rows = await getJiraIssues(prisma);
     return rows.map((row) => ({
       key: row.key,
-      summary: row.summary,
-      status: row.status,
-      issueType: row.issueType,
-      priority: row.priority,
+      summary: row.summary ?? '',
+      status: row.status ?? '',
+      issueType: row.issueType ?? '',
+      priority: row.priority ?? '',
       epicKey: row.epicKey,
       epicSummary: row.parent?.summary ?? null,
       parentIssueType: row.parent?.issueType ?? null,

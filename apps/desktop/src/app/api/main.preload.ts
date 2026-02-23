@@ -10,9 +10,6 @@ contextBridge.exposeInMainWorld('electron', {
     getPath: () => ipcRenderer.invoke('database:get-path'),
     delete: () => ipcRenderer.invoke('database:delete'),
   },
-  cache: {
-    clearCache: () => ipcRenderer.invoke('cache:clear'),
-  },
   store: {
     get: (key: string) => ipcRenderer.invoke('store:get', key),
     set: (key: string, value: unknown) =>

@@ -27,10 +27,6 @@ interface ElectronStore {
   setJiraConfig: (config: JiraConfigInput) => Promise<void>;
 }
 
-interface ElectronCache {
-  clearCache: () => Promise<void>;
-}
-
 interface ElectronDatabase {
   getPath: () => Promise<string>;
   delete: () => Promise<{ success: boolean; error?: string }>;
@@ -44,7 +40,6 @@ declare global {
       showItemInFolder: (path: string) => Promise<void>;
       platform: string;
       database: ElectronDatabase;
-      cache: ElectronCache;
       store: ElectronStore;
       jira: ElectronJira;
     };

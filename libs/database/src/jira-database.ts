@@ -27,6 +27,17 @@ export async function upsertJiraIssue(
       priority: issue.priority,
       epicKey: issue.epicKey ?? undefined,
       assigneeEmail: issue.assigneeEmail ?? undefined,
+      parent: issue.epicKey
+        ? {
+            connectOrCreate: {
+              where: { key: issue.epicKey },
+              create: {
+                key: issue.epicKey,
+                issueType: 'Epic',
+              },
+            },
+          }
+        : undefined,
     },
     create: {
       key: issue.key,
@@ -35,6 +46,17 @@ export async function upsertJiraIssue(
       issueType: issue.issueType,
       priority: issue.priority,
       epicKey: issue.epicKey ?? undefined,
+      parent: issue.epicKey
+        ? {
+            connectOrCreate: {
+              where: { key: issue.epicKey },
+              create: {
+                key: issue.epicKey,
+                issueType: 'Epic',
+              },
+            },
+          }
+        : undefined,
       assigneeEmail: issue.assigneeEmail ?? undefined,
     },
   });

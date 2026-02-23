@@ -62,8 +62,14 @@ export default class App {
 
   private static initMainWindow() {
     const workAreaSize = screen.getPrimaryDisplay().workAreaSize;
-    const width = Math.min(WINDOW.defaultWidth, workAreaSize.width || WINDOW.defaultWidth);
-    const height = Math.min(WINDOW.defaultHeight, workAreaSize.height || WINDOW.defaultHeight);
+    const width = Math.min(
+      WINDOW.defaultWidth,
+      workAreaSize.width || WINDOW.defaultWidth
+    );
+    const height = Math.min(
+      WINDOW.defaultHeight,
+      workAreaSize.height || WINDOW.defaultHeight
+    );
 
     // Create the browser window.
     App.mainWindow = new BrowserWindow({
@@ -74,6 +80,7 @@ export default class App {
       maxWidth: WINDOW.maxWidth,
       maxHeight: WINDOW.maxHeight,
       show: false,
+      titleBarStyle: 'hidden',
       webPreferences: {
         contextIsolation: true,
         backgroundThrottling: false,
