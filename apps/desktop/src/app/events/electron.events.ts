@@ -22,6 +22,13 @@ export default class ElectronEvents {
 ipcMain.handle('shell:open-external', (_, url: string) =>
   shell.openExternal(url)
 );
+ipcMain.handle('shell:open-jira-external', async (_, issueKey: string) => {
+  const config = getJiraConfig();
+  if (config?.domain) {
+    const url = `https://${config.domain}.atlassian.net/browse/${issueKey}`;
+    await shell.openExternal(url);
+  }
+});
 ipcMain.handle('shell:show-item-in-folder', (_, path: string) =>
   shell.showItemInFolder(path)
 );

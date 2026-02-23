@@ -3,6 +3,8 @@ import { contextBridge, ipcRenderer } from 'electron';
 contextBridge.exposeInMainWorld('electron', {
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
   openExternal: (url: string) => ipcRenderer.invoke('shell:open-external', url),
+  openJiraExternal: (issueKey: string) =>
+    ipcRenderer.invoke('shell:open-jira-external', issueKey),
   showItemInFolder: (path: string) =>
     ipcRenderer.invoke('shell:show-item-in-folder', path),
   platform: process.platform,
