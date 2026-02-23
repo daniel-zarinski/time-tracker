@@ -28,6 +28,7 @@ export async function upsertJiraIssue(
       priority: issue.priority,
       epicKey: issue.epicKey ?? undefined,
       assigneeEmail: issue.assigneeEmail ?? undefined,
+      syncedAt: new Date(),
       parent: issue.epicKey
         ? {
             connectOrCreate: {
@@ -47,6 +48,7 @@ export async function upsertJiraIssue(
       issueType: issue.issueType,
       priority: issue.priority,
       epicKey: issue.epicKey ?? undefined,
+      syncedAt: new Date(),
       parent: issue.epicKey
         ? {
             connectOrCreate: {
@@ -67,6 +69,16 @@ export async function getJiraIssues(
   prisma: PrismaClient
 ): Promise<JiraIssueWithParent[]> {
   return prisma.jiraIssue.findMany({
+    include: { parent: true },
+    orderBy: { updatedAt: 'desc' },
+  });
+}
+
+export async function getJiraIssuesUnsynced(
+  prisma: PrismaClient
+): Promise<JiraIssueWithParent[]> {
+  return prisma.jiraIssue.findMany({
+    where: { syncedAt: null },
     include: { parent: true },
     orderBy: { updatedAt: 'desc' },
   });

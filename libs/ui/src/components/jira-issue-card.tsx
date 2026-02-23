@@ -64,7 +64,7 @@ export function JiraIssueCard({
                   showDetails && 'rotate-180'
                 )}
               />
-              <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
+              <div className="flex min-w-0 flex-1 items-center gap-1.5">
                 <Badge
                   variant="outline"
                   className="shrink-0 text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70"
@@ -81,54 +81,54 @@ export function JiraIssueCard({
 
         <CollapsibleContent>
           <CardContent className="px-3 pt-0 pb-2">
-            <div className="py-1.5 flex flex-col gap-3">
-              {issue.epicKey && (
-                <div className="flex items-center gap-1.5 pt-2 border-t border-muted-foreground/5">
-                  <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium">
-                    {parentLabel}
-                  </span>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-2 gap-y-4">
+              <div className="flex flex-col gap-1 items-center">
+                <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium">
+                  {parentLabel}
+                </span>
+                <div className="flex flex-wrap items-center gap-1.5">
                   <Badge
                     variant="outline"
-                    className="text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70"
+                    className="text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70 shrink-0"
                   >
                     {issue.epicKey}
                   </Badge>
                   {issue.parent?.summary && (
-                    <span className="text-xs text-muted-foreground/80">
+                    <span className="text-xs text-muted-foreground/80 truncate">
                       {issue.parent.summary}
                     </span>
                   )}
                 </div>
-              )}
-              <div className="flex items-center gap-1.5 pt-2 border-t border-muted-foreground/5">
+              </div>
+              <div className="flex flex-col gap-1 items-center">
                 <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium">
                   Type
                 </span>
                 <Badge
                   variant="outline"
-                  className="text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70"
+                  className="text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70 w-fit"
                 >
                   {issue.issueType ?? ''}
                 </Badge>
               </div>
-              <div className="flex items-center gap-1.5 pt-2 border-t border-muted-foreground/5">
+              <div className="flex flex-col gap-1 items-center">
                 <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium">
                   Status
                 </span>
                 <Badge
                   variant="outline"
-                  className="text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70"
+                  className="text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70 w-fit"
                 >
                   {issue.status ?? 'Unknown'}
                 </Badge>
               </div>
-              <div className="flex items-center gap-1.5 pt-2 border-t border-muted-foreground/5">
+              <div className="flex flex-col gap-1 items-center">
                 <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium">
                   Priority
                 </span>
                 <Badge
                   variant="outline"
-                  className="text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70"
+                  className="text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70 w-fit"
                 >
                   {issue.priority ?? ''}
                 </Badge>
@@ -136,7 +136,7 @@ export function JiraIssueCard({
             </div>
           </CardContent>
 
-          <CardFooter className="flex justify-center px-3 pb-2 gap-6">
+          <CardFooter className="flex justify-center px-3 pb-2 gap-6 mt-4">
             <Button size="sm" onClick={handleTrackTime} className="flex-1">
               <TimerIcon className="h-4 w-4" />
               Track Time

@@ -8,13 +8,13 @@
     "build:renderer": "nx build renderer",
     "build:desktop": "nx build desktop",
     "build:ui": "nx typecheck ui",
+    "dev": "nx run-many --targets=serve --projects=renderer,desktop --parallel",
     "serve:renderer": "nx serve renderer",
     "serve:desktop": "nx serve desktop",
     "test:renderer": "nx test renderer",
     "test:desktop": "nx test desktop",
     "package": "nx run desktop:package",
-    "make": "nx run desktop:make",
-    "dev": "nx run-many --targets=serve --projects=renderer,desktop --parallel"
+    "make": "nx run desktop:make"
   },
   "private": true,
   "devDependencies": {
