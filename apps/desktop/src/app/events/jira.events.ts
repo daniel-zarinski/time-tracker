@@ -9,7 +9,7 @@ import type {
 } from '@time-tracker/jira';
 import { JiraApiError } from '@time-tracker/jira';
 import { getClient, getJiraIssues } from '@time-tracker/database';
-import { JiraService, toJiraConfig } from '../api/jira-service';
+import { JiraService, toJiraConfig } from '../services';
 import { getJiraConfig } from '../store/config-store';
 
 function validateConfig(config: JiraConfig): void {
@@ -135,19 +135,11 @@ export function bootstrapJiraEvents(): void {
     }
   );
 
-  ipcMain.handle('jira:get-issues', async (): Promise<JiraIssue[]> => {
-    const prisma = getClient();
-    const rows = await getJiraIssues(prisma);
-    return rows.map((row) => ({
-      key: row.key,
-      summary: row.summary ?? '',
-      status: row.status ?? '',
-      issueType: row.issueType ?? '',
-      priority: row.priority ?? '',
-      epicKey: row.epicKey,
-      epicSummary: row.parent?.summary ?? null,
-      parentIssueType: row.parent?.issueType ?? null,
-      assigneeEmail: row.assigneeEmail,
-    }));
+  ipcMain.handle('jira:get-issues', async () => {
+    try {
+      return getJiraIssues(getClient());
+    } catch (err) {
+      throw serializeError(err);
+    }
   });
 }

@@ -1,3 +1,4 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Button,
   Input,
@@ -25,75 +26,38 @@ import { useEffect, useState } from 'react';
 const JIRA_TOAST_ID = 'jira-settings';
 
 export function SettingsTab() {
+  const queryClient = useQueryClient();
   const [email, setEmail] = useState('');
   const [domain, setDomain] = useState('');
   const [token, setToken] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isTesting, setIsTesting] = useState(false);
-  const [isDeletingDatabase, setIsDeletingDatabase] = useState(false);
-  const [dbPath, setDbPath] = useState<string | null>(null);
 
-  useEffect(() => {
-    window.electron.store
-      .getJiraConfig()
-      .then((config) => {
-        if (config) {
-          setEmail(config.email);
-          setDomain(config.domain);
-          setToken(config.token);
-        }
-      })
-      .finally(() => setIsLoading(false));
-  }, []);
+  const configQuery = useQuery({
+    queryKey: ['jira', 'config'],
+    queryFn: () => window.store.getJiraConfig(),
+  });
+  const dbPathQuery = useQuery({
+    queryKey: ['database', 'path'],
+    queryFn: () => window.database.getPath(),
+  });
 
-  useEffect(() => {
-    window.electron.database.getPath().then(setDbPath);
-  }, []);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!domain.trim() || !email || !token) return;
-    setIsSaving(true);
-    try {
-      await window.electron.store.setJiraConfig({ domain, email, token });
+  const saveMutation = useMutation({
+    mutationFn: (config: { domain: string; email: string; token: string }) =>
+      window.store.setJiraConfig(config),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['jira', 'config'] });
       toast.success('Settings saved', { id: JIRA_TOAST_ID });
-    } finally {
-      setIsSaving(false);
-    }
-  }
+    },
+  });
 
-  async function handleTestConnection() {
-    if (!domain.trim() || !email || !token) return;
-    setIsTesting(true);
-    try {
-      await toast
-        .promise(
-          window.electron.jira.testConnection({ domain, email, token }),
-          {
-            id: JIRA_TOAST_ID,
-            loading: 'Testing connection…',
-            success: 'Connected',
-            error: 'Connection failed',
-          }
-        )
-        .unwrap();
-    } finally {
-      setIsTesting(false);
-    }
-  }
+  const testMutation = useMutation({
+    mutationFn: (config: { domain: string; email: string; token: string }) =>
+      window.jira.testConnection(config),
+  });
 
-  async function handleDeleteDatabase() {
-    if (
-      !window.confirm(
-        'Delete all time entries and persisted data? This cannot be undone.'
-      )
-    ) {
-      return;
-    }
-    setIsDeletingDatabase(true);
-    try {
-      const result = await window.electron.database.delete();
+  const deleteMutation = useMutation({
+    mutationFn: () => window.database.delete(),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['database', 'path'] });
       if (result.success) {
         toast.success('Database deleted. Restart the app to continue.', {
           id: JIRA_TOAST_ID,
@@ -105,17 +69,63 @@ export function SettingsTab() {
           position: 'bottom-center',
         });
       }
-    } catch (err) {
+    },
+    onError: () => {
       toast.error('Failed to delete database', {
         id: JIRA_TOAST_ID,
         position: 'bottom-center',
       });
-    } finally {
-      setIsDeletingDatabase(false);
+    },
+  });
+
+  useEffect(() => {
+    const config = configQuery.data;
+    if (config) {
+      setEmail(config.email);
+      setDomain(config.domain);
+      setToken(config.token);
+    }
+  }, [configQuery.data]);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!domain.trim() || !email || !token) return;
+    saveMutation.mutate({ domain, email, token });
+  }
+
+  async function handleTestConnection() {
+    if (!domain.trim() || !email || !token) return;
+    try {
+      await toast
+        .promise(
+          testMutation.mutateAsync({ domain, email, token }),
+          {
+            id: JIRA_TOAST_ID,
+            loading: 'Testing connection…',
+            success: 'Connected',
+            error: 'Connection failed',
+          }
+        )
+        .unwrap();
+    } catch {
+      // Toast handles error display
     }
   }
 
-  if (isLoading) {
+  async function handleDeleteDatabase() {
+    if (
+      !window.confirm(
+        'Delete all time entries and persisted data? This cannot be undone.',
+      )
+    ) {
+      return;
+    }
+    deleteMutation.mutate();
+  }
+
+  const dbPath = dbPathQuery.data ?? null;
+
+  if (configQuery.isLoading) {
     return (
       <div className="w-full max-w-md mx-auto p-4 text-muted-foreground text-sm">
         Loading settings…
@@ -188,7 +198,7 @@ export function SettingsTab() {
                       className="inline h-auto p-0 font-normal align-baseline ml-1 text-primary underline underline-offset-4 hover:text-primary/80"
                       onClick={() =>
                         window.electron.openExternal(
-                          'https://id.atlassian.com/manage-profile/security/api-tokens'
+                          'https://id.atlassian.com/manage-profile/security/api-tokens',
                         )
                       }
                     >
@@ -200,13 +210,13 @@ export function SettingsTab() {
                 <FieldSeparator />
 
                 <Field orientation="horizontal">
-                  <Button type="submit" disabled={isSaving}>
+                  <Button type="submit" disabled={saveMutation.isPending}>
                     Save
                   </Button>
                   <Button
                     variant="outline"
                     type="button"
-                    disabled={isTesting}
+                    disabled={testMutation.isPending}
                     onClick={handleTestConnection}
                   >
                     Test Connection
@@ -251,9 +261,7 @@ export function SettingsTab() {
                       variant="outline"
                       type="button"
                       size="sm"
-                      onClick={() =>
-                        window.electron.showItemInFolder(dbPath)
-                      }
+                      onClick={() => window.electron.showItemInFolder(dbPath)}
                     >
                       <FolderOpen className="h-4 w-4 mr-2" />
                       Show in folder
@@ -266,7 +274,7 @@ export function SettingsTab() {
                   variant="destructive"
                   type="button"
                   size="sm"
-                  disabled={isDeletingDatabase}
+                  disabled={deleteMutation.isPending}
                   onClick={handleDeleteDatabase}
                 >
                   <Trash2 className="h-4 w-4 mr-2" />

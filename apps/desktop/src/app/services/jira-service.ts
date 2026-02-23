@@ -1,6 +1,5 @@
 import {
   getClient,
-  getJiraIssues,
   PrismaClient,
   upsertJiraIssue,
 } from '@time-tracker/database';
@@ -161,9 +160,7 @@ export class JiraService {
       }
     }
 
-    await Promise.all(
-      allIssues.map((i) => upsertJiraIssue(this.prisma, i))
-    );
+    await Promise.all(allIssues.map((i) => upsertJiraIssue(this.prisma, i)));
 
     return allIssues;
   }
@@ -173,21 +170,6 @@ export class JiraService {
       project: project === 'all' || !project ? undefined : project,
       assigneeCurrentUser: true,
     });
-  }
-
-  async getJiraIssues(): Promise<JiraIssue[]> {
-    const rows = await getJiraIssues(this.prisma);
-    return rows.map((row) => ({
-      key: row.key,
-      summary: row.summary,
-      status: row.status,
-      issueType: row.issueType,
-      priority: row.priority,
-      epicKey: row.epicKey,
-      epicSummary: row.parent?.summary ?? null,
-      parentIssueType: row.parent?.issueType ?? null,
-      assigneeEmail: row.assigneeEmail,
-    }));
   }
 
   async fetchStatuses(): Promise<JiraStatusInfo[]> {

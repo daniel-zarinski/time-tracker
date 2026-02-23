@@ -14,7 +14,7 @@ import {
   TabsTrigger,
   TabsContent,
 } from '@time-tracker/ui';
-import type { JiraIssue } from '@time-tracker/jira';
+import type { JiraIssueWithParent } from '@time-tracker/database';
 import { Settings, AlertCircle, Inbox } from 'lucide-react';
 import { useAppStore } from '../store';
 
@@ -58,14 +58,18 @@ function sortStatuses(statuses: string[]): string[] {
 export function JiraIssuesTab() {
   const setActiveTab = useAppStore.use.setActiveTab();
 
+  const configQuery = useQuery({
+    queryKey: ['jira', 'config'],
+    queryFn: () => window.store.getJiraConfig(),
+  });
   const getIssuesQuery = useQuery({
     queryKey: ['jira', 'my-issues'],
-    queryFn: () => window.electron.jira.getJiraIssues(),
+    queryFn: () => window.jira.getJiraIssues(),
     retry: false,
   });
   const fetchMyIssuesQuery = useMutation({
     mutationKey: ['jira', 'fetch-my-issues'],
-    mutationFn: () => window.electron.jira.fetchMyIssues(),
+    mutationFn: () => window.jira.fetchMyIssues(),
     onSuccess: () => {
       getIssuesQuery.refetch();
     },
@@ -135,9 +139,9 @@ export function JiraIssuesTab() {
   }
 
   const issues = getIssuesQuery.data ?? [];
-  const groupedByStatus = issues.reduce<Record<string, JiraIssue[]>>(
+  const groupedByStatus = issues.reduce<Record<string, JiraIssueWithParent[]>>(
     (acc, issue) => {
-      const status = issue.status || 'Unknown';
+      const status = issue.status ?? 'Unknown';
       const displayStatus = OTHER_STATUS_SET.has(
         status as (typeof OTHER_STATUSES)[number]
       )
@@ -152,7 +156,8 @@ export function JiraIssuesTab() {
   const statuses = sortStatuses(Object.keys(groupedByStatus));
 
   async function handleOpenInJira(issueKey: string) {
-    const config = await window.electron.store.getJiraConfig();
+    const config =
+      configQuery.data ?? (await configQuery.refetch()).data;
     if (config?.domain) {
       const url = `https://${config.domain}.atlassian.net/browse/${issueKey}`;
       await window.electron.openExternal(url);

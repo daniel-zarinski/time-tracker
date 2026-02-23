@@ -9,10 +9,10 @@ import {
 } from './ui/collapsible';
 import { ChevronDownIcon, ExternalLinkIcon } from 'lucide-react';
 import { cn } from '@time-tracker/utils';
-import type { JiraIssue } from '@time-tracker/jira';
+import type { JiraIssueWithParent } from '@time-tracker/database';
 
 export interface JiraIssueCardProps {
-  issue: JiraIssue;
+  issue: JiraIssueWithParent;
   onOpenInJira?: (issueKey: string) => void | Promise<void>;
 }
 
@@ -23,10 +23,11 @@ export function JiraIssueCard({ issue, onOpenInJira }: JiraIssueCardProps) {
     await onOpenInJira?.(issue.key);
   }
 
+  const parentIssueType = issue.parent?.issueType ?? '';
   const parentLabel =
-    issue.parentIssueType === 'Epic'
+    parentIssueType === 'Epic'
       ? 'Epic'
-      : issue.parentIssueType === 'Story'
+      : parentIssueType === 'Story'
       ? 'Story'
       : 'Parent';
 
@@ -60,7 +61,7 @@ export function JiraIssueCard({ issue, onOpenInJira }: JiraIssueCardProps) {
                   {issue.key}
                 </Badge>
                 <span className="font-semibold text-foreground wrap-break-word">
-                  {issue.summary}
+                  {issue.summary ?? ''}
                 </span>
               </div>
               <div className="flex shrink-0 items-center gap-1.5">
@@ -68,7 +69,7 @@ export function JiraIssueCard({ issue, onOpenInJira }: JiraIssueCardProps) {
                   variant="outline"
                   className="text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70"
                 >
-                  {issue.priority}
+                  {issue.priority ?? ''}
                 </Badge>
               </div>
             </div>
@@ -89,9 +90,9 @@ export function JiraIssueCard({ issue, onOpenInJira }: JiraIssueCardProps) {
                   >
                     {issue.epicKey}
                   </Badge>
-                  {issue.epicSummary && (
+                  {issue.parent?.summary && (
                     <span className="text-xs text-muted-foreground/80">
-                      {issue.epicSummary}
+                      {issue.parent.summary}
                     </span>
                   )}
                 </div>
@@ -104,7 +105,7 @@ export function JiraIssueCard({ issue, onOpenInJira }: JiraIssueCardProps) {
                   variant="outline"
                   className="text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70"
                 >
-                  {issue.issueType}
+                  {issue.issueType ?? ''}
                 </Badge>
               </div>
               <div className="flex items-center gap-1.5 pt-2 border-t border-muted-foreground/5">
@@ -115,7 +116,7 @@ export function JiraIssueCard({ issue, onOpenInJira }: JiraIssueCardProps) {
                   variant="outline"
                   className="text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70"
                 >
-                  {issue.status}
+                  {issue.status ?? 'Unknown'}
                 </Badge>
               </div>
             </div>

@@ -7,6 +7,28 @@ datasource db {
   provider = "sqlite"
 }
 
+model TimeEntry {
+  id               String     @id @default(uuid())
+  issueKey         String     @map("issue_key") // Should this be optional?
+  timeSpentSeconds Int?       @map("time_spent_seconds") // When nullable it means currently being tracked
+  startedAt        DateTime   @map("started_at")
+  description      String     @default("")
+  syncStatus       SyncStatus @default(LOCAL) @map("sync_status")
+  syncError        String?    @map("sync_error")
+  worklogId        String?    @unique @map("worklog_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  issue   JiraIssue @relation(fields: [issueKey], references: [key])
+  worklog Worklog?  @relation(fields: [worklogId], references: [id])
+
+  @@index([issueKey])
+  @@index([syncStatus])
+  @@index([startedAt])
+  @@map("time_entry")
+}
+
 model JiraIssue {
   id             String  @id @default(uuid())
   key            String  @unique
@@ -24,7 +46,44 @@ model JiraIssue {
   parent   JiraIssue?  @relation("ParentIssue", fields: [parentIssueKey], references: [key])
   children JiraIssue[] @relation("ParentIssue")
 
+  worklogs    Worklog[]
+  timeEntries TimeEntry[]
+
   @@index([parentIssueKey])
   @@index([key])
   @@map("jira_issue")
+}
+
+model Worklog {
+  id               String   @id @default(uuid())
+  tempoWorklogId   Int      @unique @map("tempo_worklog_id")
+  jiraWorklogId    Int?     @map("jira_worklog_id")
+  issueKey         String   @map("issue_key")
+  issueId          Int      @map("issue_id")
+  timeSpentSeconds Int      @map("time_spent_seconds")
+  billableSeconds  Int      @default(0) @map("billable_seconds")
+  startedAt        DateTime @map("started_at")
+  description      String   @default("")
+  authorAccountId  String   @map("author_account_id")
+  authorName       String?  @map("author_name")
+  tempoCreatedAt   String?  @map("tempo_created_at")
+  tempoUpdatedAt   String?  @map("tempo_updated_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  issue     JiraIssue  @relation(fields: [issueKey], references: [key])
+  timeEntry TimeEntry?
+
+  @@index([issueKey])
+  @@index([tempoWorklogId])
+  @@index([authorAccountId])
+  @@index([startedAt])
+  @@map("worklog")
+}
+
+enum SyncStatus {
+  LOCAL
+  SYNCED
+  ERROR
 }

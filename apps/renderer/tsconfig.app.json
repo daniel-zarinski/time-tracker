@@ -26,7 +26,13 @@
   "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx"],
   "references": [
     {
+      "path": "../../libs/utils/tsconfig.lib.json"
+    },
+    {
       "path": "../../libs/jira/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/database/tsconfig.lib.json"
     },
     {
       "path": "../../libs/ui/tsconfig.lib.json"

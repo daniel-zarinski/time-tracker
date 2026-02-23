@@ -12,6 +12,7 @@ export interface JiraIssueUpsertInput {
   priority: string;
   epicKey?: string | null;
   assigneeEmail?: string | null;
+  // rank?: number | null; // built in to kanban board
 }
 
 export async function upsertJiraIssue(
