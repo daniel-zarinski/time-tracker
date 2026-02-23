@@ -62,9 +62,16 @@ interface CommandPaletteProps
   emptyMessage?: string;
 }
 
-function filterItem(item: CommandPaletteItem, search: string): boolean {
-  const score = defaultFilter(item.label, search, item.keywords);
-  return score > 0;
+function scoreItem(item: CommandPaletteItem, search: string): number {
+  const trimmed = search.trim().toLowerCase();
+  if (!trimmed) return 1;
+  // Exact keyword match = highest priority
+  if (item.keywords?.some((k) => k.toLowerCase() === trimmed)) return 1;
+  // Keyword prefix match = high priority
+  if (item.keywords?.some((k) => k.toLowerCase().startsWith(trimmed)))
+    return 0.95;
+  // Use defaultFilter for label/keyword fuzzy match (already uses keywords)
+  return defaultFilter(item.label, trimmed, item.keywords);
 }
 
 function getVisibleItems(
@@ -73,7 +80,11 @@ function getVisibleItems(
 ): CommandPaletteItem[] {
   const trimmed = search.trim().toLowerCase();
   if (trimmed) {
-    return group.items.filter((item) => filterItem(item, trimmed));
+    return group.items
+      .map((item) => ({ item, score: scoreItem(item, trimmed) }))
+      .filter(({ score }) => score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(({ item }) => item);
   }
   if (group.maxItems != null) {
     return group.items.slice(0, group.maxItems);
