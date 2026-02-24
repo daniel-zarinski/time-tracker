@@ -80,88 +80,99 @@ export function TimelineGrid({
             onPointerUp={onPointerUp}
           >
             {entriesWithLayout.map(
-              ({
-                entry,
-                gridRowStart,
-                gridRowSpan,
-                column,
-                totalColumns,
-              }) => {
+              ({ entry, gridRowStart, gridRowSpan, column, totalColumns }) => {
                 const isActive = entry.timeSpentSeconds == null;
                 return (
-                <li
-                  key={entry.id}
-                  className="pointer-events-none relative"
-                  style={{
-                    gridRow: `${gridRowStart} / span ${gridRowSpan}`,
-                    gridColumn: '1',
-                  }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onClearSelection();
-                      onEntryClick(entry.issue);
+                  <li
+                    key={entry.id}
+                    className="pointer-events-none relative"
+                    style={{
+                      gridRow: `${gridRowStart} / span ${gridRowSpan}`,
+                      gridColumn: '1',
                     }}
-                    className={cn(
-                      'pointer-events-auto absolute inset-y-0.5 inset-x-[9px] max-w-[75%] overflow-hidden rounded-lg border px-2 pt-0 pb-2 text-left transition-colors',
-                      isActive
-                        ? 'border-l-2 border-l-accent border-primary/20 bg-primary/15 animate-pulse'
-                        : 'border border-primary/20 bg-primary/10 hover:bg-primary/15',
-                      totalColumns > 1 && 'inset-y-0.5'
-                    )}
-                    style={
-                      totalColumns > 1
-                        ? {
-                            left: `calc(${(column / totalColumns) * 100}% + 0.25rem)`,
-                            right: `calc(${((totalColumns - column - 1) / totalColumns) * 100}% + 0.25rem)`,
-                          }
-                        : undefined
-                    }
                   >
-                    <p className="truncate text-xs text-primary">
-                      <span className="font-semibold">{entry.issue.key ?? entry.issueKey}</span>
-                      {entry.issue.summary && (
-                        <span className="ml-1.5 text-primary/60">{entry.issue.summary}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClearSelection();
+                        onEntryClick(entry.issue);
+                      }}
+                      className={cn(
+                        'pointer-events-auto absolute inset-y-0.5 inset-x-[9px] max-w-[75%] overflow-hidden rounded-lg border px-2 pt-0 pb-2 text-left transition-colors',
+                        isActive
+                          ? 'border-l-4 border-accent bg-primary/15 animate-pulse'
+                          : 'border border-primary/20 bg-primary/10 hover:bg-primary/15',
+                        totalColumns > 1 && 'inset-y-0.5'
                       )}
-                    </p>
-                    {gridRowSpan >= 3 && (
-                      <p className="mt-0.5 text-[10px] text-primary/60">
-                        {formatEntryTime(new Date(entry.startedAt))}
+                      style={
+                        totalColumns > 1
+                          ? {
+                              left: `calc(${
+                                (column / totalColumns) * 100
+                              }% + 0.25rem)`,
+                              right: `calc(${
+                                ((totalColumns - column - 1) / totalColumns) *
+                                100
+                              }% + 0.25rem)`,
+                            }
+                          : undefined
+                      }
+                    >
+                      <p className="truncate text-xs text-primary">
+                        <span className="font-semibold">
+                          {entry.issue.key ?? entry.issueKey}
+                        </span>
+                        {entry.issue.summary && (
+                          <span className="ml-1.5 text-primary/60">
+                            {entry.issue.summary}
+                          </span>
+                        )}
                       </p>
-                    )}
-                  </button>
-                </li>
+                      {gridRowSpan >= 3 && (
+                        <p className="mt-0.5 text-[10px] text-primary/60">
+                          {formatEntryTime(new Date(entry.startedAt))}
+                        </p>
+                      )}
+                    </button>
+                  </li>
                 );
               }
             )}
 
             {/* Drag-to-select highlight */}
-            {selection && (() => {
-              const minRow = Math.min(selection.startRow, selection.endRow);
-              const maxRow = Math.max(selection.startRow, selection.endRow);
-              const span = maxRow - minRow + 1;
-              const startTime = gridRowToTime(minRow, date);
-              const endTime = gridRowToTime(maxRow + 1, date);
-              const totalMinutes = span * 15;
-              const hours = Math.floor(totalMinutes / 60);
-              const minutes = totalMinutes % 60;
-              const duration = hours > 0
-                ? minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`
-                : `${minutes}m`;
-              return (
-                <li
-                  className="pointer-events-none relative z-10"
-                  style={{ gridRow: `${minRow} / span ${span}`, gridColumn: '1' }}
-                >
-                  <div className="absolute inset-y-1 inset-x-[9px] flex items-center justify-center rounded-lg border border-dashed border-primary/40 bg-primary/10">
-                    <span className="text-xs font-medium text-primary/70">
-                      {formatEntryTime(startTime)} – {formatEntryTime(endTime)} ({duration})
-                    </span>
-                  </div>
-                </li>
-              );
-            })()}
+            {selection &&
+              (() => {
+                const minRow = Math.min(selection.startRow, selection.endRow);
+                const maxRow = Math.max(selection.startRow, selection.endRow);
+                const span = maxRow - minRow + 1;
+                const startTime = gridRowToTime(minRow, date);
+                const endTime = gridRowToTime(maxRow + 1, date);
+                const totalMinutes = span * 15;
+                const hours = Math.floor(totalMinutes / 60);
+                const minutes = totalMinutes % 60;
+                const duration =
+                  hours > 0
+                    ? minutes > 0
+                      ? `${hours}h ${minutes}m`
+                      : `${hours}h`
+                    : `${minutes}m`;
+                return (
+                  <li
+                    className="pointer-events-none relative z-10"
+                    style={{
+                      gridRow: `${minRow} / span ${span}`,
+                      gridColumn: '1',
+                    }}
+                  >
+                    <div className="absolute inset-y-1 inset-x-[9px] flex items-center justify-center rounded-lg border border-dashed border-primary/40 bg-primary/10">
+                      <span className="text-xs font-medium text-primary/70">
+                        {formatEntryTime(startTime)} –{' '}
+                        {formatEntryTime(endTime)} ({duration})
+                      </span>
+                    </div>
+                  </li>
+                );
+              })()}
 
             {/* Current time indicator */}
             {isToday && <CurrentTimeIndicator />}

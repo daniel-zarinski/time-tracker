@@ -1,15 +1,128 @@
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@time-tracker/ui';
-import { Home } from 'lucide-react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import {
+  Button,
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyMedia,
+  JiraIssueCard,
+  TimeEntryCardActive,
+  Separator,
+  toast,
+} from '@time-tracker/ui';
+import { Inbox, PlayIcon } from 'lucide-react';
+import { useAppStore } from '../store';
 
 export function HomeTab() {
+  const setActiveTab = useAppStore.use.setActiveTab();
+
+  const timeEntriesQuery = useQuery({
+    queryKey: ['time-entries'],
+    queryFn: () => window.database.getTimeEntries(),
+    retry: false,
+  });
+
+  const jiraIssuesQuery = useQuery({
+    queryKey: ['jira', 'my-issues'],
+    queryFn: () => window.database.getMyJiraIssues(),
+    retry: false,
+  });
+
+  const startTracking = useMutation({
+    mutationFn: (issueKey: string) =>
+      window.timeTracking.startTracking(issueKey),
+    onSuccess: () => {
+      timeEntriesQuery.refetch();
+      toast.success('Time entry started');
+    },
+    onError: () => {
+      toast.error('Failed to start time entry');
+    },
+  });
+
+  const stopTracking = useMutation({
+    mutationFn: (id: string) => window.timeTracking.stopTracking(id),
+    onSuccess: () => {
+      timeEntriesQuery.refetch();
+      toast.success('Time entry stopped');
+    },
+    onError: () => {
+      toast.error('Failed to stop time entry');
+    },
+  });
+
+  const entries = timeEntriesQuery.data ?? [];
+  const activeEntry = entries.find((e) => e.timeSpentSeconds === null);
+  const issues = jiraIssuesQuery.data ?? [];
+  const displayedIssues = issues.slice(0, 4);
+
+  if (timeEntriesQuery.isLoading || jiraIssuesQuery.isLoading) {
+    return (
+      <Empty className="w-full max-w-md mx-auto">
+        <EmptyHeader>
+          <EmptyTitle>Loading…</EmptyTitle>
+        </EmptyHeader>
+      </Empty>
+    );
+  }
+
   return (
-    <Empty className="w-full max-w-md mx-auto">
-      <EmptyHeader>
-        <EmptyMedia variant="icon">
-          <Home />
-        </EmptyMedia>
-        <EmptyTitle>Welcome to Time Tracker</EmptyTitle>
-      </EmptyHeader>
-    </Empty>
+    <div className="w-full max-w-2xl mx-auto p-4 flex flex-col gap-3">
+      {activeEntry && (
+        <div className="sticky top-0 z-10 bg-background pb-1">
+          <TimeEntryCardActive
+            entry={activeEntry}
+            onStopTimer={stopTracking.mutateAsync}
+          />
+          {displayedIssues.length > 0 && <Separator className="mt-3" />}
+        </div>
+      )}
+
+      {displayedIssues.length > 0 ? (
+        <ul className="flex flex-col gap-2">
+          {displayedIssues.map((issue) => (
+            <li key={issue.id}>
+              <JiraIssueCard
+                issue={issue}
+                onOpenInJira={(key) => window.electron.openJiraExternal(key)}
+                onTrackTime={async (key) => {
+                  try {
+                    await startTracking.mutateAsync(key);
+                  } catch {
+                    // handled by mutation onError
+                  }
+                }}
+                headerAction={
+                  <Button
+                    size="icon"
+                    variant="default"
+                    className="shrink-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      startTracking.mutate(issue.key ?? '');
+                    }}
+                  >
+                    <PlayIcon className="size-4" />
+                  </Button>
+                }
+              />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <Empty className="w-full max-w-md mx-auto">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Inbox />
+            </EmptyMedia>
+            <EmptyTitle>No Jira issues</EmptyTitle>
+            <EmptyDescription>
+              Fetch issues from the Jira Issues tab to get started.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      )}
+    </div>
   );
 }

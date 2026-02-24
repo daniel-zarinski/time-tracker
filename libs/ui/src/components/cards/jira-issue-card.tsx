@@ -15,6 +15,7 @@ interface JiraIssueCardHeaderProps {
   issue: JiraIssueWithParent;
   showChevron?: boolean;
   expanded?: boolean;
+  headerAction?: React.ReactNode;
 }
 
 interface JiraIssueCardContentProps {
@@ -34,12 +35,14 @@ export interface JiraIssueCardProps {
   onTrackTime?: (issueKey: string) => void | Promise<unknown>;
   defaultExpanded?: boolean;
   collapsible?: boolean;
+  headerAction?: React.ReactNode;
 }
 
 function JiraIssueCardHeader({
   issue,
   showChevron = false,
   expanded = false,
+  headerAction,
 }: JiraIssueCardHeaderProps) {
   const keyAndSummary = (
     <div className="flex min-w-0 flex-1 items-center gap-1.5">
@@ -80,6 +83,7 @@ function JiraIssueCardHeader({
           {keyAndSummary}
         </div>
       )}
+      {headerAction}
     </CardHeader>
   );
 }
@@ -181,6 +185,7 @@ export function JiraIssueCard({
   onOpenInJira,
   onTrackTime,
   collapsible = true,
+  headerAction,
 }: JiraIssueCardProps) {
   const [showDetails, setShowDetails] = useState(defaultExpanded ?? false);
 
@@ -218,12 +223,13 @@ export function JiraIssueCard({
             issue={issue}
             showChevron
             expanded={showDetails}
+            headerAction={headerAction}
           />
           <CollapsibleContent>{contentAndFooter}</CollapsibleContent>
         </Collapsible>
       ) : (
         <>
-          <JiraIssueCardHeader issue={issue} showChevron={false} />
+          <JiraIssueCardHeader issue={issue} showChevron={false} headerAction={headerAction} />
           {contentAndFooter}
         </>
       )}
