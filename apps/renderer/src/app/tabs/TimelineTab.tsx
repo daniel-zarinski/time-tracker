@@ -446,9 +446,10 @@ export function TimelineTab() {
                 }) => (
                   <li
                     key={entry.id}
-                    className="relative"
+                    className="pointer-events-none relative"
                     style={{
                       gridRow: `${gridRowStart} / span ${gridRowSpan}`,
+                      gridColumn: '1',
                     }}
                   >
                     <button
@@ -458,7 +459,7 @@ export function TimelineTab() {
                         setSelectedIssue(entry.issue);
                       }}
                       className={cn(
-                        'absolute inset-y-1 inset-x-[9px] overflow-hidden rounded-lg border border-primary/20 bg-primary/10 p-2 text-left transition-colors hover:bg-primary/15',
+                        'pointer-events-auto absolute inset-y-1 inset-x-[9px] max-w-[75%] overflow-hidden rounded-lg border border-primary/20 bg-primary/10 p-2 text-left transition-colors hover:bg-primary/15',
                         totalColumns > 1 && 'inset-y-1'
                       )}
                       style={
@@ -504,7 +505,7 @@ export function TimelineTab() {
                 return (
                   <li
                     className="pointer-events-none relative z-10"
-                    style={{ gridRow: `${minRow} / span ${span}` }}
+                    style={{ gridRow: `${minRow} / span ${span}`, gridColumn: '1' }}
                   >
                     <div className="absolute inset-y-1 inset-x-[9px] flex items-center justify-center rounded-lg border border-dashed border-primary/40 bg-primary/10">
                       <span className="text-xs font-medium text-primary/70">
@@ -541,7 +542,7 @@ function CurrentTimeIndicator() {
   return (
     <li
       className="pointer-events-none relative z-20"
-      style={{ gridRow: `${gridRow} / span 1` }}
+      style={{ gridRow: `${gridRow} / span 1`, gridColumn: '1' }}
     >
       <div className="absolute inset-x-0 top-0 flex items-center">
         <div className="size-2 rounded-full bg-red-500" />
