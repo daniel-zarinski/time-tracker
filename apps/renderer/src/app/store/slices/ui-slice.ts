@@ -2,7 +2,7 @@ import { StateCreator } from 'zustand';
 
 import type { JiraIssueWithParent } from '@time-tracker/database';
 
-export type TabValue = 'home' | 'jira-issues' | 'settings';
+export type TabValue = 'tasks' | 'jira-issues' | 'settings';
 
 export interface UiSlice {
   activeTab: TabValue;
@@ -17,7 +17,7 @@ export const createUiSlice: StateCreator<
   [],
   UiSlice
 > = (set) => ({
-  activeTab: 'home',
+  activeTab: 'tasks',
   setActiveTab: (tab) => set({ activeTab: tab }, false, 'ui/setActiveTab'),
   selectedIssue: null,
   setSelectedIssue: (issue) =>

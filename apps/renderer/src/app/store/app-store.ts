@@ -18,7 +18,7 @@ export const useAppStore = createSelectors(
         }),
         {
           name: 'app-store',
-          version: 1,
+          version: 2,
           storage: createJSONStorage(() => localStorage),
           partialize: (state): PersistedState => ({
             elapsed: state.elapsed,
@@ -26,9 +26,13 @@ export const useAppStore = createSelectors(
           }),
           migrate: (persisted: unknown, version: number): PersistedState => {
             if (version < 1) {
-              return { elapsed: 0, activeTab: 'home' };
+              return { elapsed: 0, activeTab: 'tasks' };
             }
-            return persisted as PersistedState;
+            const state = persisted as PersistedState;
+            if (version < 2 && state.activeTab === 'home') {
+              return { ...state, activeTab: 'tasks' };
+            }
+            return state;
           },
         }
       ),

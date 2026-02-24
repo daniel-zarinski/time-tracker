@@ -12,7 +12,7 @@ import {
   Separator,
 } from '@time-tracker/ui';
 
-import { HomeTab, SettingsTab, JiraIssuesTab, MainTabList } from './tabs';
+import { TasksTab, SettingsTab, JiraIssuesTab, MainTabList } from './tabs';
 import { useAppStore, TabValue } from './store';
 import { useAppCommands } from './use-app-commands';
 
@@ -56,8 +56,8 @@ export function App() {
         <Separator />
 
         <main style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
-          <TabsContent value="home">
-            <HomeTab />
+          <TabsContent value="tasks">
+            <TasksTab />
           </TabsContent>
 
           <TabsContent value="jira-issues">

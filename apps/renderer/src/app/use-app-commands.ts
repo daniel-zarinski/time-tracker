@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Home, ListTodo, Settings } from 'lucide-react';
+import { ListTodo, Settings } from 'lucide-react';
 
 import type { CommandPaletteGroup } from '@time-tracker/ui';
 
@@ -28,11 +28,11 @@ export function useAppCommands(): {
       heading: 'Navigation',
       items: [
         {
-          id: 'home',
-          label: 'Home',
-          icon: Home,
+          id: 'tasks',
+          label: 'Tasks',
+          icon: ListTodo,
           shortcutKey: '1',
-          onSelect: () => setActiveTab('home'),
+          onSelect: () => setActiveTab('tasks'),
         },
         {
           id: 'jira',
