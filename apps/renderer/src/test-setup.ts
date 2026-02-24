@@ -8,9 +8,14 @@ Object.assign(globalThis.window, {
     setTempoConfig: vi.fn().mockResolvedValue(undefined),
   },
   jira: {
+    saveConfig: vi.fn().mockResolvedValue(undefined),
     getJiraIssues: vi.fn().mockResolvedValue([]),
     fetchMyIssues: vi.fn().mockResolvedValue([]),
     testConnection: vi.fn().mockResolvedValue({}),
+  },
+  tempo: {
+    testConnection: vi.fn().mockResolvedValue(undefined),
+    syncWorklogs: vi.fn().mockResolvedValue(0),
   },
   electron: {
     openExternal: vi.fn().mockResolvedValue(undefined),

@@ -15,9 +15,12 @@ export interface JiraConfigInput {
   domain: string;
   email: string;
   token: string;
+  /** Cached from getMyself when saving; used by Tempo to filter worklogs. */
+  accountId?: string;
 }
 
 export interface JiraMyselfResponse {
+  accountId: string;
   displayName: string;
   emailAddress: string;
 }
@@ -47,6 +50,7 @@ export interface JiraIssueFields {
 }
 
 export interface JiraRawIssue {
+  id?: string | number;
   key: string;
   fields: JiraIssueFields;
 }

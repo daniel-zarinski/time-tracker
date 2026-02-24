@@ -2,6 +2,7 @@ import SquirrelEvents from './app/events/squirrel.events';
 import ElectronEvents from './app/events/electron.events';
 import './app/events/time-tracking.events';
 import { bootstrapJiraEvents } from './app/events/jira.events';
+import { bootstrapTempoEvents } from './app/events/tempo.events';
 import { bootstrapDatabase } from './app/events/database.events';
 // import UpdateEvents from './app/events/update.events';
 import { app, BrowserWindow } from 'electron';
@@ -22,6 +23,7 @@ export default class Main {
   static bootstrapAppEvents() {
     ElectronEvents.bootstrapElectronEvents();
     bootstrapJiraEvents();
+    bootstrapTempoEvents();
 
     // initialize auto updater service
     if (!App.isDevelopmentMode()) {

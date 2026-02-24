@@ -1,19 +1,11 @@
 import { PrismaClient, SyncStatus } from '@prisma/client';
-import { JiraService, resolveConfig } from './jira-service';
 import { getClient } from '@time-tracker/database';
 
 export class TimeTrackingService {
   private prisma: PrismaClient;
-  private jira?: JiraService;
 
   constructor() {
     this.prisma = getClient();
-
-    try {
-      this.jira = new JiraService(resolveConfig());
-    } catch (error) {
-      console.error('Error initializing JiraService:', error);
-    }
   }
 
   async startTracking(issueKey: string, description?: string) {

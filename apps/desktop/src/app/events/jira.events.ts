@@ -7,6 +7,7 @@ import type {
 } from '@time-tracker/jira';
 import { JiraApiError } from '@time-tracker/jira';
 import { ipcMain } from 'electron';
+import { getJiraConfig, setJiraConfig } from '../store/config-store';
 import { JiraService } from '../services';
 import { resolveConfig } from '../services/jira-service';
 
@@ -24,12 +25,40 @@ function serializeError(err: unknown): {
 
 export function bootstrapJiraEvents(): void {
   ipcMain.handle(
+    'jira:save-config',
+    async (_event, input: JiraConfigInput): Promise<void> => {
+      const config = resolveConfig(input);
+      try {
+        const service = new JiraService(config);
+        const myself = await service.testConnection();
+        setJiraConfig({
+          domain: input.domain,
+          email: input.email,
+          token: input.token,
+          accountId: myself.accountId,
+        });
+      } catch (err) {
+        throw serializeError(err);
+      }
+    }
+  );
+
+  ipcMain.handle(
     'jira:test-connection',
     async (_event, input?: JiraConfigInput): Promise<JiraMyselfResponse> => {
       const config = resolveConfig(input);
       try {
         const service = new JiraService(config);
-        return service.testConnection();
+        const myself = await service.testConnection();
+        const configToSave = input ?? getJiraConfig();
+        if (
+          configToSave?.domain &&
+          configToSave?.email &&
+          configToSave?.token
+        ) {
+          setJiraConfig({ ...configToSave, accountId: myself.accountId });
+        }
+        return myself;
       } catch (err) {
         throw serializeError(err);
       }

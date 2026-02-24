@@ -1,18 +1,15 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "types": ["node"]
+    "types": ["node"],
+    "outDir": "../../dist/out-tsc/apps/desktop",
+    "rootDir": "."
   },
   "include": ["**/*.ts"],
   "references": [
-    {
-      "path": "../../libs/jira"
-    },
-    {
-      "path": "../../libs/database"
-    },
-    {
-      "path": "../../libs/utils"
-    }
+    { "path": "../../libs/tempo" },
+    { "path": "../../libs/jira" },
+    { "path": "../../libs/database" },
+    { "path": "../../libs/utils" }
   ]
 }

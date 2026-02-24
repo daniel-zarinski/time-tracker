@@ -1,8 +1,9 @@
 import type {
   DatabaseApi,
-  StoreApi,
-  JiraApi,
   ElectronApi,
+  JiraApi,
+  StoreApi,
+  TempoApi,
   TimeTrackingApi,
 } from '@time-tracker/utils';
 
@@ -11,6 +12,7 @@ declare global {
     database: DatabaseApi;
     store: StoreApi;
     jira: JiraApi;
+    tempo: TempoApi;
     electron: ElectronApi;
     timeTracking: TimeTrackingApi;
   }

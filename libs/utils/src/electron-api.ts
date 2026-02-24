@@ -40,6 +40,7 @@ export interface StoreApi {
 
 /** Jira IPC API exposed to the renderer */
 export interface JiraApi {
+  saveConfig: (config: JiraConfigInput) => Promise<void>;
   testConnection: (config?: JiraConfigInput) => Promise<JiraMyselfResponse>;
   fetchProjects: () => Promise<JiraProject[]>;
   fetchIssue: (key: string) => Promise<JiraIssue | null>;
@@ -51,6 +52,12 @@ export interface JiraApi {
   fetchStatuses: () => Promise<JiraStatusInfo[]>;
   fetchStatusesForKeys: (keys: string[]) => Promise<Record<string, string>>;
   fetchMissingIssues: () => Promise<void>;
+}
+
+/** Tempo IPC API exposed to the renderer */
+export interface TempoApi {
+  testConnection: (config?: { token: string }) => Promise<void>;
+  syncWorklogs: () => Promise<number>;
 }
 
 /** Shell / app IPC API exposed to the renderer */

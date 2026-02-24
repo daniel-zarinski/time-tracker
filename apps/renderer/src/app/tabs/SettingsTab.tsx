@@ -60,10 +60,15 @@ export function SettingsTab() {
 
   const saveMutation = useMutation({
     mutationFn: (config: { domain: string; email: string; token: string }) =>
-      window.store.setJiraConfig(config),
+      window.jira.saveConfig(config),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['jira', 'config'] });
       toast.success('Settings saved', { id: JIRA_TOAST_ID });
+    },
+    onError: (err: unknown) => {
+      const message =
+        err instanceof Error ? err.message : 'Failed to save Jira settings';
+      toast.error(message, { id: JIRA_TOAST_ID });
     },
   });
 
@@ -83,6 +88,31 @@ export function SettingsTab() {
 
   const fetchMissingIssuesMutation = useMutation({
     mutationFn: () => window.jira.fetchMissingIssues(),
+  });
+
+  const testTempoMutation = useMutation({
+    mutationFn: (config?: { token: string }) =>
+      window.tempo.testConnection(config),
+  });
+
+  const syncWorklogsMutation = useMutation({
+    mutationFn: () => window.tempo.syncWorklogs(),
+    onSuccess: (count) => {
+      const message =
+        count === 0
+          ? 'No worklogs found for the last 14 days'
+          : `Synced ${count} worklog${count === 1 ? '' : 's'}`;
+      toast.success(message, { id: TEMPO_TOAST_ID });
+    },
+    onError: (err: unknown) => {
+      const message =
+        err instanceof Error
+          ? err.message
+          : typeof err === 'object' && err !== null && 'message' in err
+          ? String((err as { message: unknown }).message)
+          : 'Failed to sync worklogs';
+      toast.error(message, { id: TEMPO_TOAST_ID });
+    },
   });
 
   const deleteMutation = useMutation({
@@ -140,6 +170,7 @@ export function SettingsTab() {
           error: 'Connection failed',
         })
         .unwrap();
+      queryClient.invalidateQueries({ queryKey: ['jira', 'config'] });
     } catch {
       // Toast handles error display
     }
@@ -315,6 +346,34 @@ export function SettingsTab() {
                   <Button type="submit" disabled={saveTempoMutation.isPending}>
                     Save
                   </Button>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    disabled={testTempoMutation.isPending}
+                    onClick={async () => {
+                      if (!tempoToken.trim()) return;
+                      try {
+                        await toast
+                          .promise(
+                            testTempoMutation.mutateAsync({
+                              token: tempoToken,
+                            }),
+                            {
+                              id: TEMPO_TOAST_ID,
+                              loading: 'Testing connection…',
+                              success: 'Connected',
+                              error: (err: Error) =>
+                                err?.message ?? 'Connection failed',
+                            }
+                          )
+                          .unwrap();
+                      } catch {
+                        // Toast handles error display
+                      }
+                    }}
+                  >
+                    Test Connection
+                  </Button>
                 </Field>
               </FieldSet>
             </FieldGroup>
@@ -355,6 +414,34 @@ export function SettingsTab() {
                   {fetchMissingIssuesMutation.isPending
                     ? 'Syncing…'
                     : 'Sync missing issues'}
+                </Button>
+              </Field>
+            </FieldSet>
+            <FieldSet className="gap-3">
+              <FieldLegend>Sync Tempo</FieldLegend>
+              <FieldDescription>
+                Fetch worklogs from Tempo for the last 30 days and upsert into
+                your local database. Requires Jira to be configured (Tempo API
+                v4 returns issue IDs only).
+              </FieldDescription>
+              <Field orientation="horizontal">
+                <Button
+                  variant="outline"
+                  type="button"
+                  size="sm"
+                  onClick={async () => {
+                    try {
+                      await syncWorklogsMutation.mutateAsync();
+                    } catch {
+                      // onError handles toast
+                    }
+                  }}
+                  disabled={syncWorklogsMutation.isPending}
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  {syncWorklogsMutation.isPending
+                    ? 'Syncing…'
+                    : 'Sync worklogs'}
                 </Button>
               </Field>
             </FieldSet>

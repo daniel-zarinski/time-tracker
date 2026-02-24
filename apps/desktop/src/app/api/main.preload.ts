@@ -4,6 +4,7 @@ import type {
   ElectronApi,
   JiraApi,
   StoreApi,
+  TempoApi,
   TimeTrackingApi,
 } from '@time-tracker/utils';
 
@@ -38,6 +39,8 @@ const storeApi: StoreApi = {
 };
 
 const jiraApi: JiraApi = {
+  saveConfig: (config: { domain: string; email: string; token: string }) =>
+    ipcRenderer.invoke('jira:save-config', config),
   testConnection: (config?: unknown) =>
     ipcRenderer.invoke('jira:test-connection', config),
   fetchProjects: () => ipcRenderer.invoke('jira:fetch-projects'),
@@ -52,6 +55,12 @@ const jiraApi: JiraApi = {
   fetchMissingIssues: () => ipcRenderer.invoke('jira:fetch-missing-issues'),
 };
 
+const tempoApi: TempoApi = {
+  testConnection: (config?: { token: string }) =>
+    ipcRenderer.invoke('tempo:test-connection', config),
+  syncWorklogs: () => ipcRenderer.invoke('tempo:sync-worklogs'),
+};
+
 const timeTrackingApi: TimeTrackingApi = {
   startTracking: (issueKey: string, description?: string) =>
     ipcRenderer.invoke('time-tracking:start', issueKey, description),
@@ -63,4 +72,5 @@ contextBridge.exposeInMainWorld('electron', electronApi);
 contextBridge.exposeInMainWorld('database', databaseApi);
 contextBridge.exposeInMainWorld('store', storeApi);
 contextBridge.exposeInMainWorld('jira', jiraApi);
+contextBridge.exposeInMainWorld('tempo', tempoApi);
 contextBridge.exposeInMainWorld('timeTracking', timeTrackingApi);

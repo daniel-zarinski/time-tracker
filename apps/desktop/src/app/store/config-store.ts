@@ -17,6 +17,7 @@ const schema = {
       domain: { type: 'string' },
       email: { type: 'string' },
       token: { type: 'string' },
+      accountId: { type: 'string' },
     },
     default: undefined,
   },
@@ -60,7 +61,13 @@ function resolveDomain(raw: {
 
 export function getJiraConfig(): JiraConfigInput | undefined {
   const raw = configStore.get(JIRA_CONFIG_KEY) as
-    | { domain?: string; baseUrl?: string; email?: string; token?: string }
+    | {
+        domain?: string;
+        baseUrl?: string;
+        email?: string;
+        token?: string;
+        accountId?: string;
+      }
     | undefined;
   if (!raw || typeof raw !== 'object') return undefined;
 
@@ -71,7 +78,10 @@ export function getJiraConfig(): JiraConfigInput | undefined {
   const token = typeof raw.token === 'string' ? raw.token : '';
   if (!email || !token) return undefined;
 
-  return { domain, email, token };
+  const accountId =
+    typeof raw.accountId === 'string' ? raw.accountId.trim() || undefined : undefined;
+
+  return { domain, email, token, accountId };
 }
 
 export function setJiraConfig(config: JiraConfigInput): void {

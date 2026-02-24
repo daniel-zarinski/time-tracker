@@ -58,8 +58,8 @@ model Worklog {
   id               String   @id @default(uuid())
   tempoWorklogId   Int      @unique @map("tempo_worklog_id")
   jiraWorklogId    Int?     @map("jira_worklog_id")
-  issueKey         String   @map("issue_key")
-  issueId          Int      @map("issue_id")
+  issueKey         String?  @map("issue_key")
+  issueId          Int?     @map("issue_id")
   timeSpentSeconds Int      @map("time_spent_seconds")
   billableSeconds  Int      @default(0) @map("billable_seconds")
   startedAt        DateTime @map("started_at")
@@ -72,7 +72,7 @@ model Worklog {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  issue     JiraIssue  @relation(fields: [issueKey], references: [key])
+  issue     JiraIssue? @relation(fields: [issueKey], references: [key], onDelete: SetNull)
   timeEntry TimeEntry?
 
   @@index([issueKey])
