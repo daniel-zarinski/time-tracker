@@ -1,59 +1,34 @@
-import { PrismaClient, SyncStatus } from '@prisma/client';
-import { getClient } from '@time-tracker/database';
+import {
+  getClient,
+  getActiveTimeEntry,
+  createTimeEntry,
+  stopTimeEntry,
+  getLastTimeEntryFromIssue as getLastTimeEntryFromIssueDb,
+} from '@time-tracker/database';
+import type { SyncStatus } from '@prisma/client';
+import type { TimeEntryWithIssue } from '@time-tracker/database';
 
 export class TimeTrackingService {
-  private prisma: PrismaClient;
+  async startTracking(
+    issueKey: string,
+    description?: string
+  ): Promise<TimeEntryWithIssue> {
+    const prisma = getClient();
+    const active = await getActiveTimeEntry(prisma);
 
-  constructor() {
-    this.prisma = getClient();
-  }
-
-  async startTracking(issueKey: string, description?: string) {
-    const existingActiveTimeEntry = await this.prisma.timeEntry.findFirst({
-      where: { issueKey, syncStatus: SyncStatus.LOCAL, timeSpentSeconds: null },
-    });
-
-    if (existingActiveTimeEntry) {
-      throw new Error('Issue is actively being tracked');
+    if (active) {
+      if (active.issueKey === issueKey) return active;
+      await stopTimeEntry(prisma, active.id);
     }
 
-    const timeEntry = await this.prisma.timeEntry.create({
-      data: {
-        issue: {
-          connectOrCreate: {
-            where: { key: issueKey },
-            create: { key: issueKey },
-          },
-        },
-        syncStatus: SyncStatus.LOCAL,
-        startedAt: new Date(),
-        description,
-      },
-    });
-
-    return timeEntry;
+    return createTimeEntry(prisma, { issueKey, description });
   }
 
   async getLastTimeEntryFromIssue(issueKey: string, syncStatus?: SyncStatus) {
-    return this.prisma.timeEntry.findFirst({
-      where: { issueKey, syncStatus },
-      orderBy: { startedAt: 'desc' },
-    });
+    return getLastTimeEntryFromIssueDb(getClient(), issueKey, syncStatus);
   }
 
-  async stopTracking(entryId: string) {
-    const timeEntry = await this.prisma.timeEntry.findUniqueOrThrow({
-      where: { id: entryId },
-    });
-
-    await this.prisma.timeEntry.update({
-      where: { id: entryId },
-      data: {
-        timeSpentSeconds:
-          Math.floor(Date.now() - timeEntry.startedAt.getTime()) / 1000,
-      },
-    });
-
-    return timeEntry;
+  async stopTracking(entryId: string): Promise<TimeEntryWithIssue> {
+    return stopTimeEntry(getClient(), entryId);
   }
 }

@@ -9,6 +9,7 @@ import {
   getDatabasePath,
   getJiraIssuesByEmail,
   getJiraIssues,
+  getTimeEntries,
 } from '@time-tracker/database';
 import { JiraApiError } from '@time-tracker/jira';
 import { resolveConfig } from '../services/jira-service';
@@ -63,9 +64,5 @@ ipcMain.handle('jira:get-issues', async () => {
 });
 
 ipcMain.handle('database:get-time-entries', async () => {
-  const client = getClient();
-  return client.timeEntry.findMany({
-    include: { issue: { include: { parent: true } } },
-    orderBy: { startedAt: 'desc' },
-  });
+  return getTimeEntries(getClient());
 });

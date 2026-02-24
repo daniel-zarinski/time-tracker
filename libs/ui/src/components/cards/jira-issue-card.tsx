@@ -108,7 +108,7 @@ function JiraIssueCardContent({
           </span>
         )}
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-2 gap-y-4">
+      <div className="grid grid-cols-3 gap-x-2 gap-y-4">
         <div className="flex flex-col gap-1 items-center">
           <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium">
             Type
@@ -161,7 +161,7 @@ function JiraIssueCardFooter({
   }
 
   return (
-    <CardFooter className="flex justify-center px-3 pb-2 gap-6 mt-2">
+    <CardFooter className="flex justify-center px-3 pb-2 gap-6 mt-4">
       <Button size="sm" onClick={handleTrackTime} className="flex-1">
         <TimerIcon className="h-4 w-4" />
         Track Time
