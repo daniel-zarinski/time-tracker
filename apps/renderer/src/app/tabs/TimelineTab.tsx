@@ -60,7 +60,7 @@ function getEntriesWithGrid(
     const visibleEnd = Math.min(entryEnd, dayEnd);
 
     const gridRowStart =
-      2 + Math.floor((visibleStart - dayStart) / QUARTER_MS);
+      1 + Math.floor((visibleStart - dayStart) / QUARTER_MS);
     const gridRowSpan = Math.max(
       1,
       Math.ceil((visibleEnd - visibleStart) / QUARTER_MS)
@@ -168,10 +168,34 @@ function isSameDay(a: Date, b: Date) {
 
 // --- Component ---
 
+function gridRowToTime(row: number, date: Date): Date {
+  const quarterIndex = row - 1;
+  const totalMinutes = quarterIndex * 15;
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    Math.floor(totalMinutes / 60),
+    totalMinutes % 60
+  );
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
 export function TimelineTab() {
   const setSelectedIssue = useAppStore.use.setSelectedIssue();
   const [date, setDate] = React.useState(() => new Date());
   const containerRef = React.useRef<HTMLDivElement>(null);
+
+  // Drag-to-select state
+  const [selection, setSelection] = React.useState<{
+    startRow: number;
+    endRow: number;
+  } | null>(null);
+  const draggingRef = React.useRef(false);
+  const olRef = React.useRef<HTMLOListElement>(null);
 
   const { data: entries = [] } = useQuery({
     queryKey: ['time-entries'],
@@ -211,6 +235,63 @@ export function TimelineTab() {
     [date]
   );
 
+  // Clear selection on date change
+  React.useEffect(() => {
+    setSelection(null);
+  }, [date]);
+
+  // Clear selection on Escape
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSelection(null);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Convert clientY to grid row number (2–97)
+  // Use Grid A's geometry (no header offset) since it aligns with time labels
+  const clientYToRow = React.useCallback((clientY: number): number => {
+    const ol = olRef.current;
+    if (!ol) return 2;
+    const relativeY = clientY - ol.getBoundingClientRect().top;
+    const quarterHeight = ol.clientHeight / QUARTER_HOUR_ROWS;
+    return clamp(Math.floor(relativeY / quarterHeight) + 1, 1, 96);
+  }, []);
+
+  const handlePointerDown = React.useCallback(
+    (e: React.PointerEvent<HTMLOListElement>) => {
+      // Don't start drag if clicking an entry button
+      if ((e.target as HTMLElement).closest('button')) return;
+      e.preventDefault();
+      const row = clientYToRow(e.clientY);
+      setSelection({ startRow: row, endRow: row });
+      draggingRef.current = true;
+      olRef.current?.setPointerCapture(e.pointerId);
+    },
+    [clientYToRow]
+  );
+
+  const handlePointerMove = React.useCallback(
+    (e: React.PointerEvent<HTMLOListElement>) => {
+      if (!draggingRef.current) return;
+      const row = clientYToRow(e.clientY);
+      setSelection((prev) =>
+        prev ? { ...prev, endRow: row } : null
+      );
+    },
+    [clientYToRow]
+  );
+
+  const handlePointerUp = React.useCallback(
+    (e: React.PointerEvent<HTMLOListElement>) => {
+      if (!draggingRef.current) return;
+      draggingRef.current = false;
+      olRef.current?.releasePointerCapture(e.pointerId);
+    },
+    []
+  );
+
   // Auto-scroll to current time on mount / date change
   React.useEffect(() => {
     const container = containerRef.current;
@@ -229,7 +310,7 @@ export function TimelineTab() {
       scrollHour = 8;
     }
 
-    const pxPerHalfHour = 56;
+    const pxPerHalfHour = 44.8; // 2.8rem * 16px
     const scrollTarget = scrollHour * 2 * pxPerHalfHour;
 
     requestAnimationFrame(() => {
@@ -328,7 +409,7 @@ export function TimelineTab() {
               className="col-start-1 col-end-2 row-start-1 divide-y divide-border/50"
               style={{
                 display: 'grid',
-                gridTemplateRows: `repeat(${HALF_HOUR_ROWS}, minmax(3.5rem, 1fr))`,
+                gridTemplateRows: `repeat(${HALF_HOUR_ROWS}, minmax(2.8rem, 1fr))`,
               }}
             >
               {Array.from({ length: HALF_HOUR_ROWS }, (_, i) => (
@@ -344,12 +425,16 @@ export function TimelineTab() {
 
             {/* Grid B: events overlay */}
             <ol
-              className="col-start-1 col-end-2 row-start-1"
+              ref={olRef}
+              className="relative col-start-1 col-end-2 row-start-1"
               style={{
                 display: 'grid',
-                gridTemplateRows: `1.75rem repeat(${QUARTER_HOUR_ROWS}, minmax(0, 1fr)) auto`,
+                gridTemplateRows: `repeat(${QUARTER_HOUR_ROWS}, minmax(0, 1fr))`,
                 gridTemplateColumns: '1fr',
               }}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
             >
               {entriesWithLayout.map(
                 ({
@@ -368,9 +453,12 @@ export function TimelineTab() {
                   >
                     <button
                       type="button"
-                      onClick={() => setSelectedIssue(entry.issue)}
+                      onClick={() => {
+                        setSelection(null);
+                        setSelectedIssue(entry.issue);
+                      }}
                       className={cn(
-                        'absolute inset-1 overflow-hidden rounded-lg border border-primary/20 bg-primary/10 p-2 text-left transition-colors hover:bg-primary/15',
+                        'absolute inset-y-1 inset-x-[9px] overflow-hidden rounded-lg border border-primary/20 bg-primary/10 p-2 text-left transition-colors hover:bg-primary/15',
                         totalColumns > 1 && 'inset-y-1'
                       )}
                       style={
@@ -400,6 +488,33 @@ export function TimelineTab() {
                 )
               )}
 
+              {/* Drag-to-select highlight */}
+              {selection && (() => {
+                const minRow = Math.min(selection.startRow, selection.endRow);
+                const maxRow = Math.max(selection.startRow, selection.endRow);
+                const span = maxRow - minRow + 1;
+                const startTime = gridRowToTime(minRow, date);
+                const endTime = gridRowToTime(maxRow + 1, date);
+                const totalMinutes = span * 15;
+                const hours = Math.floor(totalMinutes / 60);
+                const minutes = totalMinutes % 60;
+                const duration = hours > 0
+                  ? minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`
+                  : `${minutes}m`;
+                return (
+                  <li
+                    className="pointer-events-none relative z-10"
+                    style={{ gridRow: `${minRow} / span ${span}` }}
+                  >
+                    <div className="absolute inset-y-1 inset-x-[9px] flex items-center justify-center rounded-lg border border-dashed border-primary/40 bg-primary/10">
+                      <span className="text-xs font-medium text-primary/70">
+                        {formatEntryTime(startTime)} – {formatEntryTime(endTime)} ({duration})
+                      </span>
+                    </div>
+                  </li>
+                );
+              })()}
+
               {/* Current time indicator */}
               {isToday && <CurrentTimeIndicator />}
             </ol>
@@ -421,8 +536,7 @@ function CurrentTimeIndicator() {
   const hours = now.getHours();
   const minutes = now.getMinutes();
   const quarterSlot = hours * 4 + Math.floor(minutes / 15);
-  // +2 to account for the 1.75rem header row in the event grid
-  const gridRow = quarterSlot + 2;
+  const gridRow = quarterSlot + 1;
 
   return (
     <li
