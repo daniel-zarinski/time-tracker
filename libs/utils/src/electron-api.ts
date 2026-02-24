@@ -34,6 +34,8 @@ export interface StoreApi {
   set: (key: string, value: unknown) => Promise<void>;
   getJiraConfig: () => Promise<JiraConfigInput | undefined>;
   setJiraConfig: (config: JiraConfigInput) => Promise<void>;
+  getTempoConfig: () => Promise<{ token: string } | undefined>;
+  setTempoConfig: (config: { token: string }) => Promise<void>;
 }
 
 /** Jira IPC API exposed to the renderer */

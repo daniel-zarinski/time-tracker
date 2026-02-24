@@ -20,16 +20,30 @@ import {
   InputGroupText,
   toast,
 } from '@time-tracker/ui';
-import { Database, FolderOpen, Globe, RefreshCw, Trash2 } from 'lucide-react';
+import {
+  Clock,
+  Database,
+  FolderOpen,
+  Globe,
+  RefreshCw,
+  Trash2,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const JIRA_TOAST_ID = 'jira-settings';
+const TEMPO_TOAST_ID = 'tempo-settings';
+
+const TEMPO_API_INTEGRATION_PATH =
+  '/plugins/servlet/ac/io.tempo.jira/tempo-app#!/configuration/api-integration';
+const TEMPO_HELP_URL =
+  'https://help.tempo.io/planner/latest/using-rest-api-integrations';
 
 export function SettingsTab() {
   const queryClient = useQueryClient();
   const [email, setEmail] = useState('');
   const [domain, setDomain] = useState('');
   const [token, setToken] = useState('');
+  const [tempoToken, setTempoToken] = useState('');
 
   const configQuery = useQuery({
     queryKey: ['jira', 'config'],
@@ -39,6 +53,10 @@ export function SettingsTab() {
     queryKey: ['database', 'path'],
     queryFn: () => window.database.getPath(),
   });
+  const tempoConfigQuery = useQuery({
+    queryKey: ['tempo', 'config'],
+    queryFn: () => window.store.getTempoConfig(),
+  });
 
   const saveMutation = useMutation({
     mutationFn: (config: { domain: string; email: string; token: string }) =>
@@ -46,6 +64,15 @@ export function SettingsTab() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['jira', 'config'] });
       toast.success('Settings saved', { id: JIRA_TOAST_ID });
+    },
+  });
+
+  const saveTempoMutation = useMutation({
+    mutationFn: (config: { token: string }) =>
+      window.store.setTempoConfig(config),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tempo', 'config'] });
+      toast.success('Settings saved', { id: TEMPO_TOAST_ID });
     },
   });
 
@@ -91,6 +118,11 @@ export function SettingsTab() {
     }
   }, [configQuery.data]);
 
+  useEffect(() => {
+    const config = tempoConfigQuery.data;
+    setTempoToken(config?.token ?? '');
+  }, [tempoConfigQuery.data]);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!domain.trim() || !email || !token) return;
@@ -126,7 +158,7 @@ export function SettingsTab() {
 
   const dbPath = dbPathQuery.data ?? null;
 
-  if (configQuery.isLoading) {
+  if (configQuery.isLoading || tempoConfigQuery.isLoading) {
     return (
       <div className="w-full max-w-md mx-auto p-4 text-muted-foreground text-sm">
         Loading settings…
@@ -221,6 +253,67 @@ export function SettingsTab() {
                     onClick={handleTestConnection}
                   >
                     Test Connection
+                  </Button>
+                </Field>
+              </FieldSet>
+            </FieldGroup>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-4">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-md bg-muted">
+              <Clock className="h-4 w-4" />
+            </div>
+            <CardTitle className="text-base font-semibold">
+              Tempo Integration
+            </CardTitle>
+          </div>
+          <CardDescription className="text-xs">
+            Connect to Tempo for Jira to sync worklogs.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              saveTempoMutation.mutate({ token: tempoToken });
+            }}
+          >
+            <FieldGroup>
+              <FieldSet>
+                <Field>
+                  <FieldLabel htmlFor="tempo-token">API Token</FieldLabel>
+                  <Input
+                    id="tempo-token"
+                    type="password"
+                    placeholder="Your Tempo API token"
+                    value={tempoToken}
+                    onChange={(e) => setTempoToken(e.target.value)}
+                  />
+                  <FieldDescription>
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="inline h-auto p-0 font-normal align-baseline ml-1 text-primary underline underline-offset-4 hover:text-primary/80"
+                      onClick={() => {
+                        const domain = configQuery.data?.domain;
+                        const url = domain
+                          ? `https://${domain}.atlassian.net${TEMPO_API_INTEGRATION_PATH}`
+                          : TEMPO_HELP_URL;
+                        window.electron.openExternal(url);
+                      }}
+                    >
+                      Generate API token
+                    </Button>
+                  </FieldDescription>
+                </Field>
+                <FieldSeparator />
+                <Field orientation="horizontal">
+                  <Button type="submit" disabled={saveTempoMutation.isPending}>
+                    Save
                   </Button>
                 </Field>
               </FieldSet>

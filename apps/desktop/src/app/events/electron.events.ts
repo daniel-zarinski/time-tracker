@@ -4,13 +4,13 @@
  */
 
 import { app, ipcMain, shell } from 'electron';
-import { existsSync, unlinkSync } from 'fs';
-import { getDatabasePath, disconnect } from '@time-tracker/database';
 import { environment } from '../../environments/environment';
 import {
   configStore,
   getJiraConfig,
   setJiraConfig,
+  getTempoConfig,
+  setTempoConfig,
 } from '../store/config-store';
 
 export default class ElectronEvents {
@@ -53,3 +53,5 @@ ipcMain.handle('store:set', (_, key: string, value: unknown) =>
 );
 ipcMain.handle('store:get-jira-config', () => getJiraConfig());
 ipcMain.handle('store:set-jira-config', (_, config) => setJiraConfig(config));
+ipcMain.handle('store:get-tempo-config', () => getTempoConfig());
+ipcMain.handle('store:set-tempo-config', (_, config) => setTempoConfig(config));

@@ -4,6 +4,8 @@ Object.assign(globalThis.window, {
   store: {
     getJiraConfig: vi.fn().mockResolvedValue(undefined),
     setJiraConfig: vi.fn().mockResolvedValue(undefined),
+    getTempoConfig: vi.fn().mockResolvedValue(undefined),
+    setTempoConfig: vi.fn().mockResolvedValue(undefined),
   },
   jira: {
     getJiraIssues: vi.fn().mockResolvedValue([]),
