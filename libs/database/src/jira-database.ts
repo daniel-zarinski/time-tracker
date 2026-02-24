@@ -113,3 +113,49 @@ export async function getJiraIssuesUnsynced(
     orderBy: { updatedAt: 'desc' },
   });
 }
+
+const ACTIVE_STATUSES = ['In Progress', 'In Review'];
+
+export async function getRelevantJiraIssues(
+  prisma: PrismaClient,
+  email: string,
+  options?: { limit?: number }
+): Promise<JiraIssueWithParent[]> {
+  const limit = options?.limit ?? 5;
+
+  // Query 1: Get recently tracked issue keys in recency order
+  const recentEntries = await prisma.timeEntry.findMany({
+    where: { issue: { assigneeEmail: email } },
+    distinct: ['issueKey'],
+    orderBy: { startedAt: 'desc' },
+    select: { issueKey: true },
+    take: limit,
+  });
+
+  const recentKeys = recentEntries.map((e) => e.issueKey);
+
+  // Query 2: Fetch issues matching recent keys OR active statuses
+  const issues = await prisma.jiraIssue.findMany({
+    where: {
+      key: { not: null },
+      assigneeEmail: email,
+      OR: [
+        { key: { in: recentKeys } },
+        { status: { in: ACTIVE_STATUSES } },
+      ],
+    },
+    include: { parent: true },
+  });
+
+  // Sort: recently tracked first (in recency order), then the rest
+  const keyOrder = new Map(recentKeys.map((k, i) => [k, i]));
+  issues.sort((a, b) => {
+    const aIdx =
+      a.key != null ? (keyOrder.get(a.key) ?? recentKeys.length) : recentKeys.length;
+    const bIdx =
+      b.key != null ? (keyOrder.get(b.key) ?? recentKeys.length) : recentKeys.length;
+    return aIdx - bIdx;
+  });
+
+  return issues.slice(0, limit);
+}
