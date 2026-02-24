@@ -10,11 +10,13 @@ import {
   Tabs,
   TabsContent,
   Separator,
+  toast,
 } from '@time-tracker/ui';
 
 import { TasksTab, SettingsTab, JiraIssuesTab, MainTabList } from './tabs';
 import { useAppStore, TabValue } from './store';
 import { useAppCommands } from './use-app-commands';
+import { useMutation } from '@tanstack/react-query';
 
 export function App() {
   const activeTab = useAppStore.use.activeTab();
@@ -23,6 +25,15 @@ export function App() {
   const setSelectedIssue = useAppStore.use.setSelectedIssue();
   const [commandOpen, setCommandOpen] = React.useState(false);
   const { commands } = useAppCommands();
+  const startTrackingMutation = useMutation({
+    mutationFn: (key: string) => window.timeTracking.startTracking(key),
+    onSuccess: () => {
+      setSelectedIssue(null);
+    },
+    onError: () => {
+      toast.error('Failed to start time entry', { position: 'bottom-center' });
+    },
+  });
 
   return (
     <div className="min-h-screen text-foreground">
@@ -84,6 +95,9 @@ export function App() {
               defaultExpanded
               collapsible={false}
               onOpenInJira={(key) => window.electron.openJiraExternal(key)}
+              onTrackTime={async (key) => {
+                await startTrackingMutation.mutateAsync(key);
+              }}
             />
           )}
         </DialogContent>

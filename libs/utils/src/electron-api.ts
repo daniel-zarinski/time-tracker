@@ -16,6 +16,7 @@ export interface TimeTrackingApi {
     issueKey: string,
     description?: string
   ) => Promise<TimeEntryWithIssue>;
+  stopTracking: (entryId: string) => Promise<void>;
 }
 
 /** Database IPC API exposed to the renderer */

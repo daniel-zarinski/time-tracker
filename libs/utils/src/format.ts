@@ -1,10 +1,3 @@
-export interface TimeEntryUpdates {
-  startedAt?: Date;
-  endedAt?: Date;
-  timeSpentSeconds?: number;
-  description?: string;
-}
-
 export function formatDuration(seconds: number): string {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
@@ -16,7 +9,9 @@ export function formatDurationTimer(seconds: number): string {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = seconds % 60;
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(
+    s
+  ).padStart(2, '0')}`;
 }
 
 export function formatRelativeDate(date: Date): string {

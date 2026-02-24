@@ -14,3 +14,8 @@ ipcMain.handle(
     return timeEntry;
   }
 );
+
+ipcMain.handle('time-tracking:stop', async (_, entryId: string) => {
+  const timeTrackingService = new TimeTrackingService();
+  return timeTrackingService.stopTracking(entryId);
+});

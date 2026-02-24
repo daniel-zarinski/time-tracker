@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   ScrollArea,
   Empty,
@@ -8,14 +8,28 @@ import {
   EmptyMedia,
   TimeEntryCardActive,
   TimeEntryCardDefault,
+  toast,
 } from '@time-tracker/ui';
 import { Clock } from 'lucide-react';
+import { useAppStore } from '../store';
 
 export function TasksTab() {
+  const setSelectedIssue = useAppStore.use.setSelectedIssue();
   const timeEntriesQuery = useQuery({
     queryKey: ['time-entries'],
     queryFn: () => window.database.getTimeEntries(),
     retry: false,
+  });
+
+  const stopTracking = useMutation({
+    mutationFn: (id: string) => window.timeTracking.stopTracking(id),
+    onSuccess: () => {
+      timeEntriesQuery.refetch();
+      toast.success('Time entry stopped');
+    },
+    onError: () => {
+      toast.error('Failed to stop time entry');
+    },
   });
 
   const entries = timeEntriesQuery.data ?? [];
@@ -53,17 +67,18 @@ export function TasksTab() {
       {activeEntry && (
         <TimeEntryCardActive
           entry={activeEntry}
-          onStopTimer={(id) => console.log('stop', id)}
+          onStopTimer={stopTracking.mutateAsync}
         />
       )}
 
       <ScrollArea className="h-[calc(100vh-10rem)]">
-        <ul className="flex flex-col gap-2 pr-4">
+        <ul className="flex flex-col gap-2">
           {completedEntries.map((entry) => (
             <li key={entry.id}>
               <TimeEntryCardDefault
                 entry={entry}
-                onOpenInJira={(key) => window.electron.openJiraExternal(key)}
+                // onOpenInJira={(key) => window.electron.openJiraExternal(key)}
+                onOpenInJira={() => setSelectedIssue(entry.issue)}
               />
             </li>
           ))}

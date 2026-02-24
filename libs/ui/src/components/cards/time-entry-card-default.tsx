@@ -1,49 +1,52 @@
-import { useState } from 'react';
 import type { TimeEntryWithIssue } from '@time-tracker/database';
-import { cn } from '@time-tracker/utils';
 import {
-  PlayIcon,
-  ExternalLinkIcon,
-  Trash2Icon,
+  cn,
+  formatDuration,
+  formatRelativeDate,
+  formatTime,
+} from '@time-tracker/utils';
+import {
+  EyeIcon,
   MoreHorizontalIcon,
+  PlayIcon,
+  Trash2Icon,
 } from 'lucide-react';
+import { useState } from 'react';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import {
   Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
   CardAction,
   CardContent,
+  CardDescription,
   CardFooter,
+  CardHeader,
+  CardTitle,
 } from '../ui/card';
 import {
   Collapsible,
-  CollapsibleTrigger,
   CollapsibleContent,
+  CollapsibleTrigger,
 } from '../ui/collapsible';
 import {
   DropdownMenu,
-  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import {
-  formatDuration,
-  formatRelativeDate,
-  formatTime,
-  type TimeEntryUpdates,
-} from './time-entry-card';
+
+export interface TimeEntryUpdates {
+  startedAt?: Date;
+  endedAt?: Date;
+  timeSpentSeconds?: number;
+  description?: string;
+}
 
 interface TimeEntryCardDefaultProps {
   entry: TimeEntryWithIssue;
   onResumeTimer?: (issueKey: string) => void | Promise<void>;
-  onSave?: (
-    entryId: string,
-    updates: TimeEntryUpdates
-  ) => void | Promise<void>;
+  onSave?: (entryId: string, updates: TimeEntryUpdates) => void | Promise<void>;
   onDelete?: (entryId: string) => void | Promise<void>;
   onOpenInJira?: (issueKey: string) => void | Promise<void>;
   className?: string;
@@ -120,8 +123,8 @@ export function TimeEntryCardDefault({
                           onOpenInJira?.(entry.issue.key);
                         }}
                       >
-                        <ExternalLinkIcon className="size-4" />
-                        Open in Jira
+                        <EyeIcon className="size-4" />
+                        View
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
@@ -172,8 +175,8 @@ export function TimeEntryCardDefault({
               size="xs"
               onClick={() => onOpenInJira?.(entry.issue.key)}
             >
-              <ExternalLinkIcon className="size-3" />
-              Open in Jira
+              <EyeIcon className="size-3" />
+              View
             </Button>
             <div className="flex-1" />
             <Button

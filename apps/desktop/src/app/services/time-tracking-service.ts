@@ -41,4 +41,20 @@ export class TimeTrackingService {
 
     return timeEntry;
   }
+
+  async stopTracking(entryId: string) {
+    const timeEntry = await this.prisma.timeEntry.findUniqueOrThrow({
+      where: { id: entryId },
+    });
+
+    await this.prisma.timeEntry.update({
+      where: { id: entryId },
+      data: {
+        timeSpentSeconds:
+          Math.floor(Date.now() - timeEntry.startedAt.getTime()) / 1000,
+      },
+    });
+
+    return timeEntry;
+  }
 }

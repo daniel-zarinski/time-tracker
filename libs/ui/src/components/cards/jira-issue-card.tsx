@@ -25,13 +25,13 @@ interface JiraIssueCardContentProps {
 interface JiraIssueCardFooterProps {
   issueKey: string;
   onOpenInJira?: (issueKey: string) => void | Promise<void>;
-  onTrackTime?: (issueKey: string) => void | Promise<void>;
+  onTrackTime?: (issueKey: string) => void | Promise<unknown>;
 }
 
 export interface JiraIssueCardProps {
   issue: JiraIssueWithParent;
   onOpenInJira?: (issueKey: string) => void | Promise<void>;
-  onTrackTime?: (issueKey: string) => void | Promise<void>;
+  onTrackTime?: (issueKey: string) => void | Promise<unknown>;
   defaultExpanded?: boolean;
   collapsible?: boolean;
 }
@@ -81,7 +81,10 @@ function JiraIssueCardHeader({
   );
 }
 
-function JiraIssueCardContent({ issue, parentLabel }: JiraIssueCardContentProps) {
+function JiraIssueCardContent({
+  issue,
+  parentLabel,
+}: JiraIssueCardContentProps) {
   return (
     <CardContent className="px-3 pt-0 pb-2">
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-2 gap-y-4">
@@ -183,8 +186,8 @@ export function JiraIssueCard({
     parentIssueType === 'Epic'
       ? 'Epic'
       : parentIssueType === 'Story'
-        ? 'Story'
-        : 'Parent';
+      ? 'Story'
+      : 'Parent';
 
   const contentAndFooter = (
     <>

@@ -5,20 +5,22 @@ import { useEffect, useState } from 'react';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Card, CardHeader } from '../ui/card';
-import { formatDurationTimer } from './time-entry-card';
+import { formatDurationTimer } from '@time-tracker/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 
 interface TimeEntryCardActiveProps {
   entry: TimeEntryWithIssue;
   elapsedSeconds?: number; // TODO: Remove
   onStopTimer?: (entryId: string) => void | Promise<void>;
+  onCardClick?: () => void;
   className?: string;
 }
 
 export function TimeEntryCardActive({
   entry,
-  onStopTimer,
   className,
+  onStopTimer,
+  onCardClick,
 }: TimeEntryCardActiveProps) {
   const [, setTick] = useState(0);
 
@@ -38,10 +40,14 @@ export function TimeEntryCardActive({
     <Card
       className={cn(
         'transition-all duration-200 border rounded-(--radius) shadow-none overflow-hidden',
-        'border-l-2 border-primary bg-card/30',
+        'border-l-2 border-accent bg-card/30',
         'py-0',
+        onCardClick && 'hover:bg-card/60 cursor-pointer',
         className
       )}
+      onClick={onCardClick}
+      role="button"
+      tabIndex={0}
     >
       <CardHeader className="px-3 py-2.5 flex flex-row items-center gap-3 space-y-0">
         <span className="relative flex size-2 shrink-0">
@@ -49,23 +55,17 @@ export function TimeEntryCardActive({
           <span className="relative inline-flex size-2 rounded-full bg-primary" />
         </span>
 
-        <Badge
-          variant="outline"
-          className="shrink-0 text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70"
-        >
-          {entry.issue.key}
-        </Badge>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
-              {entry.issue.summary ?? ''}
-            </span>
-          </TooltipTrigger>
-          <TooltipContent side="bottom">
+        <div className="min-w-0 flex-1 flex flex-col gap-0.5">
+          <Badge
+            variant="outline"
+            className="shrink-0 w-fit text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70"
+          >
+            {entry.issue.key}
+          </Badge>
+          <span className="text-sm text-muted-foreground wrap-break-word">
             {entry.issue.summary ?? ''}
-          </TooltipContent>
-        </Tooltip>
+          </span>
+        </div>
 
         <Tooltip>
           <TooltipTrigger asChild>
@@ -84,7 +84,6 @@ export function TimeEntryCardActive({
           onClick={() => onStopTimer?.(entry.id)}
         >
           <SquareIcon className="size-3" />
-          Stop
         </Button>
       </CardHeader>
     </Card>

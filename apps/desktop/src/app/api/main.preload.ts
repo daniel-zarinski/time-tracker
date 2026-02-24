@@ -52,6 +52,8 @@ const jiraApi: JiraApi = {
 const timeTrackingApi: TimeTrackingApi = {
   startTracking: (issueKey: string, description?: string) =>
     ipcRenderer.invoke('time-tracking:start', issueKey, description),
+  stopTracking: (entryId: string) =>
+    ipcRenderer.invoke('time-tracking:stop', entryId),
 };
 
 contextBridge.exposeInMainWorld('electron', electronApi);
