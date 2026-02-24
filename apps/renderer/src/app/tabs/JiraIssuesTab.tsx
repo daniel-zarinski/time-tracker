@@ -17,6 +17,7 @@ import {
 import type { JiraIssueWithParent } from '@time-tracker/database';
 import { Settings, AlertCircle, Inbox } from 'lucide-react';
 import { useAppStore } from '../store';
+import { toast } from 'sonner';
 
 const OTHER_STATUSES = [
   'DEV COMPLETED',
@@ -200,6 +201,23 @@ export function JiraIssuesTab() {
                       onOpenInJira={(key) =>
                         window.electron.openJiraExternal(key)
                       }
+                      onTrackTime={async (key) => {
+                        try {
+                          const timeEntry =
+                            await window.timeTracking.startTracking(key);
+                          toast.success(
+                            `Started tracking ${timeEntry.issueKey}`
+                          );
+                          setActiveTab('tasks');
+                        } catch (error) {
+                          toast.error(
+                            `Failed to start tracking ${key}: ${error}`,
+                            {
+                              position: 'bottom-center',
+                            }
+                          );
+                        }
+                      }}
                     />
                   </li>
                 ))}

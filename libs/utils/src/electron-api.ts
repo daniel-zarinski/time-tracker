@@ -5,7 +5,18 @@ import type {
   JiraIssue,
   JiraStatusInfo,
 } from '@time-tracker/jira';
-import type { JiraIssueWithParent } from '@time-tracker/database';
+import type {
+  JiraIssueWithParent,
+  TimeEntryWithIssue,
+} from '@time-tracker/database';
+
+/** Time Tracking IPC API exposed to the renderer */
+export interface TimeTrackingApi {
+  startTracking: (
+    issueKey: string,
+    description?: string
+  ) => Promise<TimeEntryWithIssue>;
+}
 
 /** Database IPC API exposed to the renderer */
 export interface DatabaseApi {
@@ -13,6 +24,7 @@ export interface DatabaseApi {
   delete: () => Promise<{ success: boolean; error?: string }>;
   getMyJiraIssues: () => Promise<JiraIssueWithParent[]>;
   getAllJiraIssues: () => Promise<JiraIssueWithParent[]>;
+  getTimeEntries: () => Promise<TimeEntryWithIssue[]>;
 }
 
 /** Store IPC API exposed to the renderer */

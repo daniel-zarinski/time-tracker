@@ -29,6 +29,7 @@ export const useAppStore = createSelectors(
               return { elapsed: 0, activeTab: 'tasks' };
             }
             const state = persisted as PersistedState;
+            // @ts-expect-error - TODO: Migrations...
             if (version < 2 && state.activeTab === 'home') {
               return { ...state, activeTab: 'tasks' };
             }

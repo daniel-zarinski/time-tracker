@@ -1,5 +1,6 @@
 import SquirrelEvents from './app/events/squirrel.events';
 import ElectronEvents from './app/events/electron.events';
+import './app/events/time-tracking.events';
 import { bootstrapJiraEvents } from './app/events/jira.events';
 import { bootstrapDatabase } from './app/events/database.events';
 // import UpdateEvents from './app/events/update.events';

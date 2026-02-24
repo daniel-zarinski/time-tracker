@@ -4,6 +4,7 @@ import type {
   ElectronApi,
   JiraApi,
   StoreApi,
+  TimeTrackingApi,
 } from '@time-tracker/utils';
 
 const electronApi: ElectronApi = {
@@ -21,6 +22,7 @@ const databaseApi: DatabaseApi = {
   delete: () => ipcRenderer.invoke('database:delete'),
   getMyJiraIssues: () => ipcRenderer.invoke('database:get-my-jira-issues'),
   getAllJiraIssues: () => ipcRenderer.invoke('database:get-all-jira-issues'),
+  getTimeEntries: () => ipcRenderer.invoke('database:get-time-entries'),
 };
 
 const storeApi: StoreApi = {
@@ -47,7 +49,13 @@ const jiraApi: JiraApi = {
   fetchMissingIssues: () => ipcRenderer.invoke('jira:fetch-missing-issues'),
 };
 
+const timeTrackingApi: TimeTrackingApi = {
+  startTracking: (issueKey: string, description?: string) =>
+    ipcRenderer.invoke('time-tracking:start', issueKey, description),
+};
+
 contextBridge.exposeInMainWorld('electron', electronApi);
 contextBridge.exposeInMainWorld('database', databaseApi);
 contextBridge.exposeInMainWorld('store', storeApi);
 contextBridge.exposeInMainWorld('jira', jiraApi);
+contextBridge.exposeInMainWorld('timeTracking', timeTrackingApi);

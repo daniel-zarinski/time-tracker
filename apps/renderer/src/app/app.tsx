@@ -82,6 +82,7 @@ export function App() {
             <JiraIssueCard
               issue={selectedIssue}
               defaultExpanded
+              collapsible={false}
               onOpenInJira={(key) => window.electron.openJiraExternal(key)}
             />
           )}

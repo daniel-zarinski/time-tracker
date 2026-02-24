@@ -3,7 +3,7 @@ import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HashRouter } from 'react-router-dom';
-import { ThemeProvider, Toaster } from '@time-tracker/ui';
+import { ThemeProvider, Toaster, TooltipProvider } from '@time-tracker/ui';
 
 import App from './app/app';
 
@@ -18,7 +18,9 @@ root.render(
     <QueryClientProvider client={queryClient}>
       <HashRouter>
         <ThemeProvider>
-          <App />
+          <TooltipProvider>
+            <App />
+          </TooltipProvider>
           <Toaster />
         </ThemeProvider>
       </HashRouter>

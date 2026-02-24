@@ -3,6 +3,7 @@ import type {
   StoreApi,
   JiraApi,
   ElectronApi,
+  TimeTrackingApi,
 } from '@time-tracker/utils';
 
 declare global {
@@ -11,6 +12,7 @@ declare global {
     store: StoreApi;
     jira: JiraApi;
     electron: ElectronApi;
+    timeTracking: TimeTrackingApi;
   }
 }
 

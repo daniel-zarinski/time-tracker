@@ -61,3 +61,11 @@ ipcMain.handle('jira:get-issues', async () => {
   const client = getClient();
   return getJiraIssues(client);
 });
+
+ipcMain.handle('database:get-time-entries', async () => {
+  const client = getClient();
+  return client.timeEntry.findMany({
+    include: { issue: { include: { parent: true } } },
+    orderBy: { startedAt: 'desc' },
+  });
+});
