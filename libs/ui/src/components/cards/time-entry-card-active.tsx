@@ -73,7 +73,7 @@ export function TimeEntryCardActive({
           >
             {entry.issue.key}
           </Badge>
-          <span className="text-sm text-muted-foreground wrap-break-word">
+          <span className="text-sm text-foreground/90 wrap-break-word">
             {entry.issue.summary ?? ''}
           </span>
         </div>
