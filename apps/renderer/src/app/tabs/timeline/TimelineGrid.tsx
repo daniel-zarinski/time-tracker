@@ -86,7 +86,9 @@ export function TimelineGrid({
                 gridRowSpan,
                 column,
                 totalColumns,
-              }) => (
+              }) => {
+                const isActive = entry.timeSpentSeconds == null;
+                return (
                 <li
                   key={entry.id}
                   className="pointer-events-none relative"
@@ -102,7 +104,10 @@ export function TimelineGrid({
                       onEntryClick(entry.issue);
                     }}
                     className={cn(
-                      'pointer-events-auto absolute inset-y-0.5 inset-x-[9px] max-w-[75%] overflow-hidden rounded-lg border border-primary/20 bg-primary/10 px-2 pt-0 pb-2 text-left transition-colors hover:bg-primary/15',
+                      'pointer-events-auto absolute inset-y-0.5 inset-x-[9px] max-w-[75%] overflow-hidden rounded-lg border px-2 pt-0 pb-2 text-left transition-colors',
+                      isActive
+                        ? 'border-l-2 border-l-accent border-primary/20 bg-primary/15 animate-pulse'
+                        : 'border border-primary/20 bg-primary/10 hover:bg-primary/15',
                       totalColumns > 1 && 'inset-y-0.5'
                     )}
                     style={
@@ -127,7 +132,8 @@ export function TimelineGrid({
                     )}
                   </button>
                 </li>
-              )
+                );
+              }
             )}
 
             {/* Drag-to-select highlight */}
