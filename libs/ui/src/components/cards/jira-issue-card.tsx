@@ -45,10 +45,10 @@ function JiraIssueCardHeader({
   headerAction,
 }: JiraIssueCardHeaderProps) {
   const keyAndSummary = (
-    <div className="flex min-w-0 flex-1 items-center gap-1.5">
+    <div className="flex min-w-0 flex-1 flex-col gap-0.5">
       <Badge
         variant="outline"
-        className="shrink-0 text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70"
+        className="shrink-0 w-fit text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70"
       >
         {issue.key ?? '—'}
       </Badge>
