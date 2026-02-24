@@ -22,8 +22,11 @@ const databaseApi: DatabaseApi = {
   getPath: () => ipcRenderer.invoke('database:get-path'),
   delete: () => ipcRenderer.invoke('database:delete'),
   getMyJiraIssues: () => ipcRenderer.invoke('database:get-my-jira-issues'),
+  getRelevantJiraIssues: (options) =>
+    ipcRenderer.invoke('database:get-relevant-jira-issues', options),
   getAllJiraIssues: () => ipcRenderer.invoke('database:get-all-jira-issues'),
-  getTimeEntries: () => ipcRenderer.invoke('database:get-time-entries'),
+  getTimeEntries: (options) =>
+    ipcRenderer.invoke('database:get-time-entries', options),
 };
 
 const storeApi: StoreApi = {

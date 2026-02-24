@@ -24,8 +24,8 @@ export function HomeTab() {
   });
 
   const jiraIssuesQuery = useQuery({
-    queryKey: ['jira', 'my-issues'],
-    queryFn: () => window.database.getMyJiraIssues(),
+    queryKey: ['jira', 'relevant-issues'],
+    queryFn: () => window.database.getRelevantJiraIssues({ limit: 10 }),
     retry: false,
   });
 
@@ -55,7 +55,6 @@ export function HomeTab() {
   const entries = timeEntriesQuery.data ?? [];
   const activeEntry = entries.find((e) => e.timeSpentSeconds === null);
   const issues = jiraIssuesQuery.data ?? [];
-  const displayedIssues = issues.slice(0, 4);
 
   if (timeEntriesQuery.isLoading || jiraIssuesQuery.isLoading) {
     return (
@@ -75,13 +74,13 @@ export function HomeTab() {
             entry={activeEntry}
             onStopTimer={stopTracking.mutateAsync}
           />
-          {displayedIssues.length > 0 && <Separator className="mt-3" />}
+          {issues.length > 0 && <Separator className="mt-3" />}
         </div>
       )}
 
-      {displayedIssues.length > 0 ? (
+      {issues.length > 0 ? (
         <ul className="flex flex-col gap-2">
-          {displayedIssues.map((issue) => (
+          {issues.map((issue) => (
             <li key={issue.id}>
               <JiraIssueCard
                 issue={issue}

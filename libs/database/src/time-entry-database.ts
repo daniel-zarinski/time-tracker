@@ -19,11 +19,13 @@ export async function getActiveTimeEntry(
 }
 
 export async function getTimeEntries(
-  prisma: PrismaClient
+  prisma: PrismaClient,
+  options?: { limit?: number }
 ): Promise<TimeEntryWithIssue[]> {
   return prisma.timeEntry.findMany({
     include: timeEntryInclude,
     orderBy: { startedAt: 'desc' },
+    take: options?.limit,
   });
 }
 
@@ -78,6 +80,17 @@ export async function getLastTimeEntryFromIssue(
   syncStatus?: SyncStatus
 ) {
   return prisma.timeEntry.findFirst({
+    where: { issueKey, syncStatus },
+    orderBy: { startedAt: 'desc' },
+  });
+}
+
+export async function getTimeEntriesByIssueKey(
+  prisma: PrismaClient,
+  issueKey: string,
+  syncStatus?: SyncStatus
+) {
+  return prisma.timeEntry.findMany({
     where: { issueKey, syncStatus },
     orderBy: { startedAt: 'desc' },
   });

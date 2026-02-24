@@ -24,8 +24,13 @@ export interface DatabaseApi {
   getPath: () => Promise<string>;
   delete: () => Promise<{ success: boolean; error?: string }>;
   getMyJiraIssues: () => Promise<JiraIssueWithParent[]>;
+  getRelevantJiraIssues: (options?: {
+    limit?: number;
+  }) => Promise<JiraIssueWithParent[]>;
   getAllJiraIssues: () => Promise<JiraIssueWithParent[]>;
-  getTimeEntries: () => Promise<TimeEntryWithIssue[]>;
+  getTimeEntries: (options?: {
+    limit?: number;
+  }) => Promise<TimeEntryWithIssue[]>;
 }
 
 /** Store IPC API exposed to the renderer */

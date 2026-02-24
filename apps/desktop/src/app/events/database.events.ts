@@ -9,6 +9,7 @@ import {
   getDatabasePath,
   getJiraIssuesByEmail,
   getJiraIssues,
+  getRelevantJiraIssues,
   getTimeEntries,
 } from '@time-tracker/database';
 import { JiraApiError } from '@time-tracker/jira';
@@ -58,11 +59,26 @@ ipcMain.handle('database:get-my-jira-issues', async () => {
   return getJiraIssuesByEmail(client, config.email);
 });
 
+ipcMain.handle(
+  'database:get-relevant-jira-issues',
+  async (_event, options?: { limit?: number }) => {
+    const config = resolveConfig();
+    if (!config.email) {
+      throw new JiraApiError('Jira email is not configured');
+    }
+    const client = getClient();
+    return getRelevantJiraIssues(client, config.email, options);
+  }
+);
+
 ipcMain.handle('jira:get-issues', async () => {
   const client = getClient();
   return getJiraIssues(client);
 });
 
-ipcMain.handle('database:get-time-entries', async () => {
-  return getTimeEntries(getClient());
-});
+ipcMain.handle(
+  'database:get-time-entries',
+  async (_event, options?: { limit?: number }) => {
+    return getTimeEntries(getClient(), options);
+  }
+);
