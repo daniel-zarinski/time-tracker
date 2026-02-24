@@ -57,6 +57,7 @@ export interface JiraRawIssue {
 
 export interface JiraIssue {
   key: string;
+  jiraId: number | null;
   summary: string;
   status: string;
   issueType: string;

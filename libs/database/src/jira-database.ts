@@ -6,6 +6,7 @@ export type JiraIssueWithParent = Prisma.JiraIssueGetPayload<{
 
 export interface JiraIssueUpsertInput {
   key: string;
+  jiraId?: number | null;
   summary: string;
   status: string;
   issueType: string;
@@ -22,6 +23,7 @@ export async function upsertJiraIssue(
   await prisma.jiraIssue.upsert({
     where: { key: issue.key },
     update: {
+      jiraId: issue.jiraId ?? undefined,
       summary: issue.summary,
       status: issue.status,
       issueType: issue.issueType,
@@ -43,6 +45,7 @@ export async function upsertJiraIssue(
     },
     create: {
       key: issue.key,
+      jiraId: issue.jiraId ?? undefined,
       summary: issue.summary,
       status: issue.status,
       issueType: issue.issueType,

@@ -108,8 +108,18 @@ export class JiraService {
     const epicSummary = parent?.fields?.summary ?? null;
     const parentIssueType = parent?.fields?.issuetype?.name ?? null;
     const assigneeEmail = raw.fields?.assignee?.emailAddress ?? null;
+    const jiraId =
+      raw.id != null
+        ? typeof raw.id === 'string'
+          ? parseInt(raw.id, 10)
+          : raw.id
+        : null;
+    const jiraIdValid = typeof jiraId === 'number' && !Number.isNaN(jiraId)
+      ? jiraId
+      : null;
     return {
       key: raw.key,
+      jiraId: jiraIdValid,
       summary: raw.fields?.summary ?? '',
       status: raw.fields?.status?.name ?? 'Unknown',
       issueType: raw.fields?.issuetype?.name ?? 'Unknown',

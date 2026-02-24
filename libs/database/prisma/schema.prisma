@@ -31,6 +31,7 @@ model TimeEntry {
 
 model JiraIssue {
   id             String  @id @default(uuid())
+  jiraId         Int?    @unique @map("jira_id")
   key            String  @unique
   summary        String?
   status         String?

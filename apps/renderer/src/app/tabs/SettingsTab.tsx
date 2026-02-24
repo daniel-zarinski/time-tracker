@@ -88,6 +88,31 @@ export function SettingsTab() {
 
   const fetchMissingIssuesMutation = useMutation({
     mutationFn: () => window.jira.fetchMissingIssues(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['jira'] });
+      toast.success('Missing issues synced', { id: JIRA_TOAST_ID });
+    },
+    onError: (err: unknown) => {
+      const message =
+        err instanceof Error ? err.message : 'Failed to sync missing issues';
+      toast.error(message, { id: JIRA_TOAST_ID });
+    },
+  });
+
+  const fetchAllMyIssuesMutation = useMutation({
+    mutationFn: () => window.jira.fetchMyIssues(),
+    onSuccess: (issues) => {
+      queryClient.invalidateQueries({ queryKey: ['jira'] });
+      toast.success(
+        `Synced ${issues.length} issue${issues.length === 1 ? '' : 's'}`,
+        { id: JIRA_TOAST_ID }
+      );
+    },
+    onError: (err: unknown) => {
+      const message =
+        err instanceof Error ? err.message : 'Failed to fetch issues';
+      toast.error(message, { id: JIRA_TOAST_ID });
+    },
   });
 
   const testTempoMutation = useMutation({
@@ -400,14 +425,29 @@ export function SettingsTab() {
             <FieldSet className="gap-3">
               <FieldLegend>Sync Jira</FieldLegend>
               <FieldDescription>
-                Fetch issues from Jira that are not yet in your local database.
+                Fetch issues from Jira. Use &quot;Sync all my issues&quot; to
+                import everything assigned to you, or &quot;Sync missing
+                issues&quot; to fetch only issues referenced in worklogs but not
+                yet in your database.
               </FieldDescription>
-              <Field orientation="horizontal">
+              <Field orientation="horizontal" className="flex-wrap gap-2">
                 <Button
                   variant="outline"
                   type="button"
                   size="sm"
-                  onClick={() => fetchMissingIssuesMutation.mutateAsync()}
+                  onClick={() => fetchAllMyIssuesMutation.mutate()}
+                  disabled={fetchAllMyIssuesMutation.isPending}
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  {fetchAllMyIssuesMutation.isPending
+                    ? 'Syncing…'
+                    : 'Sync all my issues'}
+                </Button>
+                <Button
+                  variant="outline"
+                  type="button"
+                  size="sm"
+                  onClick={() => fetchMissingIssuesMutation.mutate()}
                   disabled={fetchMissingIssuesMutation.isPending}
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
