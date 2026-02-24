@@ -47,7 +47,7 @@ function JiraIssueCardHeader({
         variant="outline"
         className="shrink-0 text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70"
       >
-        {issue.key}
+        {issue.key ?? '—'}
       </Badge>
       <span className="font-semibold text-foreground wrap-break-word">
         {issue.summary ?? ''}
@@ -193,7 +193,7 @@ export function JiraIssueCard({
     <>
       <JiraIssueCardContent issue={issue} parentLabel={parentLabel} />
       <JiraIssueCardFooter
-        issueKey={issue.key}
+        issueKey={issue.key ?? ''}
         onOpenInJira={onOpenInJira}
         onTrackTime={onTrackTime}
       />

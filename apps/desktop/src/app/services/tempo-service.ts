@@ -16,7 +16,6 @@ function tempoWorklogToUpsertInput(w: TempoWorklog): WorklogUpsertInput {
   return {
     tempoWorklogId: w.tempoWorklogId,
     jiraWorklogId: w.jiraWorklogId ?? null,
-    issueKey: w.issue?.key ?? null,
     issueId: w.issue?.id ?? null,
     timeSpentSeconds: w.timeSpentSeconds,
     billableSeconds: w.billableSeconds,

@@ -5,7 +5,7 @@ export type JiraIssueWithParent = Prisma.JiraIssueGetPayload<{
 }>;
 
 export interface JiraIssueUpsertInput {
-  key: string;
+  key?: string | null;
   jiraId?: number | null;
   summary: string;
   status: string;
@@ -20,9 +20,22 @@ export async function upsertJiraIssue(
   prisma: PrismaClient,
   issue: JiraIssueUpsertInput
 ): Promise<void> {
+  const key = issue.key?.trim() || null;
+  const jiraId = issue.jiraId ?? null;
+
+  if (!key && jiraId == null) {
+    throw new Error('JiraIssueUpsertInput requires at least key or jiraId');
+  }
+
+  const where = key
+    ? ({ key } as const)
+    : ({ jiraId: jiraId as number } as const);
+  const keyData = issue.key ?? undefined;
+
   await prisma.jiraIssue.upsert({
-    where: { key: issue.key },
+    where,
     update: {
+      key: keyData,
       jiraId: issue.jiraId ?? undefined,
       summary: issue.summary,
       status: issue.status,
@@ -31,20 +44,21 @@ export async function upsertJiraIssue(
       epicKey: issue.epicKey ?? undefined,
       assigneeEmail: issue.assigneeEmail ?? undefined,
       syncedAt: new Date(),
-      parent: issue.epicKey
-        ? {
-            connectOrCreate: {
-              where: { key: issue.epicKey },
-              create: {
-                key: issue.epicKey,
-                issueType: 'Epic',
+      parent:
+        issue.epicKey && issue.epicKey !== ''
+          ? {
+              connectOrCreate: {
+                where: { key: issue.epicKey },
+                create: {
+                  key: issue.epicKey,
+                  issueType: 'Epic',
+                },
               },
-            },
-          }
-        : undefined,
+            }
+          : undefined,
     },
     create: {
-      key: issue.key,
+      key: keyData,
       jiraId: issue.jiraId ?? undefined,
       summary: issue.summary,
       status: issue.status,
@@ -52,17 +66,18 @@ export async function upsertJiraIssue(
       priority: issue.priority,
       epicKey: issue.epicKey ?? undefined,
       syncedAt: new Date(),
-      parent: issue.epicKey
-        ? {
-            connectOrCreate: {
-              where: { key: issue.epicKey },
-              create: {
-                key: issue.epicKey,
-                issueType: 'Epic',
+      parent:
+        issue.epicKey && issue.epicKey !== ''
+          ? {
+              connectOrCreate: {
+                where: { key: issue.epicKey },
+                create: {
+                  key: issue.epicKey,
+                  issueType: 'Epic',
+                },
               },
-            },
-          }
-        : undefined,
+            }
+          : undefined,
       assigneeEmail: issue.assigneeEmail ?? undefined,
     },
   });
@@ -72,6 +87,7 @@ export async function getJiraIssues(
   prisma: PrismaClient
 ): Promise<JiraIssueWithParent[]> {
   return prisma.jiraIssue.findMany({
+    where: { key: { not: null } },
     include: { parent: true },
     orderBy: { updatedAt: 'desc' },
   });
@@ -82,7 +98,7 @@ export async function getJiraIssuesByEmail(
   email: string
 ): Promise<JiraIssueWithParent[]> {
   return prisma.jiraIssue.findMany({
-    where: { assigneeEmail: email },
+    where: { assigneeEmail: email, key: { not: null } },
     include: { parent: true },
     orderBy: { updatedAt: 'desc' },
   });

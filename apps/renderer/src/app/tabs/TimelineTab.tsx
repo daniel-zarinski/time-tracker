@@ -284,7 +284,7 @@ export function TimelineTab() {
               >
                 <div className="min-w-0 flex-1 flex flex-col gap-0.5 overflow-hidden h-full">
                   <span className="text-xs font-medium text-foreground line-clamp-1">
-                    {entry.issue.key}
+                    {entry.issue.key ?? entry.issueKey}
                   </span>
                   {span >= 2 && (
                     <span className="text-[10px] text-muted-foreground line-clamp-2">

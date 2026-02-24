@@ -20,7 +20,9 @@ export function useAppCommands(): {
     retry: false,
   });
 
-  const issues = getIssuesQuery.data ?? [];
+  const issues = (getIssuesQuery.data ?? []).filter(
+    (i): i is typeof i & { key: string } => i.key != null
+  );
   const isLoading = getIssuesQuery.isLoading || getIssuesQuery.isFetching;
 
   const commands: CommandPaletteGroup[] = [

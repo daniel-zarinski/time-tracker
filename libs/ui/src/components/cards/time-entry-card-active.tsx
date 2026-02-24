@@ -71,7 +71,7 @@ export function TimeEntryCardActive({
             variant="outline"
             className="shrink-0 w-fit text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70"
           >
-            {entry.issue.key}
+            {entry.issue.key ?? entry.issueKey}
           </Badge>
           <span className="text-sm text-foreground/90 wrap-break-word">
             {entry.issue.summary ?? ''}

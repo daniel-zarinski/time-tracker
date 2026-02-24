@@ -114,9 +114,8 @@ export class JiraService {
           ? parseInt(raw.id, 10)
           : raw.id
         : null;
-    const jiraIdValid = typeof jiraId === 'number' && !Number.isNaN(jiraId)
-      ? jiraId
-      : null;
+    const jiraIdValid =
+      typeof jiraId === 'number' && !Number.isNaN(jiraId) ? jiraId : null;
     return {
       key: raw.key,
       jiraId: jiraIdValid,
@@ -254,10 +253,16 @@ export class JiraService {
     console.log(`Found ${issues.length} missing issues`);
 
     for (const issue of issues) {
-      console.log(`Fetching issue ${issue.key}`);
-      await this.fetchIssue(issue.key).catch((err) => {
-        console.error(`Error fetching issue ${issue.key}: ${err}`);
-      });
+      const identifier =
+        issue.key ?? (issue.jiraId != null ? String(issue.jiraId) : null);
+      console.log(`Fetching issue ${issue.key ?? issue.jiraId}`);
+      if (identifier) {
+        await this.fetchIssue(identifier).catch((err) => {
+          console.error(`Error fetching issue ${identifier}: ${err}`);
+        });
+      } else {
+        console.error(`Issue has neither key nor jiraId`);
+      }
     }
     console.log('Done fetching missing issues');
   }

@@ -195,7 +195,7 @@ export function JiraIssuesTab() {
             <ScrollArea className="h-[calc(100vh-10rem)]">
               <ul className="flex flex-col gap-2 pr-4">
                 {groupedByStatus[status].map((issue) => (
-                  <li key={issue.key}>
+                  <li key={issue.id}>
                     <JiraIssueCard
                       issue={issue}
                       onOpenInJira={(key) =>

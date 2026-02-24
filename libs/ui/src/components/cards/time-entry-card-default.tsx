@@ -107,7 +107,7 @@ export function TimeEntryCardDefault({
                   variant="outline"
                   className="shrink-0 text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70"
                 >
-                  {entry.issue.key}
+                  {entry.issue.key ?? entry.issueKey}
                 </Badge>
               </CardTitle>
               <CardDescription
@@ -131,7 +131,7 @@ export function TimeEntryCardDefault({
                       <DropdownMenuItem
                         onClick={(e) => {
                           e.stopPropagation();
-                          onOpenInJira?.(entry.issue.key);
+                          onOpenInJira?.(entry.issue.key ?? entry.issueKey);
                         }}
                       >
                         <EyeIcon className="size-4" />
@@ -176,7 +176,7 @@ export function TimeEntryCardDefault({
             <Button
               variant="outline"
               size="xs"
-              onClick={() => onResumeTimer?.(entry.issue.key)}
+              onClick={() => onResumeTimer?.(entry.issue.key ?? entry.issueKey)}
             >
               <PlayIcon className="size-3" />
               Resume
@@ -184,7 +184,7 @@ export function TimeEntryCardDefault({
             <Button
               variant="outline"
               size="xs"
-              onClick={() => onOpenInJira?.(entry.issue.key)}
+              onClick={() => onOpenInJira?.(entry.issue.key ?? entry.issueKey)}
             >
               <EyeIcon className="size-3" />
               View
