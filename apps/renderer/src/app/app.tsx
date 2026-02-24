@@ -37,13 +37,14 @@ export function App() {
   });
 
   return (
-    <div className="min-h-screen text-foreground">
+    <div className="flex h-screen flex-col text-foreground">
       <Tabs
         value={activeTab}
         onValueChange={(v) => setActiveTab(v as TabValue)}
+        className="flex h-full flex-col"
       >
         <header
-          className="flex items-center justify-between pt-2"
+          className="sticky top-0 z-40 flex items-center justify-between bg-background pt-2"
           style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
         >
           <div className="flex-1" aria-hidden />
@@ -67,20 +68,20 @@ export function App() {
 
         <Separator />
 
-        <main style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
-          <TabsContent value="tasks">
+        <main className="flex min-h-0 flex-1 flex-col" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+          <TabsContent value="tasks" className="overflow-y-auto">
             <TasksTab />
           </TabsContent>
 
-          <TabsContent value="timeline">
+          <TabsContent value="timeline" className="overflow-y-auto">
             <TimelineTab />
           </TabsContent>
 
-          <TabsContent value="jira-issues">
+          <TabsContent value="jira-issues" className="overflow-y-auto">
             <JiraIssuesTab />
           </TabsContent>
 
-          <TabsContent value="settings">
+          <TabsContent value="settings" className="overflow-y-auto">
             <SettingsTab />
           </TabsContent>
         </main>

@@ -1,6 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
-  ScrollArea,
   Empty,
   EmptyHeader,
   EmptyTitle,
@@ -66,27 +65,28 @@ export function TasksTab() {
   return (
     <div className="w-full max-w-2xl mx-auto p-4 flex flex-col gap-3">
       {activeEntry && (
-        <TimeEntryCardActive
-          entry={activeEntry}
-          onStopTimer={stopTracking.mutateAsync}
-        />
+        <div className="sticky top-0 z-10 bg-background pb-1">
+          <TimeEntryCardActive
+            entry={activeEntry}
+            onStopTimer={stopTracking.mutateAsync}
+          />
+          {completedEntries.length > 0 && <Separator className="mt-3" />}
+        </div>
       )}
 
-      {completedEntries.length > 0 && <Separator className="my-2" />}
+      {!activeEntry && completedEntries.length > 0 && <Separator className="my-2" />}
 
-      <ScrollArea className="h-[calc(100vh-16rem)]">
-        <ul className="flex flex-col gap-2">
-          {completedEntries.map((entry) => (
-            <li key={entry.id}>
-              <TimeEntryCardDefault
-                entry={entry}
-                // onOpenInJira={(key) => window.electron.openJiraExternal(key)}
-                onOpenInJira={() => setSelectedIssue(entry.issue)}
-              />
-            </li>
-          ))}
-        </ul>
-      </ScrollArea>
+      <ul className="flex flex-col gap-2">
+        {completedEntries.map((entry) => (
+          <li key={entry.id}>
+            <TimeEntryCardDefault
+              entry={entry}
+              // onOpenInJira={(key) => window.electron.openJiraExternal(key)}
+              onOpenInJira={() => setSelectedIssue(entry.issue)}
+            />
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

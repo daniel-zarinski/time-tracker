@@ -1,57 +1,49 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button, Card, ScrollArea } from '@time-tracker/ui';
-import { formatTime } from '@time-tracker/utils';
+import { Button } from '@time-tracker/ui';
+import { cn } from '@time-tracker/utils';
 import type { TimeEntryWithIssue } from '@time-tracker/database';
 import { useAppStore } from '../store';
 
-const SLOT_MINUTES = 15;
-const DAY_START_HOUR = 6;
-const DAY_END_HOUR = 22;
-const SLOT_COUNT = ((DAY_END_HOUR - DAY_START_HOUR) * 60) / SLOT_MINUTES;
-const ROW_HEIGHT = 24;
-const SLOT_MS = SLOT_MINUTES * 60 * 1000;
+// --- Constants ---
+const HALF_HOUR_ROWS = 48;
+const QUARTER_HOUR_ROWS = 96;
+const QUARTER_MS = 15 * 60 * 1000;
 
-const slotToDate = (i: number) =>
-  new Date(
-    2000,
-    0,
-    1,
-    DAY_START_HOUR + Math.floor((i * SLOT_MINUTES) / 60),
-    (i * SLOT_MINUTES) % 60
-  );
-
-interface SlotSpan {
-  minSlot: number;
-  span: number;
+// --- Types ---
+interface GridPosition {
+  gridRowStart: number;
+  gridRowSpan: number;
 }
 
-interface EntryWithSlots extends SlotSpan {
+interface EntryWithGrid extends GridPosition {
   entry: TimeEntryWithIssue;
 }
 
-interface EntryWithLayout extends EntryWithSlots {
+interface EntryWithLayout extends EntryWithGrid {
   column: number;
   totalColumns: number;
 }
+
+// --- Helpers ---
 
 function getDayBounds(date: Date) {
   const y = date.getFullYear();
   const m = date.getMonth();
   const d = date.getDate();
   return {
-    start: new Date(y, m, d, DAY_START_HOUR, 0, 0).getTime(),
-    end: new Date(y, m, d, DAY_END_HOUR, 0, 0).getTime(),
+    start: new Date(y, m, d, 0, 0, 0).getTime(),
+    end: new Date(y, m, d + 1, 0, 0, 0).getTime(),
   };
 }
 
-function getEntriesWithSlots(
+function getEntriesWithGrid(
   entries: TimeEntryWithIssue[],
   date: Date
-): EntryWithSlots[] {
+): EntryWithGrid[] {
   const { start: dayStart, end: dayEnd } = getDayBounds(date);
-  const result: EntryWithSlots[] = [];
+  const result: EntryWithGrid[] = [];
 
   for (const entry of entries) {
     const entryStart = new Date(entry.startedAt).getTime();
@@ -66,39 +58,42 @@ function getEntriesWithSlots(
 
     const visibleStart = Math.max(entryStart, dayStart);
     const visibleEnd = Math.min(entryEnd, dayEnd);
-    const minSlot = Math.floor((visibleStart - dayStart) / SLOT_MS);
-    const span = Math.ceil((visibleEnd - visibleStart) / SLOT_MS);
-    if (span < 1) continue;
 
-    result.push({
-      entry,
-      minSlot: Math.max(0, Math.min(SLOT_COUNT - 1, minSlot)),
-      span: Math.max(1, Math.min(SLOT_COUNT - minSlot, span)),
-    });
+    const gridRowStart =
+      2 + Math.floor((visibleStart - dayStart) / QUARTER_MS);
+    const gridRowSpan = Math.max(
+      1,
+      Math.ceil((visibleEnd - visibleStart) / QUARTER_MS)
+    );
+
+    result.push({ entry, gridRowStart, gridRowSpan });
   }
 
   return result;
 }
 
-function collides(a: SlotSpan, b: SlotSpan): boolean {
-  return a.minSlot < b.minSlot + b.span && b.minSlot < a.minSlot + a.span;
+function collides(a: GridPosition, b: GridPosition): boolean {
+  return (
+    a.gridRowStart < b.gridRowStart + b.gridRowSpan &&
+    b.gridRowStart < a.gridRowStart + a.gridRowSpan
+  );
 }
 
 function computeEntryLayout(
-  entriesWithSlots: EntryWithSlots[]
+  entriesWithGrid: EntryWithGrid[]
 ): EntryWithLayout[] {
-  if (!entriesWithSlots.length) return [];
+  if (!entriesWithGrid.length) return [];
 
-  const indexed = entriesWithSlots
+  const indexed = entriesWithGrid
     .map((item, originalIndex) => ({ ...item, originalIndex }))
     .sort((a, b) =>
-      a.minSlot !== b.minSlot
-        ? a.minSlot - b.minSlot
-        : a.minSlot + a.span - (b.minSlot + b.span)
+      a.gridRowStart !== b.gridRowStart
+        ? a.gridRowStart - b.gridRowStart
+        : a.gridRowStart + a.gridRowSpan - (b.gridRowStart + b.gridRowSpan)
     );
 
   const layoutMap = new Map<number, { column: number; totalColumns: number }>();
-  const columns: Array<Array<SlotSpan & { originalIndex: number }>> = [];
+  const columns: Array<Array<GridPosition & { originalIndex: number }>> = [];
   let lastEnd: number | null = null;
 
   const flush = () => {
@@ -113,8 +108,8 @@ function computeEntryLayout(
   };
 
   for (const ev of indexed) {
-    const evEnd = ev.minSlot + ev.span;
-    if (lastEnd !== null && ev.minSlot >= lastEnd) flush();
+    const evEnd = ev.gridRowStart + ev.gridRowSpan;
+    if (lastEnd !== null && ev.gridRowStart >= lastEnd) flush();
 
     const colIdx = columns.findIndex(
       (col) => !collides(col[col.length - 1], ev)
@@ -126,15 +121,57 @@ function computeEntryLayout(
   }
   if (columns.length) flush();
 
-  return entriesWithSlots.map((item, i) => ({
+  return entriesWithGrid.map((item, i) => ({
     ...item,
     ...(layoutMap.get(i) ?? { column: 0, totalColumns: 1 }),
   }));
 }
 
+function getWeekDays(date: Date): Date[] {
+  const d = new Date(date);
+  const day = d.getDay();
+  // Monday = 0 offset, Sunday = 6 offset
+  const mondayOffset = day === 0 ? -6 : 1 - day;
+  const monday = new Date(d);
+  monday.setDate(d.getDate() + mondayOffset);
+  return Array.from({ length: 7 }, (_, i) => {
+    const day = new Date(monday);
+    day.setDate(monday.getDate() + i);
+    return day;
+  });
+}
+
+function formatHour(hour: number): string {
+  if (hour === 0 || hour === 24) return '12AM';
+  if (hour === 12) return '12PM';
+  if (hour < 12) return `${hour}AM`;
+  return `${hour - 12}PM`;
+}
+
+function formatEntryTime(date: Date): string {
+  return date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+}
+
+const DAY_LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
+function isSameDay(a: Date, b: Date) {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
+
+// --- Component ---
+
 export function TimelineTab() {
   const setSelectedIssue = useAppStore.use.setSelectedIssue();
   const [date, setDate] = React.useState(() => new Date());
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
   const { data: entries = [] } = useQuery({
     queryKey: ['time-entries'],
@@ -142,48 +179,19 @@ export function TimelineTab() {
     retry: false,
   });
 
-  const entriesWithSlots = React.useMemo(
-    () => getEntriesWithSlots(entries, date),
+  const entriesWithGrid = React.useMemo(
+    () => getEntriesWithGrid(entries, date),
     [entries, date]
   );
 
   const entriesWithLayout = React.useMemo(
-    () => computeEntryLayout(entriesWithSlots),
-    [entriesWithSlots]
+    () => computeEntryLayout(entriesWithGrid),
+    [entriesWithGrid]
   );
 
-  const gridRef = React.useRef<HTMLDivElement>(null);
-  const firstRowRef = React.useRef<HTMLDivElement>(null);
-  const [slotHeight, setSlotHeight] = React.useState(ROW_HEIGHT);
-  const dragRef = React.useRef<{ start: number; end: number } | null>(null);
-  const [drag, setDrag] = React.useState<{ start: number; end: number } | null>(
-    null
-  );
-  const setDragState = React.useCallback(
-    (v: { start: number; end: number } | null) => {
-      dragRef.current = v;
-      setDrag(v);
-    },
-    []
-  );
-
-  React.useLayoutEffect(() => {
-    const firstRow = firstRowRef.current;
-    if (firstRow) {
-      const height = firstRow.getBoundingClientRect().height;
-      setSlotHeight(height);
-    }
-  }, []);
-
-  const getSlot = React.useCallback((clientY: number) => {
-    const firstRow = firstRowRef.current;
-    if (!firstRow) return 0;
-    const rowRect = firstRow.getBoundingClientRect();
-    const relativeY = clientY - rowRect.top;
-    const rowHeight = rowRect.height;
-    const slot = Math.floor(relativeY / rowHeight);
-    return Math.max(0, Math.min(SLOT_COUNT - 1, slot));
-  }, []);
+  const weekDays = React.useMemo(() => getWeekDays(date), [date]);
+  const today = React.useMemo(() => new Date(), []);
+  const isToday = isSameDay(date, today);
 
   const nav = React.useCallback(
     (delta: number) => {
@@ -194,124 +202,237 @@ export function TimelineTab() {
     [date]
   );
 
-  const preview: SlotSpan | null = drag
-    ? {
-        minSlot: Math.min(drag.start, drag.end),
-        span: Math.abs(drag.end - drag.start) + 1,
-      }
-    : null;
-  const isToday = date.toDateString() === new Date().toDateString();
+  const navWeek = React.useCallback(
+    (delta: number) => {
+      const next = new Date(date);
+      next.setDate(next.getDate() + delta * 7);
+      setDate(next);
+    },
+    [date]
+  );
+
+  // Auto-scroll to current time on mount / date change
+  React.useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    // Find the scrollable TabsContent ancestor
+    const scrollParent = container.closest('[data-slot="tabs-content"]');
+    if (!scrollParent) return;
+
+    const now = new Date();
+    let scrollHour: number;
+
+    if (isSameDay(date, now)) {
+      scrollHour = Math.max(0, now.getHours() - 1);
+    } else {
+      scrollHour = 8;
+    }
+
+    const pxPerHalfHour = 56;
+    const scrollTarget = scrollHour * 2 * pxPerHalfHour;
+
+    requestAnimationFrame(() => {
+      scrollParent.scrollTop = scrollTarget;
+    });
+  }, [date]);
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-4 flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+    <div className="flex flex-col">
+      {/* Header */}
+      <div className="sticky top-0 z-30 flex items-center justify-between border-b border-border bg-background px-4 py-3">
+        <div className="flex items-center gap-1">
+          <h2 className="text-sm font-semibold">
+            {date.toLocaleDateString('en-US', {
+              weekday: 'long',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </h2>
+        </div>
+        <div className="flex items-center gap-1">
           <Button variant="ghost" size="icon" onClick={() => nav(-1)}>
             <ChevronLeft className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setDate(new Date())}
+          >
+            Today
           </Button>
           <Button variant="ghost" size="icon" onClick={() => nav(1)}>
             <ChevronRight className="size-4" />
           </Button>
-          <span className="text-sm font-medium">
-            {isToday
-              ? 'Today'
-              : date.toLocaleDateString(undefined, {
-                  weekday: 'short',
-                  month: 'short',
-                  day: 'numeric',
-                })}
-          </span>
-          <span className="text-sm text-muted-foreground">
-            {date.toLocaleDateString(undefined, {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-            })}
-          </span>
         </div>
-        <Button variant="ghost" size="sm" onClick={() => setDate(new Date())}>
-          Today
+      </div>
+
+      {/* Week day selector */}
+      <div className="sticky top-[49px] z-30 flex items-center border-b border-border bg-background px-2 py-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-7"
+          onClick={() => navWeek(-1)}
+        >
+          <ChevronLeft className="size-3.5" />
+        </Button>
+        <div className="flex flex-1 justify-around">
+          {weekDays.map((d, i) => {
+            const isSelected = isSameDay(d, date);
+            const isDayToday = isSameDay(d, today);
+            return (
+              <button
+                key={i}
+                onClick={() => setDate(d)}
+                className={cn(
+                  'flex flex-col items-center gap-0.5 rounded-lg px-2 py-1 text-xs transition-colors',
+                  !isSelected && !isDayToday && 'text-foreground hover:bg-muted',
+                  !isSelected && isDayToday && 'text-primary hover:bg-muted',
+                  isSelected && 'bg-primary text-primary-foreground'
+                )}
+              >
+                <span className="font-medium">{DAY_LETTERS[i]}</span>
+                <span
+                  className={cn(
+                    'flex size-6 items-center justify-center rounded-full text-xs font-semibold',
+                    isSelected && 'bg-primary-foreground/20'
+                  )}
+                >
+                  {d.getDate()}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-7"
+          onClick={() => navWeek(1)}
+        >
+          <ChevronRight className="size-3.5" />
         </Button>
       </div>
 
-      <ScrollArea className="h-[calc(100vh-10rem)]">
-        <div
-          ref={gridRef}
-          className="relative min-w-[200px] select-none"
-          onPointerMove={(e) => {
-            const d = dragRef.current;
-            if (d) setDragState({ ...d, end: getSlot(e.clientY) });
-          }}
-          onPointerUp={() => setDragState(null)}
-          onPointerCancel={() => setDragState(null)}
-        >
-          <div className="flex flex-col">
-            {Array.from({ length: SLOT_COUNT }, (_, i) => (
-              <div
-                key={i}
-                ref={i === 0 ? firstRowRef : undefined}
-                className="flex items-stretch border-b border-border/50"
-                style={{ minHeight: ROW_HEIGHT }}
-              >
-                <span className="w-20 shrink-0 py-0.5 text-sm text-muted-foreground">
-                  {i % 2 === 0 ? formatTime(slotToDate(i)) : ''}
-                </span>
-                <div
-                  className="flex-1 cursor-crosshair"
-                  onPointerDown={(e) => {
-                    if (e.button !== 0) return;
-                    gridRef.current?.setPointerCapture(e.pointerId);
-                    const slot = getSlot(e.clientY);
-                    setDragState({ start: slot, end: slot });
-                  }}
-                />
-              </div>
-            ))}
-          </div>
+      {/* Calendar grid */}
+      <div ref={containerRef}>
+        <div className="flex w-full flex-auto">
+          {/* Gutter spacer for time labels */}
+          <div className="w-14 flex-none" />
 
-          {entriesWithLayout.map(
-            ({ entry, minSlot, span, column, totalColumns }) => (
-              <Card
-                key={entry.id}
-                className="absolute z-10 cursor-pointer border-border bg-card py-1 px-2 hover:bg-card/80 hover:border-primary/30 transition-colors"
-                style={{
-                  top: minSlot * slotHeight,
-                  height: span * slotHeight,
-                  left: `calc(5rem + ${column} * (100% - 5rem) / ${totalColumns})`,
-                  width: `calc((100% - 5rem) / ${totalColumns})`,
-                }}
-                onClick={() => setSelectedIssue(entry.issue)}
-              >
-                <div className="min-w-0 flex-1 flex flex-col gap-0.5 overflow-hidden h-full">
-                  <span className="text-xs font-medium text-foreground line-clamp-1">
-                    {entry.issue.key ?? entry.issueKey}
-                  </span>
-                  {span >= 2 && (
-                    <span className="text-[10px] text-muted-foreground line-clamp-2">
-                      {entry.issue.summary ?? ''}
+          {/* Grid container */}
+          <div className="grid flex-auto grid-cols-1 grid-rows-1">
+            {/* Grid A: horizontal lines + time labels */}
+            <div
+              className="col-start-1 col-end-2 row-start-1 divide-y divide-border/50"
+              style={{
+                display: 'grid',
+                gridTemplateRows: `repeat(${HALF_HOUR_ROWS}, minmax(3.5rem, 1fr))`,
+              }}
+            >
+              {Array.from({ length: HALF_HOUR_ROWS }, (_, i) => (
+                <div key={i} className="relative">
+                  {i % 2 === 0 && (
+                    <span className="sticky left-0 -ml-14 -mt-2.5 inline-block w-14 pr-2 text-right text-[10px] text-muted-foreground">
+                      {formatHour(i / 2)}
                     </span>
                   )}
                 </div>
-              </Card>
-            )
-          )}
+              ))}
+            </div>
 
-          {preview && (
-            <Card
-              className="absolute left-20 right-0 z-20 border-primary/50 bg-primary/10 py-1 px-2 pointer-events-none"
+            {/* Grid B: events overlay */}
+            <ol
+              className="col-start-1 col-end-2 row-start-1"
               style={{
-                top: preview.minSlot * slotHeight,
-                height: preview.span * slotHeight,
+                display: 'grid',
+                gridTemplateRows: `1.75rem repeat(${QUARTER_HOUR_ROWS}, minmax(0, 1fr)) auto`,
+                gridTemplateColumns: '1fr',
               }}
             >
-              <span className="text-sm text-muted-foreground">
-                {formatTime(slotToDate(preview.minSlot))} –{' '}
-                {formatTime(slotToDate(preview.minSlot + preview.span))}
-              </span>
-            </Card>
-          )}
+              {entriesWithLayout.map(
+                ({
+                  entry,
+                  gridRowStart,
+                  gridRowSpan,
+                  column,
+                  totalColumns,
+                }) => (
+                  <li
+                    key={entry.id}
+                    className="relative"
+                    style={{
+                      gridRow: `${gridRowStart} / span ${gridRowSpan}`,
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setSelectedIssue(entry.issue)}
+                      className={cn(
+                        'absolute inset-1 overflow-hidden rounded-lg border border-primary/20 bg-primary/10 p-2 text-left transition-colors hover:bg-primary/15',
+                        totalColumns > 1 && 'inset-y-1'
+                      )}
+                      style={
+                        totalColumns > 1
+                          ? {
+                              left: `calc(${(column / totalColumns) * 100}% + 0.25rem)`,
+                              right: `calc(${((totalColumns - column - 1) / totalColumns) * 100}% + 0.25rem)`,
+                            }
+                          : undefined
+                      }
+                    >
+                      <p className="truncate text-xs font-semibold text-primary">
+                        {entry.issue.key ?? entry.issueKey}
+                      </p>
+                      {gridRowSpan >= 2 && (
+                        <p className="truncate text-[10px] text-primary/70">
+                          {entry.issue.summary ?? ''}
+                        </p>
+                      )}
+                      {gridRowSpan >= 3 && (
+                        <p className="mt-0.5 text-[10px] text-primary/60">
+                          {formatEntryTime(new Date(entry.startedAt))}
+                        </p>
+                      )}
+                    </button>
+                  </li>
+                )
+              )}
+
+              {/* Current time indicator */}
+              {isToday && <CurrentTimeIndicator />}
+            </ol>
+          </div>
         </div>
-      </ScrollArea>
+      </div>
     </div>
+  );
+}
+
+function CurrentTimeIndicator() {
+  const [now, setNow] = React.useState(() => new Date());
+
+  React.useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  const quarterSlot = hours * 4 + Math.floor(minutes / 15);
+  // +2 to account for the 1.75rem header row in the event grid
+  const gridRow = quarterSlot + 2;
+
+  return (
+    <li
+      className="pointer-events-none relative z-20"
+      style={{ gridRow: `${gridRow} / span 1` }}
+    >
+      <div className="absolute inset-x-0 top-0 flex items-center">
+        <div className="size-2 rounded-full bg-red-500" />
+        <div className="h-px flex-1 bg-red-500" />
+      </div>
+    </li>
   );
 }

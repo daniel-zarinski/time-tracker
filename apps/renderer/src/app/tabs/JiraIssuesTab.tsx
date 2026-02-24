@@ -177,9 +177,9 @@ export function JiraIssuesTab() {
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-4 flex flex-col gap-4">
-      <Tabs defaultValue={toTabValue(statuses[0])}>
-        <ScrollArea className="w-full pb-2" orientation="horizontal">
+    <Tabs defaultValue={toTabValue(statuses[0])} className="flex flex-col">
+      <div className="sticky top-0 z-30 bg-background">
+        <ScrollArea className="w-full max-w-2xl mx-auto px-4 pb-2" orientation="horizontal">
           <div className="flex min-w-max">
             <TabsList variant="line">
               {statuses.map((status) => (
@@ -190,42 +190,38 @@ export function JiraIssuesTab() {
             </TabsList>
           </div>
         </ScrollArea>
-        {statuses.map((status) => (
-          <TabsContent key={status} value={toTabValue(status)}>
-            <ScrollArea className="h-[calc(100vh-10rem)]">
-              <ul className="flex flex-col gap-2 pr-4">
-                {groupedByStatus[status].map((issue) => (
-                  <li key={issue.id}>
-                    <JiraIssueCard
-                      issue={issue}
-                      onOpenInJira={(key) =>
-                        window.electron.openJiraExternal(key)
-                      }
-                      onTrackTime={async (key) => {
-                        try {
-                          const timeEntry =
-                            await window.timeTracking.startTracking(key);
-                          toast.success(
-                            `Started tracking ${timeEntry.issueKey}`
-                          );
-                          setActiveTab('tasks');
-                        } catch (error) {
-                          toast.error(
-                            `Failed to start tracking ${key}: ${error}`,
-                            {
-                              position: 'bottom-center',
-                            }
-                          );
+      </div>
+      {statuses.map((status) => (
+        <TabsContent key={status} value={toTabValue(status)} className="px-4">
+          <ul className="flex flex-col gap-2 w-full max-w-2xl mx-auto">
+            {groupedByStatus[status].map((issue) => (
+              <li key={issue.id}>
+                <JiraIssueCard
+                  issue={issue}
+                  onOpenInJira={(key) =>
+                    window.electron.openJiraExternal(key)
+                  }
+                  onTrackTime={async (key) => {
+                    try {
+                      const timeEntry =
+                        await window.timeTracking.startTracking(key);
+                      toast.success(`Started tracking ${timeEntry.issueKey}`);
+                      setActiveTab('tasks');
+                    } catch (error) {
+                      toast.error(
+                        `Failed to start tracking ${key}: ${error}`,
+                        {
+                          position: 'bottom-center',
                         }
-                      }}
-                    />
-                  </li>
-                ))}
-              </ul>
-            </ScrollArea>
-          </TabsContent>
-        ))}
-      </Tabs>
-    </div>
+                      );
+                    }
+                  }}
+                />
+              </li>
+            ))}
+          </ul>
+        </TabsContent>
+      ))}
+    </Tabs>
   );
 }
