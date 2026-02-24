@@ -2,7 +2,7 @@ import { StateCreator } from 'zustand';
 
 import type { JiraIssueWithParent } from '@time-tracker/database';
 
-export type TabValue = 'tasks' | 'jira-issues' | 'settings';
+export type TabValue = 'tasks' | 'timeline' | 'jira-issues' | 'settings';
 
 export interface UiSlice {
   activeTab: TabValue;

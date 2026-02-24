@@ -7,6 +7,7 @@ export function MainTabList() {
       style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
     >
       <TabsTrigger value="tasks">Tasks</TabsTrigger>
+      <TabsTrigger value="timeline">Timeline</TabsTrigger>
       <TabsTrigger value="jira-issues">Jira Issues</TabsTrigger>
       <TabsTrigger value="settings">Settings</TabsTrigger>
     </TabsList>

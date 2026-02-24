@@ -17,6 +17,7 @@ import { TasksTab, SettingsTab, JiraIssuesTab, MainTabList } from './tabs';
 import { useAppStore, TabValue } from './store';
 import { useAppCommands } from './use-app-commands';
 import { useMutation } from '@tanstack/react-query';
+import { TimelineTab } from './tabs/TimelineTab';
 
 export function App() {
   const activeTab = useAppStore.use.activeTab();
@@ -69,6 +70,10 @@ export function App() {
         <main style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
           <TabsContent value="tasks">
             <TasksTab />
+          </TabsContent>
+
+          <TabsContent value="timeline">
+            <TimelineTab />
           </TabsContent>
 
           <TabsContent value="jira-issues">
