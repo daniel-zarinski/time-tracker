@@ -9,6 +9,7 @@ import {
   TimeEntryCardActive,
   TimeEntryCardDefault,
   toast,
+  Separator,
 } from '@time-tracker/ui';
 import { Clock } from 'lucide-react';
 import { useAppStore } from '../store';
@@ -71,7 +72,9 @@ export function TasksTab() {
         />
       )}
 
-      <ScrollArea className="h-[calc(100vh-10rem)]">
+      {completedEntries.length > 0 && <Separator className="my-2" />}
+
+      <ScrollArea className="h-[calc(100vh-16rem)]">
         <ul className="flex flex-col gap-2">
           {completedEntries.map((entry) => (
             <li key={entry.id}>

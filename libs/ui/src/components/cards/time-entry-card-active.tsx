@@ -7,10 +7,12 @@ import { Button } from '../ui/button';
 import { Card, CardHeader } from '../ui/card';
 import { formatDurationTimer } from '@time-tracker/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { Progress } from '../ui/progress';
 
 interface TimeEntryCardActiveProps {
   entry: TimeEntryWithIssue;
-  elapsedSeconds?: number; // TODO: Remove
+  /** Hours per day for progress calculation (default: 7) */
+  hoursPerDay?: number;
   onStopTimer?: (entryId: string) => void | Promise<void>;
   onCardClick?: () => void;
   className?: string;
@@ -18,6 +20,7 @@ interface TimeEntryCardActiveProps {
 
 export function TimeEntryCardActive({
   entry,
+  hoursPerDay = 7,
   className,
   onStopTimer,
   onCardClick,
@@ -36,12 +39,15 @@ export function TimeEntryCardActive({
       (new Date().getTime() - new Date(entry.startedAt).getTime()) / 1000
     );
 
+  const secondsPerDay = hoursPerDay * 3600;
+  const progressValue = Math.min(100, (elapsedSeconds / secondsPerDay) * 100);
+
   return (
     <Card
       className={cn(
         'transition-all duration-200 border rounded-(--radius) shadow-none overflow-hidden',
         'border-l-2 border-accent bg-card/30',
-        'py-0',
+        'py-0 gap-0',
         onCardClick && 'hover:bg-card/60 cursor-pointer',
         className
       )}
@@ -49,11 +55,16 @@ export function TimeEntryCardActive({
       role="button"
       tabIndex={0}
     >
+      <Progress
+        value={progressValue}
+        className="h-1 rounded-none bg-primary/15"
+        indicatorClassName="animate-pulse"
+      />
       <CardHeader className="px-3 py-2.5 flex flex-row items-center gap-3 space-y-0">
-        <span className="relative flex size-2 shrink-0">
+        {/* <span className="relative flex size-2 shrink-0">
           <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-75" />
           <span className="relative inline-flex size-2 rounded-full bg-primary" />
-        </span>
+        </span> */}
 
         <div className="min-w-0 flex-1 flex flex-col gap-0.5">
           <Badge
@@ -80,10 +91,11 @@ export function TimeEntryCardActive({
 
         <Button
           variant="destructive"
-          size="xs"
+          className="hover:bg-destructive/10 cursor-pointer"
+          size="icon-sm"
           onClick={() => onStopTimer?.(entry.id)}
         >
-          <SquareIcon className="size-3" />
+          <SquareIcon />
         </Button>
       </CardHeader>
     </Card>

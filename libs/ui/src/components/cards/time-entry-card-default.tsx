@@ -89,7 +89,7 @@ export function TimeEntryCardDefault({
         'transition-all duration-200 border rounded-(--radius) shadow-none overflow-hidden',
         syncStatusStyles(entry.syncStatus),
         'hover:bg-card/40 hover:border-primary/20',
-        'py-0',
+        'py-0 gap-0',
         expanded && 'border-primary/25 bg-card/45',
         className
       )}
@@ -156,7 +156,7 @@ export function TimeEntryCardDefault({
           </div>
         </CollapsibleTrigger>
 
-        <CardContent className="px-3 pt-0 pb-2.5">
+        <CardContent className="px-3 pt-0 pb-2.5 max-w-sm mx-auto">
           <div className="flex items-center text-xs text-muted-foreground">
             <span>{formatRelativeDate(startDate)}</span>
             <span className="mx-auto">
