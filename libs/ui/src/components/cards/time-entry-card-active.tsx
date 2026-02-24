@@ -92,10 +92,10 @@ export function TimeEntryCardActive({
         <Button
           variant="destructive"
           className="hover:bg-destructive/10 cursor-pointer"
-          size="icon-sm"
+          size="icon"
           onClick={() => onStopTimer?.(entry.id)}
         >
-          <SquareIcon />
+          <SquareIcon className="size-5" />
         </Button>
       </CardHeader>
     </Card>

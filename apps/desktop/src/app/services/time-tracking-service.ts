@@ -14,7 +14,7 @@ export class TimeTrackingService {
     });
 
     if (existingActiveTimeEntry) {
-      throw new Error('Issue is already being tracked');
+      throw new Error('Issue is actively being tracked');
     }
 
     const timeEntry = await this.prisma.timeEntry.create({
@@ -32,6 +32,13 @@ export class TimeTrackingService {
     });
 
     return timeEntry;
+  }
+
+  async getLastTimeEntryFromIssue(issueKey: string, syncStatus?: SyncStatus) {
+    return this.prisma.timeEntry.findFirst({
+      where: { issueKey, syncStatus },
+      orderBy: { startedAt: 'desc' },
+    });
   }
 
   async stopTracking(entryId: string) {

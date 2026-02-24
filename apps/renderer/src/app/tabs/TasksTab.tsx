@@ -20,6 +20,17 @@ export function TasksTab() {
     queryFn: () => window.database.getTimeEntries(),
     retry: false,
   });
+  const startTracking = useMutation({
+    mutationFn: (issueKey: string) =>
+      window.timeTracking.startTracking(issueKey),
+    onSuccess: () => {
+      timeEntriesQuery.refetch();
+      toast.success('Time entry started');
+    },
+    onError: () => {
+      toast.error('Failed to start time entry');
+    },
+  });
 
   const stopTracking = useMutation({
     mutationFn: (id: string) => window.timeTracking.stopTracking(id),
@@ -74,8 +85,6 @@ export function TasksTab() {
         </div>
       )}
 
-      {!activeEntry && completedEntries.length > 0 && <Separator className="my-2" />}
-
       <ul className="flex flex-col gap-2">
         {completedEntries.map((entry) => (
           <li key={entry.id}>
@@ -83,6 +92,7 @@ export function TasksTab() {
               entry={entry}
               // onOpenInJira={(key) => window.electron.openJiraExternal(key)}
               onOpenInJira={() => setSelectedIssue(entry.issue)}
+              onResumeTimer={() => startTracking.mutateAsync(entry.issueKey)}
             />
           </li>
         ))}

@@ -48,7 +48,7 @@ interface TimeEntryCardDefaultProps {
   entry: TimeEntryWithIssue;
   /** Hours per day for progress calculation (default: 7) */
   hoursPerDay?: number;
-  onResumeTimer?: (issueKey: string) => void | Promise<void>;
+  onResumeTimer?: (issueKey: string) => unknown | Promise<unknown>;
   onSave?: (entryId: string, updates: TimeEntryUpdates) => void | Promise<void>;
   onDelete?: (entryId: string) => void | Promise<void>;
   onOpenInJira?: (issueKey: string) => void | Promise<void>;

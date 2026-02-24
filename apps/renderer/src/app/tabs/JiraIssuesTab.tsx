@@ -30,8 +30,8 @@ const OTHER_STATUS_SET = new Set(OTHER_STATUSES);
 
 const STATUS_ORDER = [
   'In Progress',
-  'Code Review',
   'New',
+  'Code Review',
   'To Do',
   'Other',
 ] as const;
@@ -179,7 +179,10 @@ export function JiraIssuesTab() {
   return (
     <Tabs defaultValue={toTabValue(statuses[0])} className="flex flex-col">
       <div className="sticky top-0 z-30 bg-background">
-        <ScrollArea className="w-full max-w-2xl mx-auto px-4 pb-2" orientation="horizontal">
+        <ScrollArea
+          className="w-full max-w-2xl mx-auto px-4 pb-2"
+          orientation="horizontal"
+        >
           <div className="flex min-w-max">
             <TabsList variant="line">
               {statuses.map((status) => (
@@ -198,22 +201,18 @@ export function JiraIssuesTab() {
               <li key={issue.id}>
                 <JiraIssueCard
                   issue={issue}
-                  onOpenInJira={(key) =>
-                    window.electron.openJiraExternal(key)
-                  }
+                  onOpenInJira={(key) => window.electron.openJiraExternal(key)}
                   onTrackTime={async (key) => {
                     try {
-                      const timeEntry =
-                        await window.timeTracking.startTracking(key);
+                      const timeEntry = await window.timeTracking.startTracking(
+                        key
+                      );
                       toast.success(`Started tracking ${timeEntry.issueKey}`);
                       setActiveTab('tasks');
                     } catch (error) {
-                      toast.error(
-                        `Failed to start tracking ${key}: ${error}`,
-                        {
-                          position: 'bottom-center',
-                        }
-                      );
+                      toast.error(`Failed to start tracking ${key}: ${error}`, {
+                        position: 'bottom-center',
+                      });
                     }
                   }}
                 />

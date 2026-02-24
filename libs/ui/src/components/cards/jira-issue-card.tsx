@@ -86,26 +86,26 @@ function JiraIssueCardContent({
   parentLabel,
 }: JiraIssueCardContentProps) {
   return (
-    <CardContent className="px-3 pt-0 pb-2">
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-2 gap-y-4">
-        <div className="flex flex-col gap-1 items-center">
-          <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium">
-            {parentLabel}
-          </span>
-          <div className="flex flex-wrap items-center gap-1.5">
-            <Badge
-              variant="outline"
-              className="text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70 shrink-0"
-            >
-              {issue.epicKey}
-            </Badge>
-            {issue.parent?.summary && (
-              <span className="text-xs text-muted-foreground/80 truncate">
-                {issue.parent.summary}
-              </span>
-            )}
-          </div>
+    <CardContent className="px-3 pt-0 pb-0">
+      <div className="flex flex-col gap-2 items-start mb-4">
+        <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium">
+          Parent {parentLabel}
+        </span>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <Badge
+            variant="outline"
+            className="text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70 shrink-0"
+          >
+            {issue.epicKey}
+          </Badge>
+          {issue.parent?.summary && (
+            <span className="text-xs text-muted-foreground/80 truncate">
+              {issue.parent.summary}
+            </span>
+          )}
         </div>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-2 gap-y-4">
         <div className="flex flex-col gap-1 items-center">
           <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium">
             Type
