@@ -81,6 +81,10 @@ export default class App {
       maxHeight: WINDOW.maxHeight,
       show: false,
       titleBarStyle: 'hidden',
+      // Center traffic lights vertically within ~44px header (macOS traffic lights are ~12px tall)
+      ...(process.platform === 'darwin' && {
+        trafficLightPosition: { x: 12, y: 18 },
+      }),
       webPreferences: {
         contextIsolation: true,
         backgroundThrottling: false,
