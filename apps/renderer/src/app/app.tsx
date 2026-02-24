@@ -17,7 +17,7 @@ import { TasksTab, SettingsTab, JiraIssuesTab, MainTabList } from './tabs';
 import { useAppStore, TabValue } from './store';
 import { useAppCommands } from './use-app-commands';
 import { useMutation } from '@tanstack/react-query';
-import { TimelineTab } from './tabs/TimelineTab';
+import { TimelineTab } from './tabs/timeline';
 
 export function App() {
   const activeTab = useAppStore.use.activeTab();

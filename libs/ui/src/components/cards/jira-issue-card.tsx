@@ -60,7 +60,10 @@ function JiraIssueCardHeader({
       {showChevron ? (
         <CollapsibleTrigger asChild>
           <div
-            className="flex flex-1 min-w-0 cursor-pointer items-center gap-3 select-none rounded-sm -m-1 p-1 transition-colors py-8"
+            className={cn(
+              'flex flex-1 min-w-0 cursor-pointer items-center gap-3 select-none rounded-sm -m-1 p-1 transition-colors',
+              expanded ? 'py-3' : 'py-4'
+            )}
             aria-label={expanded ? 'Collapse' : 'Expand'}
           >
             <ChevronDownIcon
@@ -73,7 +76,7 @@ function JiraIssueCardHeader({
           </div>
         </CollapsibleTrigger>
       ) : (
-        <div className="flex flex-1 min-w-0 items-center gap-3 py-8">
+        <div className="flex flex-1 min-w-0 items-center gap-3 py-4">
           {keyAndSummary}
         </div>
       )}
@@ -87,23 +90,23 @@ function JiraIssueCardContent({
 }: JiraIssueCardContentProps) {
   return (
     <CardContent className="px-3 pt-0 pb-0">
-      <div className="flex flex-col gap-2 items-start mb-4">
-        <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium">
-          Parent {parentLabel}
-        </span>
-        <div className="flex flex-wrap items-center gap-1.5">
+      <div className="flex flex-col gap-1 items-start mb-2 min-w-0 w-full overflow-hidden">
+        <div className="flex items-center gap-1.5 min-w-0 w-full">
+          <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium shrink-0">
+            Parent {parentLabel}
+          </span>
           <Badge
             variant="outline"
             className="text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70 shrink-0"
           >
             {issue.epicKey}
           </Badge>
-          {issue.parent?.summary && (
-            <span className="text-xs text-muted-foreground/80 truncate">
-              {issue.parent.summary}
-            </span>
-          )}
         </div>
+        {issue.parent?.summary && (
+          <span className="text-xs text-muted-foreground/80 truncate w-full min-w-0 block">
+            {issue.parent.summary}
+          </span>
+        )}
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-2 gap-y-4">
         <div className="flex flex-col gap-1 items-center">
@@ -158,7 +161,7 @@ function JiraIssueCardFooter({
   }
 
   return (
-    <CardFooter className="flex justify-center px-3 pb-2 gap-6 mt-4">
+    <CardFooter className="flex justify-center px-3 pb-2 gap-6 mt-2">
       <Button size="sm" onClick={handleTrackTime} className="flex-1">
         <TimerIcon className="h-4 w-4" />
         Track Time
