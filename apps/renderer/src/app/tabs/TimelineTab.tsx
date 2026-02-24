@@ -459,8 +459,8 @@ export function TimelineTab() {
                         setSelectedIssue(entry.issue);
                       }}
                       className={cn(
-                        'pointer-events-auto absolute inset-y-1 inset-x-[9px] max-w-[75%] overflow-hidden rounded-lg border border-primary/20 bg-primary/10 p-2 text-left transition-colors hover:bg-primary/15',
-                        totalColumns > 1 && 'inset-y-1'
+                        'pointer-events-auto absolute inset-y-0.5 inset-x-[9px] max-w-[75%] overflow-hidden rounded-lg border border-primary/20 bg-primary/10 px-2 pt-0 pb-2 text-left transition-colors hover:bg-primary/15',
+                        totalColumns > 1 && 'inset-y-0.5'
                       )}
                       style={
                         totalColumns > 1
@@ -471,14 +471,12 @@ export function TimelineTab() {
                           : undefined
                       }
                     >
-                      <p className="truncate text-xs font-semibold text-primary">
-                        {entry.issue.key ?? entry.issueKey}
+                      <p className="truncate text-xs text-primary">
+                        <span className="font-semibold">{entry.issue.key ?? entry.issueKey}</span>
+                        {entry.issue.summary && (
+                          <span className="ml-1.5 text-primary/60">{entry.issue.summary}</span>
+                        )}
                       </p>
-                      {gridRowSpan >= 2 && (
-                        <p className="truncate text-[10px] text-primary/70">
-                          {entry.issue.summary ?? ''}
-                        </p>
-                      )}
                       {gridRowSpan >= 3 && (
                         <p className="mt-0.5 text-[10px] text-primary/60">
                           {formatEntryTime(new Date(entry.startedAt))}
