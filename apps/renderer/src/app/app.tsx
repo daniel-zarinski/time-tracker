@@ -13,7 +13,7 @@ import {
   toast,
 } from '@time-tracker/ui';
 
-import { TasksTab, SettingsTab, JiraIssuesTab, MainTabList } from './tabs';
+import { HomeTab, TasksTab, SettingsTab, JiraIssuesTab, MainTabList } from './tabs';
 import { useAppStore, TabValue } from './store';
 import { useAppCommands } from './use-app-commands';
 import { useMutation } from '@tanstack/react-query';
@@ -69,6 +69,10 @@ export function App() {
         <Separator />
 
         <main className="flex min-h-0 flex-1 flex-col" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+          <TabsContent value="home" className="overflow-y-auto">
+            <HomeTab />
+          </TabsContent>
+
           <TabsContent value="tasks" className="overflow-y-auto">
             <TasksTab />
           </TabsContent>

@@ -6,6 +6,7 @@ export function MainTabList() {
       className="gap-2"
       style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
     >
+      <TabsTrigger value="home">Home</TabsTrigger>
       <TabsTrigger value="tasks">Tasks</TabsTrigger>
       <TabsTrigger value="timeline">Timeline</TabsTrigger>
       <TabsTrigger value="jira-issues">Jira Issues</TabsTrigger>
