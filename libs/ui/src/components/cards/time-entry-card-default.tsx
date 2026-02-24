@@ -35,6 +35,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
+import { Progress } from '../ui/progress';
 
 export interface TimeEntryUpdates {
   startedAt?: Date;
@@ -45,6 +46,8 @@ export interface TimeEntryUpdates {
 
 interface TimeEntryCardDefaultProps {
   entry: TimeEntryWithIssue;
+  /** Hours per day for progress calculation (default: 7) */
+  hoursPerDay?: number;
   onResumeTimer?: (issueKey: string) => void | Promise<void>;
   onSave?: (entryId: string, updates: TimeEntryUpdates) => void | Promise<void>;
   onDelete?: (entryId: string) => void | Promise<void>;
@@ -65,6 +68,7 @@ function syncStatusStyles(status: string) {
 
 export function TimeEntryCardDefault({
   entry,
+  hoursPerDay = 7,
   onResumeTimer,
   onDelete,
   onOpenInJira,
@@ -75,6 +79,9 @@ export function TimeEntryCardDefault({
   const startDate = new Date(entry.startedAt);
   const duration = entry.timeSpentSeconds ?? 0;
   const endDate = new Date(startDate.getTime() + duration * 1000);
+
+  const secondsPerDay = hoursPerDay * 3600;
+  const progressValue = Math.min(100, (duration / secondsPerDay) * 100);
 
   return (
     <Card
@@ -87,6 +94,10 @@ export function TimeEntryCardDefault({
         className
       )}
     >
+      <Progress
+        value={progressValue}
+        className="h-1 rounded-none bg-primary/15"
+      />
       <Collapsible open={expanded} onOpenChange={setExpanded}>
         <CollapsibleTrigger asChild>
           <div className="cursor-pointer select-none">
