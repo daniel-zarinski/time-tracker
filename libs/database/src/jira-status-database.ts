@@ -55,17 +55,6 @@ export async function getJiraStatusesWithCategory(
   });
 }
 
-export async function getStatusNamesByCategory(
-  prisma: PrismaClient,
-  categoryName: string
-): Promise<string[]> {
-  const statuses = await prisma.jiraStatus.findMany({
-    where: { categoryName },
-    select: { name: true },
-  });
-  return statuses.map((s) => s.name);
-}
-
 export async function updateStatusCategory(
   prisma: PrismaClient,
   jiraStatusId: number,

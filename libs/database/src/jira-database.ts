@@ -1,5 +1,4 @@
 import type { Prisma, PrismaClient } from '@prisma/client';
-import { getStatusNamesByCategory } from './jira-status-database';
 
 export type JiraIssueWithParent = Prisma.JiraIssueGetPayload<{
   include: { parent: true };
@@ -11,6 +10,7 @@ export interface JiraIssueUpsertInput {
   summary: string;
   status: string;
   statusId?: number | null;
+  categoryKey?: string | null;
   issueType: string;
   priority: string;
   epicKey?: string | null;
@@ -49,7 +49,11 @@ export async function upsertJiraIssue(
         ? {
             connectOrCreate: {
               where: { id: issue.statusId },
-              create: { id: issue.statusId, name: issue.status },
+              create: {
+                id: issue.statusId,
+                name: issue.status,
+                categoryKey: issue.categoryKey ?? undefined,
+              },
             },
           }
         : undefined,
@@ -79,7 +83,11 @@ export async function upsertJiraIssue(
         ? {
             connectOrCreate: {
               where: { id: issue.statusId },
-              create: { id: issue.statusId, name: issue.status },
+              create: {
+                id: issue.statusId,
+                name: issue.status,
+                categoryKey: issue.categoryKey ?? undefined,
+              },
             },
           }
         : undefined,
@@ -98,6 +106,13 @@ export async function upsertJiraIssue(
       assigneeEmail: issue.assigneeEmail ?? undefined,
     },
   });
+
+  if (issue.statusId != null && issue.categoryKey != null) {
+    await prisma.jiraStatus.update({
+      where: { id: issue.statusId },
+      data: { categoryKey: issue.categoryKey },
+    });
+  }
 }
 
 export async function getJiraIssues(
@@ -131,6 +146,14 @@ export async function getJiraIssuesUnsynced(
   });
 }
 
+// categoryKey values for "not done" — covers both API formats (new/indeterminate vs TODO/IN_PROGRESS)
+const RELEVANT_CATEGORY_KEYS = [
+  'TODO',
+  'IN_PROGRESS',
+  'new',
+  'indeterminate',
+];
+
 export async function getRelevantJiraIssues(
   prisma: PrismaClient,
   email: string,
@@ -138,19 +161,11 @@ export async function getRelevantJiraIssues(
 ): Promise<JiraIssueWithParent[]> {
   const limit = options?.limit ?? 5;
 
-  const [doneStatuses, todoStatuses, activeStatuses] = await Promise.all([
-    getStatusNamesByCategory(prisma, 'Done'),
-    getStatusNamesByCategory(prisma, 'To Do'),
-    getStatusNamesByCategory(prisma, 'In Progress'),
-  ]);
-  const ignoreStatuses = [...doneStatuses, ...todoStatuses];
-
-  // Get recently tracked issue keys for ranking
   const recentEntries = await prisma.timeEntry.findMany({
     where: {
       issue: {
         assigneeEmail: email,
-        status: { notIn: ignoreStatuses },
+        jiraStatus: { categoryKey: { in: RELEVANT_CATEGORY_KEYS } },
       },
     },
     distinct: ['issueKey'],
@@ -160,29 +175,28 @@ export async function getRelevantJiraIssues(
   });
 
   const recentKeys = recentEntries.map((e) => e.issueKey);
+  const keyOrder = new Map(recentKeys.map((k, i) => [k, i]));
 
-  // Fetch all non-terminal issues assigned to user
   const issues = await prisma.jiraIssue.findMany({
     where: {
       key: { not: null },
       assigneeEmail: email,
-      status: { notIn: ignoreStatuses },
+      jiraStatus: { categoryKey: { in: RELEVANT_CATEGORY_KEYS } },
     },
-    include: { parent: true },
+    include: { parent: true, jiraStatus: true },
     take: limit * 2,
   });
 
-  // Rank: recently tracked first, then active statuses, then rest
-  const keyOrder = new Map(recentKeys.map((k, i) => [k, i]));
-  const activeSet = new Set(activeStatuses);
+  const isInProgress = (key: string | null) =>
+    key === 'IN_PROGRESS' || key === 'indeterminate';
 
   issues.sort((a, b) => {
     const aRecent = a.key != null ? keyOrder.get(a.key) ?? Infinity : Infinity;
     const bRecent = b.key != null ? keyOrder.get(b.key) ?? Infinity : Infinity;
     if (aRecent !== bRecent) return aRecent - bRecent;
 
-    const aActive = a.status && activeSet.has(a.status) ? 0 : 1;
-    const bActive = b.status && activeSet.has(b.status) ? 0 : 1;
+    const aActive = isInProgress(a.jiraStatus?.categoryKey ?? null) ? 0 : 1;
+    const bActive = isInProgress(b.jiraStatus?.categoryKey ?? null) ? 0 : 1;
     return aActive - bActive;
   });
 

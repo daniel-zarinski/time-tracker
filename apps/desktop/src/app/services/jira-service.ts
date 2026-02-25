@@ -19,47 +19,34 @@ import { JiraApiError, JiraClient } from '@time-tracker/jira';
 import { getJiraIssuesUnsynced } from '@time-tracker/database';
 import { getJiraConfig } from '../store/config-store';
 
-function getStatusCategoryKey(
-  cat: string | { key?: string } | undefined
-): string | undefined {
-  if (cat == null) return undefined;
-  if (typeof cat === 'string') return cat;
-  return cat.key;
-}
-
-const STATUS_CATEGORY_KEY_TO_NAME: Record<string, string> = {
-  // Object-form keys (older API responses)
+const CATEGORY_KEY_TO_NAME: Record<string, string> = {
   new: 'To Do',
   indeterminate: 'In Progress',
   done: 'Done',
-  // String-form values (current API responses)
   TODO: 'To Do',
   IN_PROGRESS: 'In Progress',
   DONE: 'Done',
 };
 
-const STATUS_CATEGORY_TO_KEY: Record<string, string> = {
-  TODO: 'new',
-  IN_PROGRESS: 'indeterminate',
-  DONE: 'done',
-};
+function getCategoryKey(
+  cat: string | { key?: string } | undefined
+): string | undefined {
+  if (!cat) return undefined;
+  return typeof cat === 'string' ? cat : cat.key;
+}
 
-function getStatusCategoryInfo(
+function parseStatusCategory(
   cat: string | { key?: string; name?: string; colorName?: string } | undefined
-): { key?: string; name?: string; colorName?: string } {
-  if (cat == null) return {};
-  if (typeof cat === 'string') {
-    return {
-      key: STATUS_CATEGORY_TO_KEY[cat] ?? cat,
-      name: STATUS_CATEGORY_KEY_TO_NAME[cat],
-    };
-  }
-  return {
-    key: cat.key,
-    name:
-      cat.name ?? (cat.key ? STATUS_CATEGORY_KEY_TO_NAME[cat.key] : undefined),
-    colorName: cat.colorName,
-  };
+) {
+  if (!cat) return { key: undefined, name: undefined, colorName: undefined };
+
+  const isObj = typeof cat === 'object';
+  const key = isObj ? cat.key : cat;
+  const name =
+    isObj && cat.name != null ? cat.name : (key && CATEGORY_KEY_TO_NAME[key]);
+  const colorName = isObj ? cat.colorName : undefined;
+
+  return { key, name, colorName };
 }
 
 function normalizeBaseUrl(url: string): string {
@@ -137,13 +124,13 @@ export class JiraService {
   }
 
   private mapRawIssueToJiraIssue(raw: JiraRawIssue): JiraIssue {
-    const parent = raw.fields?.parent;
-    const epicLink = raw.fields?.customfield_10014;
+    const f = raw.fields;
+    const status = f?.status;
+    const parent = f?.parent;
     const epicKey =
-      parent?.key ?? (typeof epicLink === 'string' ? epicLink : null);
-    const epicSummary = parent?.fields?.summary ?? null;
-    const parentIssueType = parent?.fields?.issuetype?.name ?? null;
-    const assigneeEmail = raw.fields?.assignee?.emailAddress ?? null;
+      parent?.key ??
+      (typeof f?.customfield_10014 === 'string' ? f.customfield_10014 : null);
+
     const jiraId =
       raw.id != null
         ? typeof raw.id === 'string'
@@ -152,18 +139,20 @@ export class JiraService {
         : null;
     const jiraIdValid =
       typeof jiraId === 'number' && !Number.isNaN(jiraId) ? jiraId : null;
+
     return {
       key: raw.key,
       jiraId: jiraIdValid,
-      summary: raw.fields?.summary ?? '',
-      status: raw.fields?.status?.name ?? 'Unknown',
-      statusId: raw.fields?.status?.id ? parseInt(raw.fields.status.id, 10) : null,
-      issueType: raw.fields?.issuetype?.name ?? 'Unknown',
-      priority: raw.fields?.priority?.name ?? 'Unknown',
+      summary: f?.summary ?? '',
+      status: status?.name ?? 'Unknown',
+      statusId: status?.id ? parseInt(status.id, 10) : null,
+      categoryKey: getCategoryKey(status?.statusCategory) ?? null,
+      issueType: f?.issuetype?.name ?? 'Unknown',
+      priority: f?.priority?.name ?? 'Unknown',
       epicKey,
-      epicSummary,
-      parentIssueType,
-      assigneeEmail,
+      epicSummary: parent?.fields?.summary ?? null,
+      parentIssueType: parent?.fields?.issuetype?.name ?? null,
+      assigneeEmail: f?.assignee?.emailAddress ?? null,
     };
   }
 
@@ -225,13 +214,13 @@ export class JiraService {
     const statuses: JiraStatusInfo[] = values
       .filter((s): s is JiraStatusRaw & { id: string } => s.id != null)
       .map((s) => {
-        const catInfo = getStatusCategoryInfo(s.statusCategory);
+        const cat = parseStatusCategory(s.statusCategory);
         return {
           id: parseInt(s.id, 10),
           name: s.name ?? '',
-          statusCategory: getStatusCategoryKey(s.statusCategory),
-          statusCategoryName: catInfo.name,
-          colorName: catInfo.colorName,
+          statusCategory: cat.key,
+          statusCategoryName: cat.name,
+          colorName: cat.colorName,
         };
       });
 
