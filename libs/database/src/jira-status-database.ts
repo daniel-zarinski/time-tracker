@@ -1,46 +1,19 @@
 import type { PrismaClient } from '@prisma/client';
 
-export interface JiraStatusCategoryInput {
+export interface JiraStatusInput {
+  id: number;
   name: string;
-  key: string;
+  categoryName?: string | null;
+  categoryKey?: string | null;
   colorName?: string | null;
 }
 
-export interface JiraStatusInput {
-  id: string;
-  name: string;
-  categoryName?: string | null;
-}
-
 export interface JiraStatusWithCategory {
-  id: string;
+  id: number;
   name: string;
   categoryName: string | null;
-  category: {
-    name: string;
-    key: string;
-    colorName: string | null;
-  } | null;
-}
-
-export async function upsertJiraStatusCategories(
-  prisma: PrismaClient,
-  categories: JiraStatusCategoryInput[]
-): Promise<void> {
-  for (const cat of categories) {
-    await prisma.jiraStatusCategory.upsert({
-      where: { name: cat.name },
-      update: {
-        key: cat.key,
-        colorName: cat.colorName ?? undefined,
-      },
-      create: {
-        name: cat.name,
-        key: cat.key,
-        colorName: cat.colorName ?? undefined,
-      },
-    });
-  }
+  categoryKey: string | null;
+  colorName: string | null;
 }
 
 export async function upsertJiraStatuses(
@@ -53,11 +26,15 @@ export async function upsertJiraStatuses(
       update: {
         name: s.name,
         categoryName: s.categoryName,
+        categoryKey: s.categoryKey,
+        colorName: s.colorName,
       },
       create: {
         id: s.id,
         name: s.name,
         categoryName: s.categoryName,
+        categoryKey: s.categoryKey,
+        colorName: s.colorName,
       },
     });
   }
@@ -67,7 +44,13 @@ export async function getJiraStatusesWithCategory(
   prisma: PrismaClient
 ): Promise<JiraStatusWithCategory[]> {
   return prisma.jiraStatus.findMany({
-    include: { category: true },
+    select: {
+      id: true,
+      name: true,
+      categoryName: true,
+      categoryKey: true,
+      colorName: true,
+    },
     orderBy: [{ categoryName: 'asc' }, { name: 'asc' }],
   });
 }
@@ -85,7 +68,7 @@ export async function getStatusNamesByCategory(
 
 export async function updateStatusCategory(
   prisma: PrismaClient,
-  jiraStatusId: string,
+  jiraStatusId: number,
   categoryName: string | null
 ): Promise<void> {
   await prisma.jiraStatus.update({

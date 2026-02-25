@@ -35,7 +35,7 @@ model JiraIssue {
   key            String? @unique
   summary        String?
   status         String?
-  statusId       String? @map("status_id")
+  statusId       Int?    @map("status_id")
   issueType      String? @map("issue_type")
   assigneeEmail  String? @map("assignee_email")
   priority       String?
@@ -85,29 +85,17 @@ model Worklog {
   @@map("worklog")
 }
 
-model JiraStatusCategory {
-  name      String  @id // "To Do", "In Progress", "Done"
-  key       String  @unique // "new", "indeterminate", "done"
-  colorName String? @map("color_name")
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  statuses JiraStatus[]
-
-  @@map("jira_status_category")
-}
-
 model JiraStatus {
-  id           String  @id // Jira's own status ID
+  id           Int     @id // Jira's own status ID
   name         String // e.g. "Code Review", "Cancelled"
-  categoryName String? @map("category_name") // FK → JiraStatusCategory.name
+  categoryName String? @map("category_name")
+  categoryKey  String? @map("category_key")
+  colorName    String? @map("color_name")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  category JiraStatusCategory? @relation(fields: [categoryName], references: [name])
-  issues   JiraIssue[]
+  issues JiraIssue[]
 
   @@index([categoryName])
   @@map("jira_status")

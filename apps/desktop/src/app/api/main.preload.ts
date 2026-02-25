@@ -77,7 +77,7 @@ const jiraApi: JiraApi = {
   syncMyIssues: () => ipcRenderer.invoke('jira:sync-my-issues'),
   getStatusMappings: () => ipcRenderer.invoke('jira:get-status-mappings'),
   updateStatusMapping: (params: {
-    statusId: string;
+    statusId: number;
     categoryName: string | null;
   }) => ipcRenderer.invoke('jira:update-status-mapping', params),
 };

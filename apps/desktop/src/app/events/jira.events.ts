@@ -180,7 +180,7 @@ export function bootstrapJiraEvents(): void {
     'jira:update-status-mapping',
     async (
       _event,
-      { statusId, categoryName }: { statusId: string; categoryName: string | null }
+      { statusId, categoryName }: { statusId: number; categoryName: string | null }
     ) => {
       try {
         const prisma = getClient();

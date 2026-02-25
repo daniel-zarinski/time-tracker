@@ -60,7 +60,7 @@ export interface JiraIssue {
   jiraId: number | null;
   summary: string;
   status: string;
-  statusId: string | null;
+  statusId: number | null;
   issueType: string;
   priority: string;
   epicKey: string | null;
@@ -76,7 +76,7 @@ export interface JiraSearchResponse {
 }
 
 export interface JiraStatusInfo {
-  id: string;
+  id: number;
   name: string;
   statusCategory?: string;
   statusCategoryName?: string;

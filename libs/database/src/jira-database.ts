@@ -10,7 +10,7 @@ export interface JiraIssueUpsertInput {
   jiraId?: number | null;
   summary: string;
   status: string;
-  statusId?: string | null;
+  statusId?: number | null;
   issueType: string;
   priority: string;
   epicKey?: string | null;

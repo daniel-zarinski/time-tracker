@@ -67,7 +67,7 @@ export interface JiraApi {
   syncMyIssues: () => Promise<{ synced: number; missing: number }>;
   getStatusMappings: () => Promise<JiraStatusWithCategory[]>;
   updateStatusMapping: (params: {
-    statusId: string;
+    statusId: number;
     categoryName: string | null;
   }) => Promise<void>;
 }

@@ -2,7 +2,6 @@ import {
   getClient,
   PrismaClient,
   upsertJiraIssue,
-  upsertJiraStatusCategories,
   upsertJiraStatuses,
 } from '@time-tracker/database';
 import type {
@@ -57,7 +56,8 @@ function getStatusCategoryInfo(
   }
   return {
     key: cat.key,
-    name: cat.name ?? (cat.key ? STATUS_CATEGORY_KEY_TO_NAME[cat.key] : undefined),
+    name:
+      cat.name ?? (cat.key ? STATUS_CATEGORY_KEY_TO_NAME[cat.key] : undefined),
     colorName: cat.colorName,
   };
 }
@@ -157,7 +157,7 @@ export class JiraService {
       jiraId: jiraIdValid,
       summary: raw.fields?.summary ?? '',
       status: raw.fields?.status?.name ?? 'Unknown',
-      statusId: raw.fields?.status?.id ?? null,
+      statusId: raw.fields?.status?.id ? parseInt(raw.fields.status.id, 10) : null,
       issueType: raw.fields?.issuetype?.name ?? 'Unknown',
       priority: raw.fields?.priority?.name ?? 'Unknown',
       epicKey,
@@ -189,34 +189,14 @@ export class JiraService {
       : 'ORDER BY updated DESC';
   }
 
-  private async fetchAndUpsertPages(jql: string): Promise<JiraIssue[]> {
-    const maxResults = '50';
-    const MAX_PAGES = 20;
-    let nextPageToken: string | undefined;
-    let pageCount = 0;
-    const allIssues: JiraIssue[] = [];
-
-    do {
-      const data = await this.client.searchJql({
-        jql,
-        fields: ISSUE_FIELDS,
-        maxResults,
-        ...(nextPageToken && { nextPageToken }),
-      });
-      const rawIssues = data.issues ?? [];
-      const mapped = rawIssues.map((raw) => this.mapRawIssueToJiraIssue(raw));
-
-      await Promise.all(mapped.map((i) => upsertJiraIssue(this.prisma, i)));
-      allIssues.push(...mapped);
-
-      pageCount++;
-      nextPageToken =
-        data.isLast === false && data.nextPageToken
-          ? data.nextPageToken
-          : undefined;
-    } while (nextPageToken && pageCount < MAX_PAGES);
-
-    return allIssues;
+  private async searchJiraIssues(jql: string): Promise<JiraIssue[]> {
+    const data = await this.client.searchJql({
+      jql,
+      fields: ISSUE_FIELDS,
+      maxResults: '500',
+    });
+    const rawIssues = data.issues ?? [];
+    return rawIssues.map((raw) => this.mapRawIssueToJiraIssue(raw));
   }
 
   async fetchIssues(options?: {
@@ -224,7 +204,11 @@ export class JiraService {
     assigneeCurrentUser?: boolean;
   }): Promise<JiraIssue[]> {
     const jql = this.buildSearchJql(options);
-    return this.fetchAndUpsertPages(jql);
+    const issues = await this.searchJiraIssues(jql);
+
+    await Promise.all(issues.map((i) => upsertJiraIssue(this.prisma, i)));
+
+    return issues;
   }
 
   async fetchMyIssues(project?: string): Promise<JiraIssue[]> {
@@ -238,40 +222,30 @@ export class JiraService {
     const data = await this.client.getStatuses({ maxResults: '200' });
     const values = (data.values ?? []) as JiraStatusRaw[];
 
-    const categoryMap = new Map<string, { name: string; key: string; colorName?: string }>();
-    const statuses: JiraStatusInfo[] = values.map((s) => {
-      const catInfo = getStatusCategoryInfo(s.statusCategory);
-      if (catInfo.name && catInfo.key) {
-        categoryMap.set(catInfo.name, {
-          name: catInfo.name,
-          key: catInfo.key,
+    const statuses: JiraStatusInfo[] = values
+      .filter((s): s is JiraStatusRaw & { id: string } => s.id != null)
+      .map((s) => {
+        const catInfo = getStatusCategoryInfo(s.statusCategory);
+        return {
+          id: parseInt(s.id, 10),
+          name: s.name ?? '',
+          statusCategory: getStatusCategoryKey(s.statusCategory),
+          statusCategoryName: catInfo.name,
           colorName: catInfo.colorName,
-        });
-      }
-      return {
-        id: s.id ?? '',
-        name: s.name ?? '',
-        statusCategory: getStatusCategoryKey(s.statusCategory),
-        statusCategoryName: catInfo.name,
-        colorName: catInfo.colorName,
-      };
-    });
+        };
+      });
 
-    // Persist categories and statuses to DB
-    const categories = Array.from(categoryMap.values());
-    if (categories.length > 0) {
-      await upsertJiraStatusCategories(this.prisma, categories);
-    }
-    if (statuses.length > 0) {
-      await upsertJiraStatuses(
-        this.prisma,
-        statuses.map((s) => ({
-          id: s.id,
-          name: s.name,
-          categoryName: s.statusCategoryName ?? null,
-        }))
-      );
-    }
+    // Persist statuses to DB (with denormalized category fields)
+    await upsertJiraStatuses(
+      this.prisma,
+      statuses.map((s) => ({
+        id: s.id,
+        name: s.name,
+        categoryName: s.statusCategoryName ?? null,
+        categoryKey: s.statusCategory ?? null,
+        colorName: s.colorName ?? null,
+      }))
+    );
 
     return statuses;
   }
