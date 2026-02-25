@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { ComboboxSelectItem } from '@time-tracker/ui';
 import { useAppStore } from '../../store';
 import {
   getEntriesWithGrid,
@@ -18,23 +19,58 @@ export function TimelineTab() {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const olRef = React.useRef<HTMLOListElement>(null);
 
+  const queryClient = useQueryClient();
+
   const {
     selection,
+    isDragging,
     clearSelection,
     handlePointerDown,
     handlePointerMove,
     handlePointerUp,
-  } = useTimelineDrag(olRef, (_event, payload) => {
-    if (payload.type === 'pointerUp') {
-      if (!payload.selection) return;
-      console.log('selection', formatSelection(payload.selection, date));
-    }
-  });
+  } = useTimelineDrag(olRef);
 
   const { data: entries = [] } = useQuery({
     queryKey: ['time-entries'],
     queryFn: () => window.database.getTimeEntries(),
     retry: false,
+  });
+
+  const { data: jiraIssues = [] } = useQuery({
+    queryKey: ['jira', 'my-issues'],
+    queryFn: () => window.database.getMyJiraIssues(),
+    retry: false,
+  });
+
+  const issueItems: ComboboxSelectItem[] = React.useMemo(
+    () =>
+      jiraIssues
+        .filter((i) => i.key != null)
+        .map((i) => ({
+          value: i.key!,
+          label: i.key!,
+          description: i.summary ?? undefined,
+        })),
+    [jiraIssues]
+  );
+
+  const createEntryMutation = useMutation({
+    mutationFn: async (issueKey: string) => {
+      if (!selection) return;
+      const sel = formatSelection(selection, date);
+      const entry = await window.timeTracking.startTracking(issueKey);
+      const timeSpentSeconds = Math.round(
+        (sel.endTime.getTime() - sel.startTime.getTime()) / 1000
+      );
+      await window.database.updateTimeEntry(entry.id, {
+        startedAt: sel.startTime,
+        timeSpentSeconds,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['time-entries'] });
+      clearSelection();
+    },
   });
 
   const entriesWithGrid = React.useMemo(
@@ -109,12 +145,15 @@ export function TimelineTab() {
         containerRef={containerRef}
         entriesWithLayout={entriesWithLayout}
         selection={selection}
+        isDragging={isDragging}
         isToday={isToday}
         date={date}
+        issues={issueItems}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onEntryClick={(entry) => setSelectedTimeEntry(entry, { view: 'edit' })}
+        onCreateEntry={(issueKey) => createEntryMutation.mutate(issueKey)}
         onClearSelection={clearSelection}
       />
     </div>

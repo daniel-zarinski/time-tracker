@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cn } from '@time-tracker/utils';
 import type { TimeEntryWithIssue } from '@time-tracker/database';
+import type { ComboboxSelectItem } from '@time-tracker/ui';
 import {
   HALF_HOUR_ROWS,
   QUARTER_HOUR_ROWS,
@@ -10,6 +11,7 @@ import {
   formatSelection,
 } from './timeline-utils';
 import { CurrentTimeIndicator } from './CurrentTimeIndicator';
+import { TimelineCreatePopover } from './TimelineCreatePopover';
 import { Selection } from './use-timeline-drag';
 
 interface TimelineGridProps {
@@ -17,12 +19,15 @@ interface TimelineGridProps {
   containerRef: React.RefObject<HTMLDivElement | null>;
   entriesWithLayout: EntryWithLayout[];
   selection: Selection | null;
+  isDragging: boolean;
   isToday: boolean;
   date: Date;
+  issues: ComboboxSelectItem[];
   onPointerDown: (e: React.PointerEvent<HTMLOListElement>) => void;
   onPointerMove: (e: React.PointerEvent<HTMLOListElement>) => void;
   onPointerUp: (e: React.PointerEvent<HTMLOListElement>) => void;
   onEntryClick: (entry: TimeEntryWithIssue) => void;
+  onCreateEntry: (issueKey: string) => void | Promise<void>;
   onClearSelection: () => void;
 }
 
@@ -31,13 +36,16 @@ export function TimelineGrid({
   containerRef,
   entriesWithLayout,
   selection,
+  isDragging,
   isToday,
   date,
   onPointerDown,
   onPointerMove,
   onPointerUp,
   onEntryClick,
+  onCreateEntry,
   onClearSelection,
+  issues,
 }: TimelineGridProps) {
   const formattedSelection = React.useMemo(() => {
     if (!selection) return null;
@@ -154,12 +162,19 @@ export function TimelineGrid({
                   gridColumn: '1',
                 }}
               >
-                <div className="absolute inset-y-1 inset-x-[9px] flex items-center justify-center rounded-lg border border-dashed border-primary/40 bg-primary/10">
+                <div className="pointer-events-auto absolute inset-y-1 inset-x-[9px] flex items-center justify-center rounded-lg border border-dashed border-primary/40 bg-primary/10">
                   <span className="text-xs font-medium text-primary/70">
                     {formatEntryTime(formattedSelection.startTime)} –{' '}
                     {formatEntryTime(formattedSelection.endTime)} (
                     {formattedSelection.duration})
                   </span>
+                  {!isDragging && (
+                    <TimelineCreatePopover
+                      issues={issues}
+                      onSubmit={onCreateEntry}
+                      onCancel={onClearSelection}
+                    />
+                  )}
                 </div>
               </li>
             )}

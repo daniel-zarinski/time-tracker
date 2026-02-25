@@ -33,6 +33,7 @@ export function useTimelineDrag(
   onEvent?: EventHandler
 ) {
   const [selection, setSelection] = React.useState<Selection | null>(null);
+  const [isDragging, setIsDragging] = React.useState(false);
   const draggingRef = React.useRef(false);
 
   const clearSelection = React.useCallback(() => setSelection(null), []);
@@ -57,6 +58,7 @@ export function useTimelineDrag(
       const row = clientYToRow(clientY);
       setSelection({ startRow: row, endRow: row });
       draggingRef.current = true;
+      setIsDragging(true);
       olRef.current?.setPointerCapture(pointerId);
       onEvent?.('pointerDown', {
         clientY,
@@ -83,6 +85,7 @@ export function useTimelineDrag(
     (e: React.PointerEvent<HTMLOListElement>) => {
       if (!draggingRef.current) return;
       draggingRef.current = false;
+      setIsDragging(false);
       const pointerId = e.pointerId;
       olRef.current?.releasePointerCapture(pointerId);
       onEvent?.('pointerUp', {
@@ -105,6 +108,7 @@ export function useTimelineDrag(
 
   return {
     selection,
+    isDragging,
     clearSelection,
     handlePointerDown,
     handlePointerMove,
