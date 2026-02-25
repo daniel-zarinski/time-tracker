@@ -16,6 +16,7 @@ interface JiraIssueCardHeaderProps {
   showChevron?: boolean;
   expanded?: boolean;
   headerAction?: React.ReactNode;
+  showInlineBadges?: boolean;
 }
 
 interface JiraIssueCardContentProps {
@@ -38,20 +39,35 @@ export interface JiraIssueCardProps {
   headerAction?: React.ReactNode;
 }
 
+const badgeClassName =
+  'shrink-0 w-fit text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70';
+
 function JiraIssueCardHeader({
   issue,
   showChevron = false,
   expanded = false,
   headerAction,
+  showInlineBadges = false,
 }: JiraIssueCardHeaderProps) {
   const keyAndSummary = (
     <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-      <Badge
-        variant="outline"
-        className="shrink-0 w-fit text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70"
-      >
-        {issue.key ?? '—'}
-      </Badge>
+      <div className="flex flex-wrap items-center gap-1.5">
+        <Badge variant="outline" className={badgeClassName}>
+          {issue.key ?? '—'}
+        </Badge>
+        {showInlineBadges && (
+          <>
+            {issue.issueType && (
+              <Badge variant="outline" className={badgeClassName}>
+                {issue.issueType}
+              </Badge>
+            )}
+            <Badge variant="outline" className={badgeClassName}>
+              {issue.status ?? 'Unknown'}
+            </Badge>
+          </>
+        )}
+      </div>
       <span className="font-semibold text-foreground wrap-break-word">
         {issue.summary ?? ''}
       </span>
@@ -227,12 +243,18 @@ export function JiraIssueCard({
             showChevron
             expanded={showDetails}
             headerAction={effectiveHeaderAction}
+            showInlineBadges={!showDetails}
           />
           <CollapsibleContent>{contentAndFooter}</CollapsibleContent>
         </Collapsible>
       ) : (
         <>
-          <JiraIssueCardHeader issue={issue} showChevron={false} headerAction={effectiveHeaderAction} />
+          <JiraIssueCardHeader
+            issue={issue}
+            showChevron={false}
+            headerAction={effectiveHeaderAction}
+            showInlineBadges={false}
+          />
           {contentAndFooter}
         </>
       )}
