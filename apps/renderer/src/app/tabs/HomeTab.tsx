@@ -22,7 +22,7 @@ export function HomeTab() {
 
   const jiraIssuesQuery = useQuery({
     queryKey: ['jira', 'relevant-issues'],
-    queryFn: () => window.database.getRelevantJiraIssues({ limit: 6 }),
+    queryFn: () => window.database.getRelevantJiraIssues({ limit: 5 }),
     retry: false,
   });
 

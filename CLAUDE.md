@@ -36,6 +36,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | Package electron | `nx run desktop:package` |
 | Make installer | `nx run desktop:make` |
 | Run affected tests | `nx affected --target=test` |
+| Typecheck all projects | `nx run-many -t typecheck` |
 | Dependency graph | `nx graph` |
 | Generate Prisma client | `nx run database:generate` |
 | Create migration | `nx run database:migrate-dev` |

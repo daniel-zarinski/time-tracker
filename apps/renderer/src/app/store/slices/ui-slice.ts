@@ -5,7 +5,7 @@ import type {
   TimeEntryWithIssue,
 } from '@time-tracker/database';
 
-export type { TabValue } from '@time-tracker/schema';
+import type { TabValue } from '@time-tracker/schema';
 
 export interface UiSlice {
   activeTab: TabValue;

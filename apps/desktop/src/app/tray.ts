@@ -4,10 +4,15 @@ import {
   getClient,
   getActiveTimeEntry,
   getRelevantJiraIssues,
+  getTimeEntries,
+  stopTimeEntry,
 } from '@time-tracker/database';
-import type { TimeEntryWithIssue } from '@time-tracker/database';
-import type { JiraIssueWithParent } from '@time-tracker/database';
+import type {
+  TimeEntryWithIssue,
+  JiraIssueWithParent,
+} from '@time-tracker/database';
 import { getJiraConfig } from './store/config-store';
+import { TimeTrackingService } from './services/time-tracking-service';
 
 let tray: Tray | null = null;
 let updateInterval: ReturnType<typeof setInterval> | null = null;
@@ -15,7 +20,9 @@ let updateInterval: ReturnType<typeof setInterval> | null = null;
 const DEFAULT_ISSUE_LIMIT = 5;
 
 function getIconPath(): string {
-  return join(__dirname, 'assets', 'icon.png');
+  return app.isPackaged
+    ? join(app.getAppPath(), 'assets', 'icon.png')
+    : join(__dirname, 'assets', 'icon.png');
 }
 
 async function getRunningEntry(): Promise<TimeEntryWithIssue | null> {
@@ -32,7 +39,37 @@ async function getRelevantIssues(
   try {
     const config = getJiraConfig();
     if (!config?.email) return [];
-    return getRelevantJiraIssues(getClient(), config.email, { limit });
+
+    const [timeEntries, relevantIssues] = await Promise.all([
+      getTimeEntries(getClient(), { limit: 20 }),
+      getRelevantJiraIssues(getClient(), config.email, { limit: limit + 2 }),
+    ]);
+
+    const last2: JiraIssueWithParent[] = [];
+    const last2Keys = new Set<string>();
+    for (const entry of timeEntries) {
+      const issue = entry.issue;
+      if (
+        issue?.key &&
+        issue.assigneeEmail === config.email &&
+        !last2Keys.has(issue.key)
+      ) {
+        last2Keys.add(issue.key);
+        last2.push(issue);
+        if (last2.length >= 2) break;
+      }
+    }
+
+    const seenKeys = new Set<string>();
+    const result: JiraIssueWithParent[] = [];
+    for (const issue of [...last2, ...relevantIssues]) {
+      if (issue.key && !seenKeys.has(issue.key)) {
+        seenKeys.add(issue.key);
+        result.push(issue);
+        if (result.length >= limit) break;
+      }
+    }
+    return result.slice(0, limit);
   } catch {
     return [];
   }
@@ -72,17 +109,17 @@ async function buildContextMenu(): Promise<Menu> {
   const menuItems: Electron.MenuItemConstructorOptions[] = [];
 
   if (running) {
-    const elapsed = Date.now() - running.startedAt.getTime();
     const label =
-      running.issue.summary?.trim() || running.issueKey || 'Unknown';
+      formatIssueLabel(running.issue) || running.issueKey || 'Unknown';
+    const entryId = running.id;
     menuItems.push(
       {
         label: `▶ ${label}`,
         enabled: false,
       },
       {
-        label: `   ${formatElapsed(elapsed)}`,
-        enabled: false,
+        label: 'Stop',
+        click: () => void stopTimeEntry(getClient(), entryId),
       },
       { type: 'separator' }
     );
@@ -95,11 +132,17 @@ async function buildContextMenu(): Promise<Menu> {
 
   if (issues.length > 0) {
     menuItems.push({ label: 'Relevant Issues', enabled: false });
+    const timeTrackingService = new TimeTrackingService();
     for (const issue of issues) {
       const isRunning = running?.issueKey === issue.key;
+      const issueKey = issue.key;
+      const canStart = !!issueKey && !isRunning;
       menuItems.push({
         label: `  ${isRunning ? '⏱' : '○'} ${formatIssueLabel(issue)}`,
-        enabled: false,
+        enabled: canStart,
+        ...(canStart && {
+          click: () => void timeTrackingService.startTracking(issueKey),
+        }),
       });
     }
     menuItems.push({ type: 'separator' });
