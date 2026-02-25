@@ -12,6 +12,7 @@ import {
   getRelevantJiraIssues,
   getTimeEntries,
   getActiveTimeEntry,
+  deleteTimeEntry,
 } from '@time-tracker/database';
 import { JiraApiError } from '@time-tracker/jira';
 import { resolveConfig } from '../services/jira-service';
@@ -87,3 +88,8 @@ ipcMain.handle(
 ipcMain.handle('database:get-active-time-entry', async () => {
   return getActiveTimeEntry(getClient());
 });
+
+ipcMain.handle(
+  'database:delete-time-entry',
+  async (_event, entryId: string) => deleteTimeEntry(getClient(), entryId)
+);

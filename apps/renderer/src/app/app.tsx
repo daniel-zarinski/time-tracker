@@ -17,10 +17,11 @@ import {
 import { HomeTab, TasksTab, SettingsTab, JiraIssuesTab, MainTabList } from './tabs';
 import { useAppStore, TabValue } from './store';
 import { useAppCommands } from './use-app-commands';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { TimelineTab } from './tabs/timeline';
 
 export function App() {
+  const queryClient = useQueryClient();
   const activeTab = useAppStore.use.activeTab();
   const setActiveTab = useAppStore.use.setActiveTab();
   const selectedIssue = useAppStore.use.selectedIssue();
@@ -37,6 +38,19 @@ export function App() {
     },
     onError: () => {
       toast.error('Failed to start time entry', { position: 'bottom-center' });
+    },
+  });
+
+  const deleteTimeEntryMutation = useMutation({
+    mutationFn: (entryId: string) => window.database.deleteTimeEntry(entryId),
+    onSuccess: () => {
+      setSelectedTimeEntry(null);
+      queryClient.invalidateQueries({ queryKey: ['time-entries'] });
+      queryClient.invalidateQueries({ queryKey: ['active-time-entry'] });
+      toast.success('Time entry deleted');
+    },
+    onError: () => {
+      toast.error('Failed to delete time entry', { position: 'bottom-center' });
     },
   });
 
@@ -133,6 +147,9 @@ export function App() {
                 await startTrackingMutation.mutateAsync(key);
               }}
               onOpenInJira={(key) => window.electron.openJiraExternal(key)}
+              onDelete={async (id) => {
+                await deleteTimeEntryMutation.mutateAsync(id);
+              }}
             />
           )}
         </DialogContent>

@@ -208,6 +208,9 @@ export function JiraIssueCard({
     </>
   );
 
+  const effectiveHeaderAction =
+    collapsible && !showDetails ? headerAction : undefined;
+
   return (
     <Card
       className={cn(
@@ -223,13 +226,13 @@ export function JiraIssueCard({
             issue={issue}
             showChevron
             expanded={showDetails}
-            headerAction={headerAction}
+            headerAction={effectiveHeaderAction}
           />
           <CollapsibleContent>{contentAndFooter}</CollapsibleContent>
         </Collapsible>
       ) : (
         <>
-          <JiraIssueCardHeader issue={issue} showChevron={false} headerAction={headerAction} />
+          <JiraIssueCardHeader issue={issue} showChevron={false} headerAction={effectiveHeaderAction} />
           {contentAndFooter}
         </>
       )}

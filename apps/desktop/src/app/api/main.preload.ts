@@ -29,6 +29,8 @@ const databaseApi: DatabaseApi = {
     ipcRenderer.invoke('database:get-time-entries', options),
   getActiveTimeEntry: () =>
     ipcRenderer.invoke('database:get-active-time-entry'),
+  deleteTimeEntry: (entryId: string) =>
+    ipcRenderer.invoke('database:delete-time-entry', entryId),
 };
 
 const storeApi: StoreApi = {

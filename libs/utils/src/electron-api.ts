@@ -32,6 +32,7 @@ export interface DatabaseApi {
     limit?: number;
   }) => Promise<TimeEntryWithIssue[]>;
   getActiveTimeEntry: () => Promise<TimeEntryWithIssue | null>;
+  deleteTimeEntry: (entryId: string) => Promise<void>;
 }
 
 /** Store IPC API exposed to the renderer */

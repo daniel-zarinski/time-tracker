@@ -115,7 +115,14 @@ export async function getJiraIssuesUnsynced(
 }
 
 const ACTIVE_STATUSES = ['In Progress', 'In Review'];
-const TERMINAL_STATUSES = ['Cancelled', 'Done', 'Closed'];
+const IGNORE_STATUSES = [
+  'Cancelled',
+  'Done',
+  'Closed',
+  'Inactive',
+  'DEV COMPLETED',
+  'To Do',
+];
 
 export async function getRelevantJiraIssues(
   prisma: PrismaClient,
@@ -124,12 +131,12 @@ export async function getRelevantJiraIssues(
 ): Promise<JiraIssueWithParent[]> {
   const limit = options?.limit ?? 5;
 
-  // Query 1: Get recently tracked issue keys in recency order
+  // Get recently tracked issue keys for ranking
   const recentEntries = await prisma.timeEntry.findMany({
     where: {
       issue: {
         assigneeEmail: email,
-        status: { notIn: TERMINAL_STATUSES },
+        status: { notIn: IGNORE_STATUSES },
       },
     },
     distinct: ['issueKey'],
@@ -140,32 +147,29 @@ export async function getRelevantJiraIssues(
 
   const recentKeys = recentEntries.map((e) => e.issueKey);
 
-  // Query 2: Fetch issues matching recent keys OR active statuses
+  // Fetch all non-terminal issues assigned to user
   const issues = await prisma.jiraIssue.findMany({
     where: {
       key: { not: null },
       assigneeEmail: email,
-      OR: [
-        { key: { in: recentKeys }, status: { notIn: TERMINAL_STATUSES } },
-        { status: { in: ACTIVE_STATUSES } },
-      ],
+      status: { notIn: IGNORE_STATUSES },
     },
     include: { parent: true },
     take: limit * 2,
   });
 
-  // Sort: recently tracked first (in recency order), then the rest
+  // Rank: recently tracked first, then active statuses, then rest
   const keyOrder = new Map(recentKeys.map((k, i) => [k, i]));
+  const activeSet = new Set(ACTIVE_STATUSES);
+
   issues.sort((a, b) => {
-    const aIdx =
-      a.key != null
-        ? keyOrder.get(a.key) ?? recentKeys.length
-        : recentKeys.length;
-    const bIdx =
-      b.key != null
-        ? keyOrder.get(b.key) ?? recentKeys.length
-        : recentKeys.length;
-    return aIdx - bIdx;
+    const aRecent = a.key != null ? keyOrder.get(a.key) ?? Infinity : Infinity;
+    const bRecent = b.key != null ? keyOrder.get(b.key) ?? Infinity : Infinity;
+    if (aRecent !== bRecent) return aRecent - bRecent;
+
+    const aActive = a.status && activeSet.has(a.status) ? 0 : 1;
+    const bActive = b.status && activeSet.has(b.status) ? 0 : 1;
+    return aActive - bActive;
   });
 
   return issues.slice(0, limit);

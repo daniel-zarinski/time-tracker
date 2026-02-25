@@ -22,7 +22,7 @@ export function HomeTab() {
 
   const jiraIssuesQuery = useQuery({
     queryKey: ['jira', 'relevant-issues'],
-    queryFn: () => window.database.getRelevantJiraIssues({ limit: 20 }),
+    queryFn: () => window.database.getRelevantJiraIssues({ limit: 6 }),
     retry: false,
   });
 
@@ -84,7 +84,7 @@ export function HomeTab() {
                 onTrackTime={startTracking.mutateAsync}
                 headerAction={
                   <Button
-                    size="icon"
+                    size="icon-sm"
                     variant="default"
                     className="shrink-0"
                     onClick={(e) => {

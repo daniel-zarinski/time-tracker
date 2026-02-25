@@ -74,6 +74,16 @@ export async function stopTimeEntry(
   });
 }
 
+export async function deleteTimeEntry(
+  prisma: PrismaClient,
+  entryId: string
+): Promise<TimeEntryWithIssue> {
+  return prisma.timeEntry.delete({
+    where: { id: entryId },
+    include: timeEntryInclude,
+  });
+}
+
 export async function getLastTimeEntryFromIssue(
   prisma: PrismaClient,
   issueKey: string,

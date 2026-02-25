@@ -43,6 +43,17 @@ export function TasksTab() {
     },
   });
 
+  const deleteTimeEntryMutation = useMutation({
+    mutationFn: (entryId: string) => window.database.deleteTimeEntry(entryId),
+    onSuccess: () => {
+      timeEntriesQuery.refetch();
+      toast.success('Time entry deleted');
+    },
+    onError: () => {
+      toast.error('Failed to delete time entry');
+    },
+  });
+
   const entries = timeEntriesQuery.data ?? [];
   const activeEntry = entries.find((e) => e.timeSpentSeconds === null);
   const completedEntries = entries.filter((e) => e.timeSpentSeconds !== null);
@@ -93,6 +104,7 @@ export function TasksTab() {
               // onOpenInJira={(key) => window.electron.openJiraExternal(key)}
               onOpenInJira={() => setSelectedIssue(entry.issue)}
               onResumeTimer={() => startTracking.mutateAsync(entry.issueKey)}
+              onDelete={(id) => deleteTimeEntryMutation.mutateAsync(id)}
             />
           </li>
         ))}
