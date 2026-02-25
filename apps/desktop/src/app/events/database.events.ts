@@ -1,6 +1,7 @@
 import { app, ipcMain } from 'electron';
-import { existsSync, mkdirSync, unlinkSync } from 'fs';
-import { join } from 'path';
+import { existsSync, closeSync, openSync, unlinkSync } from 'fs';
+import { join, dirname, resolve } from 'path';
+import { spawn } from 'child_process';
 import {
   setDatabaseUrl,
   getDatabaseUrl,
@@ -19,18 +20,80 @@ import { JiraApiError } from '@time-tracker/jira';
 import { resolveConfig } from '../services/jira-service';
 import { destroyTray } from '../tray';
 
-export function bootstrapDatabase(): void {
-  // In development, use dev.db (no arg) so we share CLI migrations.
-  // In production, use userData/database path.
-  const dbUrl = app.isPackaged
-    ? getDatabaseUrl(app.getPath('userData'))
-    : getDatabaseUrl();
+async function runMigrations(dbUrl: string): Promise<void> {
+  const appPath = app.getAppPath();
+  const basePath = appPath.replace('app.asar', 'app.asar.unpacked');
+  const schemaPath = join(basePath, 'prisma', 'schema.prisma');
 
-  if (app.isPackaged) {
-    mkdirSync(join(app.getPath('userData'), 'database'), { recursive: true });
+  if (!existsSync(schemaPath)) {
+    throw new Error(
+      `Prisma schema not found at ${schemaPath} (appPath: ${appPath})`
+    );
   }
 
+  const prismaPkg = require.resolve('prisma/package.json') as string;
+  const prismaPath = resolve(dirname(prismaPkg), 'build', 'index.js');
+  const configPath = join(basePath, 'prisma.config.ts');
+
+  if (!existsSync(configPath)) {
+    throw new Error(
+      `Prisma config not found at ${configPath} (appPath: ${appPath})`
+    );
+  }
+
+  return new Promise((resolvePromise, reject) => {
+    const child = spawn(
+      'node',
+      [
+        prismaPath,
+        'migrate',
+        'deploy',
+        '--schema',
+        schemaPath,
+        '--config',
+        configPath,
+      ],
+      {
+        env: { ...process.env, DATABASE_URL: dbUrl },
+        stdio: ['ignore', 'pipe', 'pipe'],
+      }
+    );
+
+    let stderr = '';
+    child.stderr?.on('data', (chunk) => {
+      stderr += chunk.toString();
+    });
+    child.stdout?.on('data', (chunk) => {
+      stderr += chunk.toString();
+    });
+
+    child.on('close', (code) => {
+      if (code === 0) resolvePromise();
+      else {
+        console.error('[migrations] stderr:', stderr);
+        reject(new Error(`Prisma migrate deploy failed (${code}): ${stderr}`));
+      }
+    });
+    child.on('error', reject);
+  });
+}
+
+export async function bootstrapDatabase(): Promise<void> {
+  const userData = app.getPath('userData');
+  const dbUrl = getDatabaseUrl(userData);
+
   setDatabaseUrl(dbUrl);
+
+  const dbPath = getDatabasePath(userData);
+  if (!existsSync(dbPath)) {
+    closeSync(openSync(dbPath, 'w'));
+  }
+  try {
+    await runMigrations(dbUrl);
+  } catch (err) {
+    console.error('Migration failed:', err);
+  }
+
   getClient();
 
   app.on('before-quit', async () => {
@@ -40,14 +103,12 @@ export function bootstrapDatabase(): void {
 }
 
 ipcMain.handle('database:get-path', () =>
-  app.isPackaged ? getDatabasePath(app.getPath('userData')) : getDatabasePath()
+  getDatabasePath(app.getPath('userData'))
 );
 
 ipcMain.handle('database:delete', async () => {
   await disconnect();
-  const path = app.isPackaged
-    ? getDatabasePath(app.getPath('userData'))
-    : getDatabasePath();
+  const path = getDatabasePath(app.getPath('userData'));
   if (existsSync(path)) {
     unlinkSync(path);
     return { success: true };
@@ -92,9 +153,8 @@ ipcMain.handle('database:get-active-time-entry', async () => {
   return getActiveTimeEntry(getClient());
 });
 
-ipcMain.handle(
-  'database:delete-time-entry',
-  async (_event, entryId: string) => deleteTimeEntry(getClient(), entryId)
+ipcMain.handle('database:delete-time-entry', async (_event, entryId: string) =>
+  deleteTimeEntry(getClient(), entryId)
 );
 
 ipcMain.handle(
@@ -102,12 +162,22 @@ ipcMain.handle(
   async (
     _event,
     entryId: string,
-    updates: { startedAt?: string; timeSpentSeconds?: number; description?: string }
+    updates: {
+      startedAt?: string;
+      timeSpentSeconds?: number;
+      description?: string;
+    }
   ) => {
-    const data: { startedAt?: Date; timeSpentSeconds?: number; description?: string } = {};
+    const data: {
+      startedAt?: Date;
+      timeSpentSeconds?: number;
+      description?: string;
+    } = {};
     if (updates.startedAt != null) data.startedAt = new Date(updates.startedAt);
-    if (updates.timeSpentSeconds != null) data.timeSpentSeconds = updates.timeSpentSeconds;
-    if (updates.description !== undefined) data.description = updates.description;
+    if (updates.timeSpentSeconds != null)
+      data.timeSpentSeconds = updates.timeSpentSeconds;
+    if (updates.description !== undefined)
+      data.description = updates.description;
     return updateTimeEntry(getClient(), entryId, data);
   }
 );

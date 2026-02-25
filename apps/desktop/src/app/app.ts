@@ -1,6 +1,7 @@
 import { BrowserWindow, shell, screen } from 'electron';
 import { rendererAppName, rendererAppPort, WINDOW } from './constants';
 import { createTray } from './tray';
+import { bootstrapDatabase } from './events/database.events';
 import { environment } from '../environments/environment';
 import { join } from 'path';
 import { format } from 'url';
@@ -43,10 +44,11 @@ export default class App {
     }
   }
 
-  private static onReady() {
+  private static async onReady() {
     // This method will be called when Electron has finished
     // initialization and is ready to create browser windows.
     // Some APIs can only be used after this event occurs.
+    await bootstrapDatabase();
     App.initMainWindow();
     App.loadMainWindow();
     createTray();
@@ -56,7 +58,7 @@ export default class App {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (App.mainWindow === null) {
-      App.onReady();
+      void App.onReady();
     }
   }
 
@@ -64,11 +66,11 @@ export default class App {
     const workAreaSize = screen.getPrimaryDisplay().workAreaSize;
     const width = Math.min(
       WINDOW.defaultWidth,
-      workAreaSize.width || WINDOW.defaultWidth
+      workAreaSize.width || WINDOW.defaultWidth,
     );
     const height = Math.min(
       WINDOW.defaultHeight,
-      workAreaSize.height || WINDOW.defaultHeight
+      workAreaSize.height || WINDOW.defaultHeight,
     );
 
     // Create the browser window.
@@ -127,7 +129,7 @@ export default class App {
           pathname: join(__dirname, '..', rendererAppName, 'index.html'),
           protocol: 'file:',
           slashes: true,
-        })
+        }),
       );
     }
   }

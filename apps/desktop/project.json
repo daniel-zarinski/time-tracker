@@ -12,8 +12,27 @@
         "outputPath": "dist/apps/desktop",
         "main": "apps/desktop/src/main.ts",
         "tsConfig": "apps/desktop/tsconfig.app.json",
-        "assets": ["apps/desktop/src/assets"],
-        "externalDependencies": ["electron", "electron-store", "@prisma/client", ".prisma/client", "@prisma/adapter-better-sqlite3", "better-sqlite3"]
+        "assets": [
+          "apps/desktop/src/assets",
+          {
+            "glob": "**/*",
+            "input": "libs/database/prisma",
+            "output": "prisma"
+          },
+          {
+            "glob": "prisma.config.ts",
+            "input": "libs/database",
+            "output": "."
+          }
+        ],
+        "externalDependencies": [
+          "electron",
+          "electron-store",
+          "@prisma/client",
+          ".prisma/client",
+          "@prisma/adapter-better-sqlite3",
+          "better-sqlite3"
+        ]
       },
       "configurations": {
         "production": {

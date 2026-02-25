@@ -1,3 +1,5 @@
 {
-  "$schema": "../../../../../node_modules/nx-electron/src/validation/maker.schema.json"
+  "$schema": "../../../../../node_modules/nx-electron/src/validation/maker.schema.json",
+  "asar": true,
+  "asarUnpack": ["**/prisma/**", "**/node_modules/prisma/**", "**/prisma.config.ts"]
 }
