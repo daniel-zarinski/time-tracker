@@ -1,5 +1,5 @@
-import type { TimeEntryWithIssue } from '@time-tracker/database';
-import type { TimeEntryUpdates } from './types';
+import type { TimeEntryWithIssue } from '@time-tracker/database'
+import type { TimeEntryUpdates } from '@time-tracker/utils'
 import { useState } from 'react';
 import { Button } from '../../ui/button';
 import { CardContent, CardFooter } from '../../ui/card';

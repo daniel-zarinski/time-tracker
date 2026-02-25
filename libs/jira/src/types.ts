@@ -34,7 +34,7 @@ export type JiraProject = JiraRawProject;
 
 export interface JiraIssueFields {
   summary: string;
-  status: { name: string };
+  status: { id?: string; name: string };
   issuetype: { name: string };
   priority: { name: string };
   assignee?: {
@@ -60,6 +60,7 @@ export interface JiraIssue {
   jiraId: number | null;
   summary: string;
   status: string;
+  statusId: string | null;
   issueType: string;
   priority: string;
   epicKey: string | null;

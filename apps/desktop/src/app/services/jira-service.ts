@@ -157,6 +157,7 @@ export class JiraService {
       jiraId: jiraIdValid,
       summary: raw.fields?.summary ?? '',
       status: raw.fields?.status?.name ?? 'Unknown',
+      statusId: raw.fields?.status?.id ?? null,
       issueType: raw.fields?.issuetype?.name ?? 'Unknown',
       priority: raw.fields?.priority?.name ?? 'Unknown',
       epicKey,
@@ -188,14 +189,12 @@ export class JiraService {
       : 'ORDER BY updated DESC';
   }
 
-  private async *fetchSearchPages(
-    jql: string
-  ): AsyncGenerator<JiraRawIssue[], void, unknown> {
+  private async fetchAndUpsertPages(jql: string): Promise<JiraIssue[]> {
     const maxResults = '50';
     const MAX_PAGES = 20;
     let nextPageToken: string | undefined;
     let pageCount = 0;
-    let issues: JiraRawIssue[] = [];
+    const allIssues: JiraIssue[] = [];
 
     do {
       const data = await this.client.searchJql({
@@ -204,15 +203,20 @@ export class JiraService {
         maxResults,
         ...(nextPageToken && { nextPageToken }),
       });
-      issues = data.issues ?? [];
-      yield issues;
+      const rawIssues = data.issues ?? [];
+      const mapped = rawIssues.map((raw) => this.mapRawIssueToJiraIssue(raw));
+
+      await Promise.all(mapped.map((i) => upsertJiraIssue(this.prisma, i)));
+      allIssues.push(...mapped);
 
       pageCount++;
       nextPageToken =
         data.isLast === false && data.nextPageToken
           ? data.nextPageToken
           : undefined;
-    } while (nextPageToken && pageCount < MAX_PAGES && issues.length > 0);
+    } while (nextPageToken && pageCount < MAX_PAGES);
+
+    return allIssues;
   }
 
   async fetchIssues(options?: {
@@ -220,16 +224,7 @@ export class JiraService {
     assigneeCurrentUser?: boolean;
   }): Promise<JiraIssue[]> {
     const jql = this.buildSearchJql(options);
-    const allIssues: JiraIssue[] = [];
-    for await (const page of this.fetchSearchPages(jql)) {
-      for (const raw of page) {
-        allIssues.push(this.mapRawIssueToJiraIssue(raw));
-      }
-    }
-
-    await Promise.all(allIssues.map((i) => upsertJiraIssue(this.prisma, i)));
-
-    return allIssues;
+    return this.fetchAndUpsertPages(jql);
   }
 
   async fetchMyIssues(project?: string): Promise<JiraIssue[]> {
@@ -297,6 +292,20 @@ export class JiraService {
       result[issue.key] = issue.fields?.status?.name ?? 'Unknown';
     }
     return result;
+  }
+
+  async syncMyIssues(): Promise<{ synced: number; missing: number }> {
+    const synced = await this.fetchMyIssues();
+    let totalMissing = 0;
+
+    for (let round = 0; round < 10; round++) {
+      const unsynced = await getJiraIssuesUnsynced(this.prisma);
+      if (unsynced.length === 0) break;
+      totalMissing += unsynced.length;
+      await this.fetchMissingIssues();
+    }
+
+    return { synced: synced.length, missing: totalMissing };
   }
 
   async fetchMissingIssues() {

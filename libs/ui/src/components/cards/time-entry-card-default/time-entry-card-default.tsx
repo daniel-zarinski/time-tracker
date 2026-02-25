@@ -1,27 +1,39 @@
-import { cn } from '@time-tracker/utils'
-import { useState } from 'react'
-import { Card, CardContent } from '../../ui/card'
+import type { TimeEntryWithIssue } from '@time-tracker/database';
+import type { TimeEntryUpdates } from '@time-tracker/utils';
+import { cn } from '@time-tracker/utils';
+import { useState } from 'react';
+import { Card, CardContent } from '../../ui/card';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '../../ui/collapsible'
-import { Progress } from '../../ui/progress'
-import type { TimeEntryCardDefaultProps, TimeEntryUpdates } from './types'
-import { TimeEntryCardActionsDropdown } from './time-entry-card-actions'
-import { TimeEntryCardActionsFooter } from './time-entry-card-actions'
-import { TimeEntryCardEditForm } from './time-entry-card-edit-form'
-import { TimeEntryCardHeader } from './time-entry-card-header'
-import { TimeEntryCardSummary } from './time-entry-card-summary'
+} from '../../ui/collapsible';
+import { Progress } from '../../ui/progress';
+import { TimeEntryCardActionsDropdown } from './time-entry-card-actions';
+import { TimeEntryCardActionsFooter } from './time-entry-card-actions';
+import { TimeEntryCardEditForm } from './time-entry-card-edit-form';
+import { TimeEntryCardHeader } from './time-entry-card-header';
+import { TimeEntryCardSummary } from './time-entry-card-summary';
+
+interface TimeEntryCardDefaultProps {
+  entry: TimeEntryWithIssue;
+  hoursPerDay?: number;
+  defaultExpanded?: boolean;
+  onResumeTimer?: (issueKey: string) => unknown | Promise<unknown>;
+  onSave?: (entryId: string, updates: TimeEntryUpdates) => void | Promise<void>;
+  onDelete?: (entryId: string) => void | Promise<void>;
+  onOpenInJira?: (issueKey: string) => void | Promise<void>;
+  className?: string;
+}
 
 function syncStatusStyles(status: string) {
   switch (status) {
     case 'SYNCED':
-      return 'border-green-500/20 bg-green-500/5'
+      return 'border-green-500/20 bg-green-500/5';
     case 'ERROR':
-      return 'border-destructive/20 bg-destructive/5'
+      return 'border-destructive/20 bg-destructive/5';
     default:
-      return 'border-border bg-card/30'
+      return 'border-border bg-card/30';
   }
 }
 
@@ -37,26 +49,26 @@ export function TimeEntryCardDefault({
 }: TimeEntryCardDefaultProps) {
   const [state, setState] = useState<'default' | 'expanded' | 'edit'>(
     defaultExpanded ? 'expanded' : 'default'
-  )
-  const expanded = state === 'expanded' || state === 'edit'
+  );
+  const expanded = state === 'expanded' || state === 'edit';
 
-  const startDate = new Date(entry.startedAt)
-  const duration = entry.timeSpentSeconds ?? 0
-  const endDate = new Date(startDate.getTime() + duration * 1000)
+  const startDate = new Date(entry.startedAt);
+  const duration = entry.timeSpentSeconds ?? 0;
+  const endDate = new Date(startDate.getTime() + duration * 1000);
 
-  const secondsPerDay = hoursPerDay * 3600
-  const progressValue = Math.min(100, (duration / secondsPerDay) * 100)
+  const secondsPerDay = hoursPerDay * 3600;
+  const progressValue = Math.min(100, (duration / secondsPerDay) * 100);
 
-  const issueKey = entry.issue.key ?? entry.issueKey
+  const issueKey = entry.issue.key ?? entry.issueKey;
 
   async function handleSave(entryId: string, updates: TimeEntryUpdates) {
-    if (!onSave) return
-    await onSave(entryId, updates)
-    setState('default')
+    if (!onSave) return;
+    await onSave(entryId, updates);
+    setState('default');
   }
 
   function handleCancelEdit() {
-    setState('expanded')
+    setState('expanded');
   }
 
   return (
@@ -125,7 +137,9 @@ export function TimeEntryCardDefault({
               {/* placeholder — future content TBD */}
             </div>
             <TimeEntryCardActionsFooter
-              onResume={onResumeTimer ? () => onResumeTimer(issueKey) : undefined}
+              onResume={
+                onResumeTimer ? () => onResumeTimer(issueKey) : undefined
+              }
               onView={() => onOpenInJira?.(issueKey)}
               onEdit={() => setState('edit')}
               onDelete={() => onDelete?.(entry.id)}
@@ -134,5 +148,5 @@ export function TimeEntryCardDefault({
         </Collapsible>
       )}
     </Card>
-  )
+  );
 }

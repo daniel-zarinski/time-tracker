@@ -65,8 +65,8 @@ export function JiraIssuesTab() {
     retry: false,
   });
   const fetchMyIssuesQuery = useMutation({
-    mutationKey: ['jira', 'fetch-my-issues'],
-    mutationFn: () => window.jira.fetchMyIssues(),
+    mutationKey: ['jira', 'sync-my-issues'],
+    mutationFn: () => window.jira.syncMyIssues(),
     onSuccess: () => {
       getIssuesQuery.refetch();
     },

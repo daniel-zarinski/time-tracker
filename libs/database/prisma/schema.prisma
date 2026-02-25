@@ -35,6 +35,7 @@ model JiraIssue {
   key            String? @unique
   summary        String?
   status         String?
+  statusId       String? @map("status_id")
   issueType      String? @map("issue_type")
   assigneeEmail  String? @map("assignee_email")
   priority       String?
@@ -47,11 +48,13 @@ model JiraIssue {
 
   parent      JiraIssue?  @relation("ParentIssue", fields: [parentIssueKey], references: [key])
   children    JiraIssue[] @relation("ParentIssue")
+  jiraStatus  JiraStatus? @relation(fields: [statusId], references: [id])
   worklogs    Worklog[]
   timeEntries TimeEntry[]
 
   @@index([parentIssueKey])
   @@index([key])
+  @@index([statusId])
   @@map("jira_issue")
 }
 
@@ -104,6 +107,7 @@ model JiraStatus {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   category JiraStatusCategory? @relation(fields: [categoryName], references: [name])
+  issues   JiraIssue[]
 
   @@index([categoryName])
   @@map("jira_status")

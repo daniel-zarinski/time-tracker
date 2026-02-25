@@ -74,6 +74,7 @@ const jiraApi: JiraApi = {
   fetchStatusesForKeys: (keys: string[]) =>
     ipcRenderer.invoke('jira:fetch-statuses-for-keys', keys),
   fetchMissingIssues: () => ipcRenderer.invoke('jira:fetch-missing-issues'),
+  syncMyIssues: () => ipcRenderer.invoke('jira:sync-my-issues'),
   getStatusMappings: () => ipcRenderer.invoke('jira:get-status-mappings'),
   updateStatusMapping: (params: {
     statusId: string;

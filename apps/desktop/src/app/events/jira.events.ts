@@ -147,6 +147,16 @@ export function bootstrapJiraEvents(): void {
     }
   );
 
+  ipcMain.handle('jira:sync-my-issues', async () => {
+    const config = resolveConfig();
+    try {
+      const service = new JiraService(config);
+      return service.syncMyIssues();
+    } catch (err) {
+      throw serializeError(err);
+    }
+  });
+
   ipcMain.handle('jira:fetch-missing-issues', async () => {
     const config = resolveConfig();
     try {

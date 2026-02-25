@@ -10,11 +10,11 @@ export interface JiraIssueUpsertInput {
   jiraId?: number | null;
   summary: string;
   status: string;
+  statusId?: string | null;
   issueType: string;
   priority: string;
   epicKey?: string | null;
   assigneeEmail?: string | null;
-  // rank?: number | null; // built in to kanban board
 }
 
 export async function upsertJiraIssue(
@@ -45,6 +45,14 @@ export async function upsertJiraIssue(
       epicKey: issue.epicKey ?? undefined,
       assigneeEmail: issue.assigneeEmail ?? undefined,
       syncedAt: new Date(),
+      jiraStatus: issue.statusId
+        ? {
+            connectOrCreate: {
+              where: { id: issue.statusId },
+              create: { id: issue.statusId, name: issue.status },
+            },
+          }
+        : undefined,
       parent:
         issue.epicKey && issue.epicKey !== ''
           ? {
@@ -67,6 +75,14 @@ export async function upsertJiraIssue(
       priority: issue.priority,
       epicKey: issue.epicKey ?? undefined,
       syncedAt: new Date(),
+      jiraStatus: issue.statusId
+        ? {
+            connectOrCreate: {
+              where: { id: issue.statusId },
+              create: { id: issue.statusId, name: issue.status },
+            },
+          }
+        : undefined,
       parent:
         issue.epicKey && issue.epicKey !== ''
           ? {

@@ -1,6 +1,7 @@
 export * from './components/cards/jira-issue-card';
 export * from './components/cards/time-entry-card-active';
 export * from './components/cards/time-entry-card-default';
+export * from './components/ui/calendar';
 export * from './components/command-palette';
 export * from './components/theme-provider';
 export * from './components/ui/badge';

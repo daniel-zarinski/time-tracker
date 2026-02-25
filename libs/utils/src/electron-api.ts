@@ -64,6 +64,7 @@ export interface JiraApi {
   fetchStatuses: () => Promise<JiraStatusInfo[]>;
   fetchStatusesForKeys: (keys: string[]) => Promise<Record<string, string>>;
   fetchMissingIssues: () => Promise<void>;
+  syncMyIssues: () => Promise<{ synced: number; missing: number }>;
   getStatusMappings: () => Promise<JiraStatusWithCategory[]>;
   updateStatusMapping: (params: {
     statusId: string;

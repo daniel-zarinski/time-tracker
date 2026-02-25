@@ -76,16 +76,10 @@ export function useAppCommands(): {
       heading: 'Sync Shortcuts',
       items: [
         {
-          id: 'sync-all-my-issues',
-          label: 'Sync all my issues',
+          id: 'sync-my-issues',
+          label: 'Sync my issues',
           icon: RefreshCw,
-          onSelect: () => window.jira.fetchMyIssues(),
-        },
-        {
-          id: 'sync-missing-issues',
-          label: 'Sync missing issues',
-          icon: RefreshCw,
-          onSelect: () => window.jira.fetchMissingIssues(),
+          onSelect: () => window.jira.syncMyIssues(),
         },
         {
           id: 'sync-statuses',
