@@ -115,6 +115,7 @@ export async function getJiraIssuesUnsynced(
 }
 
 const ACTIVE_STATUSES = ['In Progress', 'In Review'];
+const TERMINAL_STATUSES = ['Cancelled', 'Done', 'Closed'];
 
 export async function getRelevantJiraIssues(
   prisma: PrismaClient,
@@ -125,7 +126,12 @@ export async function getRelevantJiraIssues(
 
   // Query 1: Get recently tracked issue keys in recency order
   const recentEntries = await prisma.timeEntry.findMany({
-    where: { issue: { assigneeEmail: email } },
+    where: {
+      issue: {
+        assigneeEmail: email,
+        status: { notIn: TERMINAL_STATUSES },
+      },
+    },
     distinct: ['issueKey'],
     orderBy: { startedAt: 'desc' },
     select: { issueKey: true },
@@ -139,9 +145,13 @@ export async function getRelevantJiraIssues(
     where: {
       key: { not: null },
       assigneeEmail: email,
-      OR: [{ key: { in: recentKeys } }, { status: { in: ACTIVE_STATUSES } }],
+      OR: [
+        { key: { in: recentKeys }, status: { notIn: TERMINAL_STATUSES } },
+        { status: { in: ACTIVE_STATUSES } },
+      ],
     },
     include: { parent: true },
+    take: limit * 2,
   });
 
   // Sort: recently tracked first (in recency order), then the rest

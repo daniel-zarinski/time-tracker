@@ -22,7 +22,7 @@ interface TimelineGridProps {
   onPointerDown: (e: React.PointerEvent<HTMLOListElement>) => void;
   onPointerMove: (e: React.PointerEvent<HTMLOListElement>) => void;
   onPointerUp: (e: React.PointerEvent<HTMLOListElement>) => void;
-  onEntryClick: (issue: TimeEntryWithIssue['issue']) => void;
+  onEntryClick: (entry: TimeEntryWithIssue) => void;
   onClearSelection: () => void;
 }
 
@@ -95,7 +95,7 @@ export function TimelineGrid({
                       type="button"
                       onClick={() => {
                         onClearSelection();
-                        onEntryClick(entry.issue);
+                        onEntryClick(entry);
                       }}
                       className={cn(
                         'pointer-events-auto absolute inset-y-0.5 inset-x-[9px] max-w-[75%] overflow-hidden rounded-lg border px-2 pt-0 pb-2 text-left transition-colors',

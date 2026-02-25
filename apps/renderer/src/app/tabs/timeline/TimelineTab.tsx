@@ -12,7 +12,7 @@ import { TimelineHeader } from './TimelineHeader';
 import { TimelineGrid } from './TimelineGrid';
 
 export function TimelineTab() {
-  const setSelectedIssue = useAppStore.use.setSelectedIssue();
+  const setSelectedTimeEntry = useAppStore.use.setSelectedTimeEntry();
   const [date, setDate] = React.useState(() => new Date());
   const containerRef = React.useRef<HTMLDivElement>(null);
   const olRef = React.useRef<HTMLOListElement>(null);
@@ -103,7 +103,7 @@ export function TimelineTab() {
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        onEntryClick={setSelectedIssue}
+        onEntryClick={setSelectedTimeEntry}
         onClearSelection={clearSelection}
       />
     </div>

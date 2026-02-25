@@ -1,6 +1,9 @@
 import { StateCreator } from 'zustand';
 
-import type { JiraIssueWithParent } from '@time-tracker/database';
+import type {
+  JiraIssueWithParent,
+  TimeEntryWithIssue,
+} from '@time-tracker/database';
 
 export type TabValue = 'home' | 'tasks' | 'timeline' | 'jira-issues' | 'settings';
 
@@ -9,6 +12,8 @@ export interface UiSlice {
   setActiveTab: (tab: TabValue) => void;
   selectedIssue: JiraIssueWithParent | null;
   setSelectedIssue: (issue: JiraIssueWithParent | null) => void;
+  selectedTimeEntry: TimeEntryWithIssue | null;
+  setSelectedTimeEntry: (entry: TimeEntryWithIssue | null) => void;
 }
 
 export const createUiSlice: StateCreator<
@@ -22,4 +27,7 @@ export const createUiSlice: StateCreator<
   selectedIssue: null,
   setSelectedIssue: (issue) =>
     set({ selectedIssue: issue }, false, 'ui/setSelectedIssue'),
+  selectedTimeEntry: null,
+  setSelectedTimeEntry: (entry) =>
+    set({ selectedTimeEntry: entry }, false, 'ui/setSelectedTimeEntry'),
 });

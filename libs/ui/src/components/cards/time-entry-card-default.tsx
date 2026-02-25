@@ -48,6 +48,8 @@ interface TimeEntryCardDefaultProps {
   entry: TimeEntryWithIssue;
   /** Hours per day for progress calculation (default: 7) */
   hoursPerDay?: number;
+  /** Start with actions expanded (default: false) */
+  defaultExpanded?: boolean;
   onResumeTimer?: (issueKey: string) => unknown | Promise<unknown>;
   onSave?: (entryId: string, updates: TimeEntryUpdates) => void | Promise<void>;
   onDelete?: (entryId: string) => void | Promise<void>;
@@ -69,12 +71,13 @@ function syncStatusStyles(status: string) {
 export function TimeEntryCardDefault({
   entry,
   hoursPerDay = 7,
+  defaultExpanded = false,
   onResumeTimer,
   onDelete,
   onOpenInJira,
   className,
 }: TimeEntryCardDefaultProps) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(defaultExpanded);
 
   const startDate = new Date(entry.startedAt);
   const duration = entry.timeSpentSeconds ?? 0;

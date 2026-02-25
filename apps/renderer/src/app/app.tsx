@@ -7,6 +7,7 @@ import {
   Dialog,
   DialogContent,
   JiraIssueCard,
+  TimeEntryCardDefault,
   Tabs,
   TabsContent,
   Separator,
@@ -24,12 +25,15 @@ export function App() {
   const setActiveTab = useAppStore.use.setActiveTab();
   const selectedIssue = useAppStore.use.selectedIssue();
   const setSelectedIssue = useAppStore.use.setSelectedIssue();
+  const selectedTimeEntry = useAppStore.use.selectedTimeEntry();
+  const setSelectedTimeEntry = useAppStore.use.setSelectedTimeEntry();
   const [commandOpen, setCommandOpen] = React.useState(false);
   const { commands } = useAppCommands();
   const startTrackingMutation = useMutation({
     mutationFn: (key: string) => window.timeTracking.startTracking(key),
     onSuccess: () => {
       setSelectedIssue(null);
+      setSelectedTimeEntry(null);
     },
     onError: () => {
       toast.error('Failed to start time entry', { position: 'bottom-center' });
@@ -108,6 +112,27 @@ export function App() {
               onTrackTime={async (key) => {
                 await startTrackingMutation.mutateAsync(key);
               }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!selectedTimeEntry}
+        onOpenChange={(open) => !open && setSelectedTimeEntry(null)}
+      >
+        <DialogContent
+          className="p-0 border-0 shadow-none gap-0 mx-auto max-w-md"
+          showCloseButton
+        >
+          {selectedTimeEntry && (
+            <TimeEntryCardDefault
+              entry={selectedTimeEntry}
+              defaultExpanded
+              onResumeTimer={async (key) => {
+                await startTrackingMutation.mutateAsync(key);
+              }}
+              onOpenInJira={(key) => window.electron.openJiraExternal(key)}
             />
           )}
         </DialogContent>
