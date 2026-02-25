@@ -23,6 +23,9 @@
     },
     {
       "path": "./libs/tempo"
+    },
+    {
+      "path": "./libs/schema"
     }
   ]
 }
