@@ -52,6 +52,34 @@ describe('JiraConfigInputSchema', () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it('rejects empty strings', () => {
+    expect(
+      JiraConfigInputSchema.safeParse({ domain: '', email: 'a@b.com', token: 'tok' }).success
+    ).toBe(false);
+    expect(
+      JiraConfigInputSchema.safeParse({ domain: 'x', email: '  ', token: 'tok' }).success
+    ).toBe(false);
+    expect(
+      JiraConfigInputSchema.safeParse({ domain: 'x', email: 'a@b.com', token: '' }).success
+    ).toBe(false);
+  });
+
+  it('trims whitespace from values', () => {
+    const result = JiraConfigInputSchema.safeParse({
+      domain: '  mycompany  ',
+      email: '  user@example.com  ',
+      token: '  abc123  ',
+      accountId: '  5f9a3b2c1d  ',
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.domain).toBe('mycompany');
+      expect(result.data.email).toBe('user@example.com');
+      expect(result.data.token).toBe('abc123');
+      expect(result.data.accountId).toBe('5f9a3b2c1d');
+    }
+  });
 });
 
 describe('TempoConfigSchema', () => {
@@ -68,5 +96,18 @@ describe('TempoConfigSchema', () => {
   it('rejects non-string token', () => {
     const result = TempoConfigSchema.safeParse({ token: 42 });
     expect(result.success).toBe(false);
+  });
+
+  it('rejects empty token', () => {
+    expect(TempoConfigSchema.safeParse({ token: '' }).success).toBe(false);
+    expect(TempoConfigSchema.safeParse({ token: '   ' }).success).toBe(false);
+  });
+
+  it('trims whitespace from token', () => {
+    const result = TempoConfigSchema.safeParse({ token: '  abc  ' });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.token).toBe('abc');
+    }
   });
 });

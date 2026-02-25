@@ -5,6 +5,7 @@
  */
 
 import Store from 'electron-store';
+import { JiraConfigInputSchema, TempoConfigSchema } from '@time-tracker/schema';
 import type { JiraConfigInput, TempoConfig } from '@time-tracker/schema';
 
 const JIRA_CONFIG_KEY = 'jira.config' as const;
@@ -60,28 +61,19 @@ function resolveDomain(raw: {
 }
 
 export function getJiraConfig(): JiraConfigInput | undefined {
-  const raw = configStore.get(JIRA_CONFIG_KEY) as
-    | {
-        domain?: string;
-        baseUrl?: string;
-        email?: string;
-        token?: string;
-        accountId?: string;
-      }
-    | undefined;
+  const raw = configStore.get(JIRA_CONFIG_KEY) as Record<string, unknown> | undefined;
   if (!raw || typeof raw !== 'object') return undefined;
 
-  const domain = resolveDomain(raw);
+  const domain = resolveDomain(raw as { domain?: string; baseUrl?: string });
   if (!domain) return undefined;
 
-  const email = typeof raw.email === 'string' ? raw.email.trim() : '';
-  const token = typeof raw.token === 'string' ? raw.token : '';
-  if (!email || !token) return undefined;
-
-  const accountId =
-    typeof raw.accountId === 'string' ? raw.accountId.trim() || undefined : undefined;
-
-  return { domain, email, token, accountId };
+  const result = JiraConfigInputSchema.safeParse({
+    domain,
+    email: raw.email,
+    token: raw.token,
+    accountId: raw.accountId || undefined,
+  });
+  return result.success ? result.data : undefined;
 }
 
 export function setJiraConfig(config: JiraConfigInput): void {
@@ -89,15 +81,9 @@ export function setJiraConfig(config: JiraConfigInput): void {
 }
 
 export function getTempoConfig(): TempoConfig | undefined {
-  const raw = configStore.get(TEMPO_CONFIG_KEY) as
-    | { token?: string }
-    | undefined;
-  if (!raw || typeof raw !== 'object') return undefined;
-
-  const token = typeof raw.token === 'string' ? raw.token.trim() : '';
-  if (!token) return undefined;
-
-  return { token };
+  const raw = configStore.get(TEMPO_CONFIG_KEY);
+  const result = TempoConfigSchema.safeParse(raw);
+  return result.success ? result.data : undefined;
 }
 
 export function setTempoConfig(config: TempoConfig): void {

@@ -41,8 +41,8 @@ async function getRelevantIssues(
     if (!config?.email) return [];
 
     const [timeEntries, relevantIssues] = await Promise.all([
-      getTimeEntries(getClient(), { limit: 20 }),
-      getRelevantJiraIssues(getClient(), config.email, { limit: limit + 2 }),
+      getTimeEntries(getClient(), { limit }),
+      getRelevantJiraIssues(getClient(), config.email, { limit }),
     ]);
 
     const last2: JiraIssueWithParent[] = [];
