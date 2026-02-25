@@ -1,13 +1,14 @@
 import type {
   JiraConfigInput,
   JiraMyselfResponse,
-  JiraProject,
   JiraIssue,
   JiraStatusInfo,
-} from '@time-tracker/jira';
+  JiraStatusWithCategory,
+  TempoConfig,
+} from '@time-tracker/schema';
+import type { JiraProject } from '@time-tracker/jira';
 import type {
   JiraIssueWithParent,
-  JiraStatusWithCategory,
   TimeEntryWithIssue,
 } from '@time-tracker/database';
 
@@ -46,8 +47,8 @@ export interface StoreApi {
   set: (key: string, value: unknown) => Promise<void>;
   getJiraConfig: () => Promise<JiraConfigInput | undefined>;
   setJiraConfig: (config: JiraConfigInput) => Promise<void>;
-  getTempoConfig: () => Promise<{ token: string } | undefined>;
-  setTempoConfig: (config: { token: string }) => Promise<void>;
+  getTempoConfig: () => Promise<TempoConfig | undefined>;
+  setTempoConfig: (config: TempoConfig) => Promise<void>;
 }
 
 /** Jira IPC API exposed to the renderer */
@@ -74,7 +75,7 @@ export interface JiraApi {
 
 /** Tempo IPC API exposed to the renderer */
 export interface TempoApi {
-  testConnection: (config?: { token: string }) => Promise<void>;
+  testConnection: (config?: TempoConfig) => Promise<void>;
   syncWorklogs: () => Promise<number>;
 }
 

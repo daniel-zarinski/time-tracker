@@ -1,5 +1,6 @@
 import type { Prisma, PrismaClient } from '@prisma/client';
 import { SyncStatus } from '@prisma/client';
+import type { CreateTimeEntryInput, UpdateTimeEntryInput } from '@time-tracker/schema';
 
 export type TimeEntryWithIssue = Prisma.TimeEntryGetPayload<{
   include: { issue: { include: { parent: true } } };
@@ -27,11 +28,6 @@ export async function getTimeEntries(
     orderBy: { startedAt: 'desc' },
     take: options?.limit,
   });
-}
-
-export interface CreateTimeEntryInput {
-  issueKey: string;
-  description?: string;
 }
 
 export async function createTimeEntry(
@@ -82,12 +78,6 @@ export async function deleteTimeEntry(
     where: { id: entryId },
     include: timeEntryInclude,
   });
-}
-
-export interface UpdateTimeEntryInput {
-  startedAt?: Date;
-  timeSpentSeconds?: number;
-  description?: string;
 }
 
 export async function updateTimeEntry(

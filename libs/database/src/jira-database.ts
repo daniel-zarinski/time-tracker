@@ -1,21 +1,9 @@
 import type { Prisma, PrismaClient } from '@prisma/client';
+import type { JiraIssueUpsertInput } from '@time-tracker/schema';
 
 export type JiraIssueWithParent = Prisma.JiraIssueGetPayload<{
   include: { parent: true };
 }>;
-
-export interface JiraIssueUpsertInput {
-  key?: string | null;
-  jiraId?: number | null;
-  summary: string;
-  status: string;
-  statusId?: number | null;
-  categoryKey?: string | null;
-  issueType: string;
-  priority: string;
-  epicKey?: string | null;
-  assigneeEmail?: string | null;
-}
 
 export async function upsertJiraIssue(
   prisma: PrismaClient,
@@ -147,12 +135,7 @@ export async function getJiraIssuesUnsynced(
 }
 
 // categoryKey values for "not done" — covers both API formats (new/indeterminate vs TODO/IN_PROGRESS)
-const RELEVANT_CATEGORY_KEYS = [
-  'TODO',
-  'IN_PROGRESS',
-  'new',
-  'indeterminate',
-];
+const RELEVANT_CATEGORY_KEYS = ['TODO', 'IN_PROGRESS', 'new', 'indeterminate'];
 
 export async function getRelevantJiraIssues(
   prisma: PrismaClient,
@@ -184,7 +167,7 @@ export async function getRelevantJiraIssues(
       jiraStatus: { categoryKey: { in: RELEVANT_CATEGORY_KEYS } },
     },
     include: { parent: true, jiraStatus: true },
-    take: limit * 2,
+    take: limit,
   });
 
   const isInProgress = (key: string | null) =>

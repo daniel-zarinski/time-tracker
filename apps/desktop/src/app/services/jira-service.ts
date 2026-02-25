@@ -5,16 +5,15 @@ import {
   upsertJiraStatuses,
 } from '@time-tracker/database';
 import type {
-  JiraConfig,
   JiraConfigInput,
   JiraMyselfResponse,
-  JiraProject,
   JiraIssue,
   JiraStatusInfo,
   JiraRawProject,
   JiraRawIssue,
   JiraStatusRaw,
-} from '@time-tracker/jira';
+} from '@time-tracker/schema';
+import type { JiraConfig, JiraProject } from '@time-tracker/jira';
 import { JiraApiError, JiraClient } from '@time-tracker/jira';
 import { getJiraIssuesUnsynced } from '@time-tracker/database';
 import { getJiraConfig } from '../store/config-store';

@@ -1,5 +1,6 @@
 import { BrowserWindow, shell, screen } from 'electron';
 import { rendererAppName, rendererAppPort, WINDOW } from './constants';
+import { createTray } from './tray';
 import { environment } from '../environments/environment';
 import { join } from 'path';
 import { format } from 'url';
@@ -46,10 +47,9 @@ export default class App {
     // This method will be called when Electron has finished
     // initialization and is ready to create browser windows.
     // Some APIs can only be used after this event occurs.
-    if (rendererAppName) {
-      App.initMainWindow();
-      App.loadMainWindow();
-    }
+    App.initMainWindow();
+    App.loadMainWindow();
+    createTray();
   }
 
   private static onActivate() {
@@ -92,7 +92,7 @@ export default class App {
       },
     });
     App.mainWindow.setMenu(null);
-    App.mainWindow.center();
+    // App.mainWindow.center();
 
     // if main window is ready to show, close the splash window and show the main window
     App.mainWindow.once('ready-to-show', () => {

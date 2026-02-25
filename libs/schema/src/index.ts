@@ -1,5 +1,3 @@
-// Zod v4 schemas - shared between renderer and desktop
-
 export * from './config';
 export * from './jira-api';
 export * from './jira-models';

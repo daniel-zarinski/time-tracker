@@ -7,9 +7,20 @@
   },
   "include": ["**/*.ts"],
   "references": [
-    { "path": "../../libs/tempo" },
-    { "path": "../../libs/jira" },
-    { "path": "../../libs/database" },
-    { "path": "../../libs/utils" }
+    {
+      "path": "../../libs/tempo"
+    },
+    {
+      "path": "../../libs/schema"
+    },
+    {
+      "path": "../../libs/jira"
+    },
+    {
+      "path": "../../libs/database"
+    },
+    {
+      "path": "../../libs/utils"
+    }
   ]
 }

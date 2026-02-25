@@ -2,9 +2,9 @@ import type {
   JiraConfigInput,
   JiraIssue,
   JiraMyselfResponse,
-  JiraProject,
   JiraStatusInfo,
-} from '@time-tracker/jira';
+} from '@time-tracker/schema';
+import type { JiraProject } from '@time-tracker/jira';
 import { JiraApiError } from '@time-tracker/jira';
 import {
   getClient,

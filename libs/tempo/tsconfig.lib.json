@@ -12,5 +12,9 @@
     "moduleResolution": "bundler"
   },
   "include": ["src/**/*.ts"],
-  "references": []
+  "references": [
+    {
+      "path": "../schema/tsconfig.lib.json"
+    }
+  ]
 }

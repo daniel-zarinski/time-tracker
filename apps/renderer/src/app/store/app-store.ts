@@ -6,7 +6,7 @@ import { createTimerSlice, TimerSlice, createUiSlice, UiSlice } from './slices';
 
 export type AppStore = TimerSlice & UiSlice;
 
-type PersistedState = Pick<AppStore, 'elapsed' | 'activeTab'>;
+import type { PersistedState } from '@time-tracker/schema';
 
 export const useAppStore = createSelectors(
   create<AppStore>()(

@@ -1,6 +1,6 @@
 import { getClient, upsertWorklogs } from '@time-tracker/database';
 import type { WorklogUpsertInput } from '@time-tracker/database';
-import type { TempoWorklog } from '@time-tracker/tempo';
+import type { TempoWorklog } from '@time-tracker/schema';
 import { TempoApiError, TempoClient } from '@time-tracker/tempo';
 import { getJiraConfig, getTempoConfig } from '../store/config-store';
 import { resolveConfig as resolveJiraConfig } from './jira-service';

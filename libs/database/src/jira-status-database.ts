@@ -1,20 +1,5 @@
 import type { PrismaClient } from '@prisma/client';
-
-export interface JiraStatusInput {
-  id: number;
-  name: string;
-  categoryName?: string | null;
-  categoryKey?: string | null;
-  colorName?: string | null;
-}
-
-export interface JiraStatusWithCategory {
-  id: number;
-  name: string;
-  categoryName: string | null;
-  categoryKey: string | null;
-  colorName: string | null;
-}
+import type { JiraStatusInput, JiraStatusWithCategory } from '@time-tracker/schema';
 
 export async function upsertJiraStatuses(
   prisma: PrismaClient,

@@ -5,7 +5,7 @@ import type {
   TimeEntryWithIssue,
 } from '@time-tracker/database';
 
-export type TabValue = 'home' | 'tasks' | 'timeline' | 'jira-issues' | 'settings';
+export type { TabValue } from '@time-tracker/schema';
 
 export interface UiSlice {
   activeTab: TabValue;

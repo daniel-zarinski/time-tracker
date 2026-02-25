@@ -5,7 +5,7 @@
  */
 
 import Store from 'electron-store';
-import type { JiraConfigInput } from '@time-tracker/jira';
+import type { JiraConfigInput, TempoConfig } from '@time-tracker/schema';
 
 const JIRA_CONFIG_KEY = 'jira.config' as const;
 const TEMPO_CONFIG_KEY = 'tempo.config' as const;
@@ -88,7 +88,7 @@ export function setJiraConfig(config: JiraConfigInput): void {
   configStore.set(JIRA_CONFIG_KEY, config);
 }
 
-export function getTempoConfig(): { token: string } | undefined {
+export function getTempoConfig(): TempoConfig | undefined {
   const raw = configStore.get(TEMPO_CONFIG_KEY) as
     | { token?: string }
     | undefined;
@@ -100,6 +100,6 @@ export function getTempoConfig(): { token: string } | undefined {
   return { token };
 }
 
-export function setTempoConfig(config: { token: string }): void {
+export function setTempoConfig(config: TempoConfig): void {
   configStore.set(TEMPO_CONFIG_KEY, config);
 }

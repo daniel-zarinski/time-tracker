@@ -18,6 +18,9 @@
       "path": "../../libs/tempo/tsconfig.lib.json"
     },
     {
+      "path": "../../libs/schema/tsconfig.lib.json"
+    },
+    {
       "path": "../../libs/jira/tsconfig.lib.json"
     },
     {

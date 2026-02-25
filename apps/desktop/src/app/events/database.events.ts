@@ -17,6 +17,7 @@ import {
 } from '@time-tracker/database';
 import { JiraApiError } from '@time-tracker/jira';
 import { resolveConfig } from '../services/jira-service';
+import { destroyTray } from '../tray';
 
 export function bootstrapDatabase(): void {
   // In development, use dev.db (no arg) so we share CLI migrations.
@@ -33,6 +34,7 @@ export function bootstrapDatabase(): void {
   getClient();
 
   app.on('before-quit', async () => {
+    destroyTray();
     await disconnect();
   });
 }
