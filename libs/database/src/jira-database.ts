@@ -1,4 +1,5 @@
 import type { Prisma, PrismaClient } from '@prisma/client';
+import { getStatusNamesByCategory } from './jira-status-database';
 
 export type JiraIssueWithParent = Prisma.JiraIssueGetPayload<{
   include: { parent: true };
@@ -114,16 +115,6 @@ export async function getJiraIssuesUnsynced(
   });
 }
 
-const ACTIVE_STATUSES = ['In Progress', 'In Review'];
-const IGNORE_STATUSES = [
-  'Cancelled',
-  'Done',
-  'Closed',
-  'Inactive',
-  'DEV COMPLETED',
-  'To Do',
-];
-
 export async function getRelevantJiraIssues(
   prisma: PrismaClient,
   email: string,
@@ -131,12 +122,19 @@ export async function getRelevantJiraIssues(
 ): Promise<JiraIssueWithParent[]> {
   const limit = options?.limit ?? 5;
 
+  const [doneStatuses, todoStatuses, activeStatuses] = await Promise.all([
+    getStatusNamesByCategory(prisma, 'Done'),
+    getStatusNamesByCategory(prisma, 'To Do'),
+    getStatusNamesByCategory(prisma, 'In Progress'),
+  ]);
+  const ignoreStatuses = [...doneStatuses, ...todoStatuses];
+
   // Get recently tracked issue keys for ranking
   const recentEntries = await prisma.timeEntry.findMany({
     where: {
       issue: {
         assigneeEmail: email,
-        status: { notIn: IGNORE_STATUSES },
+        status: { notIn: ignoreStatuses },
       },
     },
     distinct: ['issueKey'],
@@ -152,7 +150,7 @@ export async function getRelevantJiraIssues(
     where: {
       key: { not: null },
       assigneeEmail: email,
-      status: { notIn: IGNORE_STATUSES },
+      status: { notIn: ignoreStatuses },
     },
     include: { parent: true },
     take: limit * 2,
@@ -160,7 +158,7 @@ export async function getRelevantJiraIssues(
 
   // Rank: recently tracked first, then active statuses, then rest
   const keyOrder = new Map(recentKeys.map((k, i) => [k, i]));
-  const activeSet = new Set(ACTIVE_STATUSES);
+  const activeSet = new Set(activeStatuses);
 
   issues.sort((a, b) => {
     const aRecent = a.key != null ? keyOrder.get(a.key) ?? Infinity : Infinity;
