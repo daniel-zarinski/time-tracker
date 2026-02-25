@@ -27,6 +27,8 @@ const databaseApi: DatabaseApi = {
   getAllJiraIssues: () => ipcRenderer.invoke('database:get-all-jira-issues'),
   getTimeEntries: (options) =>
     ipcRenderer.invoke('database:get-time-entries', options),
+  getActiveTimeEntry: () =>
+    ipcRenderer.invoke('database:get-active-time-entry'),
 };
 
 const storeApi: StoreApi = {

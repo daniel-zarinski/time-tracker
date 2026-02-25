@@ -139,10 +139,7 @@ export async function getRelevantJiraIssues(
     where: {
       key: { not: null },
       assigneeEmail: email,
-      OR: [
-        { key: { in: recentKeys } },
-        { status: { in: ACTIVE_STATUSES } },
-      ],
+      OR: [{ key: { in: recentKeys } }, { status: { in: ACTIVE_STATUSES } }],
     },
     include: { parent: true },
   });
@@ -151,9 +148,13 @@ export async function getRelevantJiraIssues(
   const keyOrder = new Map(recentKeys.map((k, i) => [k, i]));
   issues.sort((a, b) => {
     const aIdx =
-      a.key != null ? (keyOrder.get(a.key) ?? recentKeys.length) : recentKeys.length;
+      a.key != null
+        ? keyOrder.get(a.key) ?? recentKeys.length
+        : recentKeys.length;
     const bIdx =
-      b.key != null ? (keyOrder.get(b.key) ?? recentKeys.length) : recentKeys.length;
+      b.key != null
+        ? keyOrder.get(b.key) ?? recentKeys.length
+        : recentKeys.length;
     return aIdx - bIdx;
   });
 

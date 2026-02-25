@@ -11,6 +11,7 @@ import {
   getJiraIssues,
   getRelevantJiraIssues,
   getTimeEntries,
+  getActiveTimeEntry,
 } from '@time-tracker/database';
 import { JiraApiError } from '@time-tracker/jira';
 import { resolveConfig } from '../services/jira-service';
@@ -82,3 +83,7 @@ ipcMain.handle(
     return getTimeEntries(getClient(), options);
   }
 );
+
+ipcMain.handle('database:get-active-time-entry', async () => {
+  return getActiveTimeEntry(getClient());
+});

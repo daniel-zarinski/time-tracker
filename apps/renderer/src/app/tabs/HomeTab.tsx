@@ -12,20 +12,17 @@ import {
   toast,
 } from '@time-tracker/ui';
 import { Inbox, PlayIcon } from 'lucide-react';
-import { useAppStore } from '../store';
 
 export function HomeTab() {
-  const setActiveTab = useAppStore.use.setActiveTab();
-
-  const timeEntriesQuery = useQuery({
-    queryKey: ['time-entries'],
-    queryFn: () => window.database.getTimeEntries(),
+  const activeEntryQuery = useQuery({
+    queryKey: ['active-time-entry'],
+    queryFn: () => window.database.getActiveTimeEntry(),
     retry: false,
   });
 
   const jiraIssuesQuery = useQuery({
     queryKey: ['jira', 'relevant-issues'],
-    queryFn: () => window.database.getRelevantJiraIssues({ limit: 10 }),
+    queryFn: () => window.database.getRelevantJiraIssues({ limit: 5 }),
     retry: false,
   });
 
@@ -33,7 +30,7 @@ export function HomeTab() {
     mutationFn: (issueKey: string) =>
       window.timeTracking.startTracking(issueKey),
     onSuccess: () => {
-      timeEntriesQuery.refetch();
+      activeEntryQuery.refetch();
       toast.success('Time entry started');
     },
     onError: () => {
@@ -44,7 +41,7 @@ export function HomeTab() {
   const stopTracking = useMutation({
     mutationFn: (id: string) => window.timeTracking.stopTracking(id),
     onSuccess: () => {
-      timeEntriesQuery.refetch();
+      activeEntryQuery.refetch();
       toast.success('Time entry stopped');
     },
     onError: () => {
@@ -52,11 +49,10 @@ export function HomeTab() {
     },
   });
 
-  const entries = timeEntriesQuery.data ?? [];
-  const activeEntry = entries.find((e) => e.timeSpentSeconds === null);
+  const activeEntry = activeEntryQuery.data ?? null;
   const issues = jiraIssuesQuery.data ?? [];
 
-  if (timeEntriesQuery.isLoading || jiraIssuesQuery.isLoading) {
+  if (activeEntryQuery.isLoading || jiraIssuesQuery.isLoading) {
     return (
       <Empty className="w-full max-w-md mx-auto">
         <EmptyHeader>
@@ -84,14 +80,8 @@ export function HomeTab() {
             <li key={issue.id}>
               <JiraIssueCard
                 issue={issue}
-                onOpenInJira={(key) => window.electron.openJiraExternal(key)}
-                onTrackTime={async (key) => {
-                  try {
-                    await startTracking.mutateAsync(key);
-                  } catch {
-                    // handled by mutation onError
-                  }
-                }}
+                onOpenInJira={window.electron.openJiraExternal}
+                onTrackTime={startTracking.mutateAsync}
                 headerAction={
                   <Button
                     size="icon"
