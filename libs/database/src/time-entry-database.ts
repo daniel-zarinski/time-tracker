@@ -1,6 +1,9 @@
 import type { Prisma, PrismaClient } from '@prisma/client';
 import { SyncStatus } from '@prisma/client';
-import type { CreateTimeEntryInput, UpdateTimeEntryInput } from '@time-tracker/schema';
+import type {
+  CreateTimeEntryInput,
+  UpdateTimeEntryInput,
+} from '@time-tracker/schema';
 
 export type TimeEntryWithIssue = Prisma.TimeEntryGetPayload<{
   include: { issue: { include: { parent: true } } };
@@ -53,16 +56,9 @@ export async function createTimeEntry(
 
 export async function stopTimeEntry(
   prisma: PrismaClient,
-  entryId: string
+  entryId: string,
+  timeSpentSeconds: number
 ): Promise<TimeEntryWithIssue> {
-  const timeEntry = await prisma.timeEntry.findUniqueOrThrow({
-    where: { id: entryId },
-  });
-
-  const timeSpentSeconds = Math.floor(
-    (Date.now() - timeEntry.startedAt.getTime()) / 1000
-  );
-
   return prisma.timeEntry.update({
     where: { id: entryId },
     data: { timeSpentSeconds },
@@ -87,13 +83,7 @@ export async function updateTimeEntry(
 ): Promise<TimeEntryWithIssue> {
   return prisma.timeEntry.update({
     where: { id: entryId },
-    data: {
-      ...(data.startedAt != null && { startedAt: data.startedAt }),
-      ...(data.timeSpentSeconds != null && {
-        timeSpentSeconds: data.timeSpentSeconds,
-      }),
-      ...(data.description !== undefined && { description: data.description }),
-    },
+    data,
     include: timeEntryInclude,
   });
 }
@@ -117,5 +107,12 @@ export async function getTimeEntriesByIssueKey(
   return prisma.timeEntry.findMany({
     where: { issueKey, syncStatus },
     orderBy: { startedAt: 'desc' },
+  });
+}
+
+export async function getTimeEntryById(prisma: PrismaClient, entryId: string) {
+  return prisma.timeEntry.findUnique({
+    where: { id: entryId },
+    include: timeEntryInclude,
   });
 }

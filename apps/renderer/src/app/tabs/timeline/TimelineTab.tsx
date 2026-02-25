@@ -6,6 +6,7 @@ import {
   computeEntryLayout,
   getWeekDays,
   isSameDay,
+  formatSelection,
 } from './timeline-utils';
 import { useTimelineDrag } from './use-timeline-drag';
 import { TimelineHeader } from './TimelineHeader';
@@ -17,8 +18,18 @@ export function TimelineTab() {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const olRef = React.useRef<HTMLOListElement>(null);
 
-  const { selection, clearSelection, handlePointerDown, handlePointerMove, handlePointerUp } =
-    useTimelineDrag(olRef);
+  const {
+    selection,
+    clearSelection,
+    handlePointerDown,
+    handlePointerMove,
+    handlePointerUp,
+  } = useTimelineDrag(olRef, (_event, payload) => {
+    if (payload.type === 'pointerUp') {
+      if (!payload.selection) return;
+      console.log('selection', formatSelection(payload.selection, date));
+    }
+  });
 
   const { data: entries = [] } = useQuery({
     queryKey: ['time-entries'],
@@ -103,7 +114,7 @@ export function TimelineTab() {
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        onEntryClick={setSelectedTimeEntry}
+        onEntryClick={(entry) => setSelectedTimeEntry(entry, { view: 'edit' })}
         onClearSelection={clearSelection}
       />
     </div>

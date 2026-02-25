@@ -1,4 +1,5 @@
 import type { TimeEntryWithIssue } from '@time-tracker/database';
+import { Selection } from './use-timeline-drag';
 
 // --- Constants ---
 export const HALF_HOUR_ROWS = 48;
@@ -55,8 +56,7 @@ export function getEntriesWithGrid(
     const visibleStart = Math.max(entryStart, dayStart);
     const visibleEnd = Math.min(entryEnd, dayEnd);
 
-    const gridRowStart =
-      1 + Math.floor((visibleStart - dayStart) / QUARTER_MS);
+    const gridRowStart = 1 + Math.floor((visibleStart - dayStart) / QUARTER_MS);
     const gridRowSpan = Math.max(
       1,
       Math.ceil((visibleEnd - visibleStart) / QUARTER_MS)
@@ -173,4 +173,30 @@ export function gridRowToTime(row: number, date: Date): Date {
 
 export function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
+}
+
+export function formatSelection(selection: Selection, date: Date) {
+  const minRow = Math.min(selection.startRow, selection.endRow);
+  const maxRow = Math.max(selection.startRow, selection.endRow);
+  const span = maxRow - minRow + 1;
+  const startTime = gridRowToTime(minRow, date);
+  const endTime = gridRowToTime(maxRow + 1, date);
+  const totalMinutes = span * 15;
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  const duration =
+    hours > 0
+      ? minutes > 0
+        ? `${hours}h ${minutes}m`
+        : `${hours}h`
+      : `${minutes}m`;
+
+  return {
+    startTime,
+    endTime,
+    duration,
+    span,
+    minRow,
+    maxRow,
+  };
 }

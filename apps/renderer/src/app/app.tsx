@@ -27,6 +27,7 @@ export function App() {
   const selectedIssue = useAppStore.use.selectedIssue();
   const setSelectedIssue = useAppStore.use.setSelectedIssue();
   const selectedTimeEntry = useAppStore.use.selectedTimeEntry();
+  const selectedTimeEntryView = useAppStore.use.selectedTimeEntryView();
   const setSelectedTimeEntry = useAppStore.use.setSelectedTimeEntry();
   const [commandOpen, setCommandOpen] = React.useState(false);
   const { commands } = useAppCommands();
@@ -162,6 +163,7 @@ export function App() {
             <TimeEntryCardDefault
               entry={selectedTimeEntry}
               defaultExpanded
+              defaultView={selectedTimeEntryView}
               onResumeTimer={async (key) => {
                 await startTrackingMutation.mutateAsync(key);
               }}

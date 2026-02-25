@@ -4,7 +4,6 @@ import {
   getActiveTimeEntry,
   getRelevantJiraIssues,
   getTimeEntries,
-  stopTimeEntry,
 } from '@time-tracker/database';
 import type {
   TimeEntryWithIssue,
@@ -107,6 +106,7 @@ async function buildContextMenu(): Promise<Menu> {
     const label =
       formatIssueLabel(running.issue) || running.issueKey || 'Unknown';
     const entryId = running.id;
+    const timeTrackingService = new TimeTrackingService();
     menuItems.push(
       {
         label: `▶ ${label}`,
@@ -114,7 +114,7 @@ async function buildContextMenu(): Promise<Menu> {
       },
       {
         label: 'Stop',
-        click: () => void stopTimeEntry(getClient(), entryId),
+        click: () => void timeTrackingService.stopTracking(entryId),
       },
       { type: 'separator' }
     );

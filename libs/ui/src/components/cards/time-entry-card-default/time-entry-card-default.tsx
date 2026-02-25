@@ -19,6 +19,7 @@ interface TimeEntryCardDefaultProps {
   entry: TimeEntryWithIssue;
   hoursPerDay?: number;
   defaultExpanded?: boolean;
+  defaultView?: 'expanded' | 'edit';
   onResumeTimer?: (issueKey: string) => unknown | Promise<unknown>;
   onSave?: (entryId: string, updates: TimeEntryUpdates) => void | Promise<void>;
   onDelete?: (entryId: string) => void | Promise<void>;
@@ -41,6 +42,7 @@ export function TimeEntryCardDefault({
   entry,
   hoursPerDay = 7,
   defaultExpanded = false,
+  defaultView,
   onResumeTimer,
   onSave,
   onDelete,
@@ -48,7 +50,11 @@ export function TimeEntryCardDefault({
   className,
 }: TimeEntryCardDefaultProps) {
   const [state, setState] = useState<'default' | 'expanded' | 'edit'>(
-    defaultExpanded ? 'expanded' : 'default'
+    defaultView === 'edit'
+      ? 'edit'
+      : defaultExpanded
+        ? 'expanded'
+        : 'default'
   );
   const expanded = state === 'expanded' || state === 'edit';
 
@@ -98,6 +104,7 @@ export function TimeEntryCardDefault({
             entry={entry}
             onSave={handleSave}
             onCancel={handleCancelEdit}
+            onDelete={onDelete}
           />
         </>
       ) : (

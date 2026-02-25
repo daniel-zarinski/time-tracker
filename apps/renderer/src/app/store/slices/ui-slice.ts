@@ -7,13 +7,19 @@ import type {
 
 import type { TabValue } from '@time-tracker/schema';
 
+export type SelectedTimeEntryView = 'expanded' | 'edit';
+
 export interface UiSlice {
   activeTab: TabValue;
   setActiveTab: (tab: TabValue) => void;
   selectedIssue: JiraIssueWithParent | null;
   setSelectedIssue: (issue: JiraIssueWithParent | null) => void;
   selectedTimeEntry: TimeEntryWithIssue | null;
-  setSelectedTimeEntry: (entry: TimeEntryWithIssue | null) => void;
+  selectedTimeEntryView: SelectedTimeEntryView;
+  setSelectedTimeEntry: (
+    entry: TimeEntryWithIssue | null,
+    options?: { view?: SelectedTimeEntryView }
+  ) => void;
 }
 
 export const createUiSlice: StateCreator<
@@ -28,6 +34,15 @@ export const createUiSlice: StateCreator<
   setSelectedIssue: (issue) =>
     set({ selectedIssue: issue }, false, 'ui/setSelectedIssue'),
   selectedTimeEntry: null,
-  setSelectedTimeEntry: (entry) =>
-    set({ selectedTimeEntry: entry }, false, 'ui/setSelectedTimeEntry'),
+  selectedTimeEntryView: 'expanded' as SelectedTimeEntryView,
+  setSelectedTimeEntry: (entry, options) =>
+    set(
+      {
+        selectedTimeEntry: entry,
+        selectedTimeEntryView:
+          entry != null ? (options?.view ?? 'expanded') : 'expanded',
+      },
+      false,
+      'ui/setSelectedTimeEntry'
+    ),
 });

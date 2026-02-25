@@ -4,6 +4,7 @@ import {
   createTimeEntry,
   stopTimeEntry,
   getLastTimeEntryFromIssue as getLastTimeEntryFromIssueDb,
+  getTimeEntryById,
 } from '@time-tracker/database';
 import type { SyncStatus } from '@prisma/client';
 import type { TimeEntryWithIssue } from '@time-tracker/database';
@@ -18,7 +19,7 @@ export class TimeTrackingService {
 
     if (active) {
       if (active.issueKey === issueKey) return active;
-      await stopTimeEntry(prisma, active.id);
+      await this.stopTracking(active.id);
     }
 
     return createTimeEntry(prisma, { issueKey, description });
@@ -29,6 +30,17 @@ export class TimeTrackingService {
   }
 
   async stopTracking(entryId: string): Promise<TimeEntryWithIssue> {
-    return stopTimeEntry(getClient(), entryId);
+    const prisma = getClient();
+    const entry = await getTimeEntryById(prisma, entryId);
+
+    if (!entry) throw new Error('Time entry not found');
+    if (entry.timeSpentSeconds != null)
+      throw new Error('Time entry already stopped');
+
+    const timeSpentSeconds = Math.floor(
+      (Date.now() - entry.startedAt.getTime()) / 1000
+    );
+
+    return stopTimeEntry(prisma, entryId, timeSpentSeconds);
   }
 }

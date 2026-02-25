@@ -1,6 +1,6 @@
 import type { TimeEntryWithIssue } from '@time-tracker/database';
 import type { TimeEntryUpdates } from '@time-tracker/utils';
-import { CalendarIcon, Clock2Icon, TimerIcon } from 'lucide-react';
+import { CalendarIcon, Clock2Icon, TimerIcon, Trash2Icon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Button } from '../../ui/button';
 import { Calendar } from '../../ui/calendar';
@@ -67,12 +67,14 @@ interface TimeEntryCardEditFormProps {
   entry: TimeEntryWithIssue;
   onSave: (entryId: string, updates: TimeEntryUpdates) => void | Promise<void>;
   onCancel: () => void;
+  onDelete?: (entryId: string) => void | Promise<void>;
 }
 
 export function TimeEntryCardEditForm({
   entry,
   onSave,
   onCancel,
+  onDelete,
 }: TimeEntryCardEditFormProps) {
   const startDate = new Date(entry.startedAt);
   const duration = entry.timeSpentSeconds ?? 0;
@@ -268,6 +270,18 @@ export function TimeEntryCardEditForm({
         >
           {isSaving ? 'Saving\u2026' : 'Save'}
         </Button>
+        <div className="flex-1" />
+        {onDelete && (
+          <Button
+            variant="destructive"
+            size="xs"
+            onClick={() => onDelete(entry.id)}
+            disabled={isSaving}
+          >
+            <Trash2Icon className="size-3" />
+            Delete
+          </Button>
+        )}
       </CardFooter>
     </>
   );

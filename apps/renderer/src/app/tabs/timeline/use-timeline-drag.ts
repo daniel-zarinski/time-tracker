@@ -6,28 +6,64 @@ export interface Selection {
   endRow: number;
 }
 
-export function useTimelineDrag(olRef: React.RefObject<HTMLOListElement | null>) {
+export type EventType = 'pointerDown' | 'pointerMove' | 'pointerUp' | 'escape';
+export type PointerUpPayload = {
+  pointerId: number;
+  type: 'pointerUp';
+  selection: Selection | null;
+};
+export type PointerMovePayload = {
+  clientY: number;
+  row: number;
+  type: 'pointerMove';
+};
+export type PointerDownPayload = {
+  clientY: number;
+  pointerId: number;
+  row: number;
+  type: 'pointerDown';
+};
+export type EventHandler = (
+  event: EventType,
+  payload: PointerUpPayload | PointerMovePayload | PointerDownPayload
+) => void;
+
+export function useTimelineDrag(
+  olRef: React.RefObject<HTMLOListElement | null>,
+  onEvent?: EventHandler
+) {
   const [selection, setSelection] = React.useState<Selection | null>(null);
   const draggingRef = React.useRef(false);
 
   const clearSelection = React.useCallback(() => setSelection(null), []);
 
-  const clientYToRow = React.useCallback((clientY: number): number => {
-    const ol = olRef.current;
-    if (!ol) return 2;
-    const relativeY = clientY - ol.getBoundingClientRect().top;
-    const quarterHeight = ol.clientHeight / QUARTER_HOUR_ROWS;
-    return clamp(Math.floor(relativeY / quarterHeight) + 1, 1, 96);
-  }, [olRef]);
+  const clientYToRow = React.useCallback(
+    (clientY: number): number => {
+      const ol = olRef.current;
+      if (!ol) return 2;
+      const relativeY = clientY - ol.getBoundingClientRect().top;
+      const quarterHeight = ol.clientHeight / QUARTER_HOUR_ROWS;
+      return clamp(Math.floor(relativeY / quarterHeight) + 1, 1, 96);
+    },
+    [olRef]
+  );
 
   const handlePointerDown = React.useCallback(
     (e: React.PointerEvent<HTMLOListElement>) => {
       if ((e.target as HTMLElement).closest('button')) return;
       e.preventDefault();
-      const row = clientYToRow(e.clientY);
+      const clientY = e.clientY;
+      const pointerId = e.pointerId;
+      const row = clientYToRow(clientY);
       setSelection({ startRow: row, endRow: row });
       draggingRef.current = true;
-      olRef.current?.setPointerCapture(e.pointerId);
+      olRef.current?.setPointerCapture(pointerId);
+      onEvent?.('pointerDown', {
+        clientY,
+        pointerId,
+        row,
+        type: 'pointerDown',
+      });
     },
     [clientYToRow, olRef]
   );
@@ -35,10 +71,10 @@ export function useTimelineDrag(olRef: React.RefObject<HTMLOListElement | null>)
   const handlePointerMove = React.useCallback(
     (e: React.PointerEvent<HTMLOListElement>) => {
       if (!draggingRef.current) return;
-      const row = clientYToRow(e.clientY);
-      setSelection((prev) =>
-        prev ? { ...prev, endRow: row } : null
-      );
+      const clientY = e.clientY;
+      const row = clientYToRow(clientY);
+      onEvent?.('pointerMove', { clientY, row, type: 'pointerMove' });
+      setSelection((prev) => (prev ? { ...prev, endRow: row } : null));
     },
     [clientYToRow]
   );
@@ -47,9 +83,15 @@ export function useTimelineDrag(olRef: React.RefObject<HTMLOListElement | null>)
     (e: React.PointerEvent<HTMLOListElement>) => {
       if (!draggingRef.current) return;
       draggingRef.current = false;
-      olRef.current?.releasePointerCapture(e.pointerId);
+      const pointerId = e.pointerId;
+      olRef.current?.releasePointerCapture(pointerId);
+      onEvent?.('pointerUp', {
+        pointerId,
+        type: 'pointerUp',
+        selection: selection ?? null,
+      });
     },
-    [olRef]
+    [olRef, selection]
   );
 
   // Clear selection on Escape

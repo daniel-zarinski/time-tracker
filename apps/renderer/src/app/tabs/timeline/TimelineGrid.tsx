@@ -6,11 +6,11 @@ import {
   QUARTER_HOUR_ROWS,
   formatHour,
   formatEntryTime,
-  gridRowToTime,
   type EntryWithLayout,
+  formatSelection,
 } from './timeline-utils';
-import type { Selection } from './use-timeline-drag';
 import { CurrentTimeIndicator } from './CurrentTimeIndicator';
+import { Selection } from './use-timeline-drag';
 
 interface TimelineGridProps {
   olRef: React.RefObject<HTMLOListElement | null>;
@@ -39,6 +39,12 @@ export function TimelineGrid({
   onEntryClick,
   onClearSelection,
 }: TimelineGridProps) {
+  const formattedSelection = React.useMemo(() => {
+    if (!selection) return null;
+
+    return formatSelection(selection, date);
+  }, [selection, date]);
+
   return (
     <div ref={containerRef}>
       <div className="flex w-full flex-auto">
@@ -140,39 +146,23 @@ export function TimelineGrid({
             )}
 
             {/* Drag-to-select highlight */}
-            {selection &&
-              (() => {
-                const minRow = Math.min(selection.startRow, selection.endRow);
-                const maxRow = Math.max(selection.startRow, selection.endRow);
-                const span = maxRow - minRow + 1;
-                const startTime = gridRowToTime(minRow, date);
-                const endTime = gridRowToTime(maxRow + 1, date);
-                const totalMinutes = span * 15;
-                const hours = Math.floor(totalMinutes / 60);
-                const minutes = totalMinutes % 60;
-                const duration =
-                  hours > 0
-                    ? minutes > 0
-                      ? `${hours}h ${minutes}m`
-                      : `${hours}h`
-                    : `${minutes}m`;
-                return (
-                  <li
-                    className="pointer-events-none relative z-10"
-                    style={{
-                      gridRow: `${minRow} / span ${span}`,
-                      gridColumn: '1',
-                    }}
-                  >
-                    <div className="absolute inset-y-1 inset-x-[9px] flex items-center justify-center rounded-lg border border-dashed border-primary/40 bg-primary/10">
-                      <span className="text-xs font-medium text-primary/70">
-                        {formatEntryTime(startTime)} –{' '}
-                        {formatEntryTime(endTime)} ({duration})
-                      </span>
-                    </div>
-                  </li>
-                );
-              })()}
+            {formattedSelection && (
+              <li
+                className="pointer-events-none relative z-10"
+                style={{
+                  gridRow: `${formattedSelection.minRow} / span ${formattedSelection.span}`,
+                  gridColumn: '1',
+                }}
+              >
+                <div className="absolute inset-y-1 inset-x-[9px] flex items-center justify-center rounded-lg border border-dashed border-primary/40 bg-primary/10">
+                  <span className="text-xs font-medium text-primary/70">
+                    {formatEntryTime(formattedSelection.startTime)} –{' '}
+                    {formatEntryTime(formattedSelection.endTime)} (
+                    {formattedSelection.duration})
+                  </span>
+                </div>
+              </li>
+            )}
 
             {/* Current time indicator */}
             {isToday && <CurrentTimeIndicator />}

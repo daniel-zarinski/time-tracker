@@ -136,6 +136,7 @@ export async function getJiraIssuesUnsynced(
 
 // categoryKey values for "not done" — covers both API formats (new/indeterminate vs TODO/IN_PROGRESS)
 const RELEVANT_CATEGORY_KEYS = ['TODO', 'IN_PROGRESS', 'new', 'indeterminate'];
+const RELEVENT_ISSUE_TYPES = ['Story', 'Task', 'Bug', 'Sub-task'];
 
 export async function getRelevantJiraIssues(
   prisma: PrismaClient,
@@ -165,6 +166,7 @@ export async function getRelevantJiraIssues(
       key: { not: null },
       assigneeEmail: email,
       jiraStatus: { categoryKey: { in: RELEVANT_CATEGORY_KEYS } },
+      issueType: { in: RELEVENT_ISSUE_TYPES },
     },
     include: { parent: true, jiraStatus: true },
     take: limit,
