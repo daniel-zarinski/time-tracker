@@ -6,6 +6,11 @@ import type {
   JiraStatusInfo,
 } from '@time-tracker/jira';
 import { JiraApiError } from '@time-tracker/jira';
+import {
+  getClient,
+  getJiraStatusesWithCategory,
+  updateStatusCategory,
+} from '@time-tracker/database';
 import { ipcMain } from 'electron';
 import { getJiraConfig, setJiraConfig } from '../store/config-store';
 import { JiraService } from '../services';
@@ -151,4 +156,28 @@ export function bootstrapJiraEvents(): void {
       throw serializeError(err);
     }
   });
+
+  ipcMain.handle('jira:get-status-mappings', async () => {
+    try {
+      const prisma = getClient();
+      return getJiraStatusesWithCategory(prisma);
+    } catch (err) {
+      throw serializeError(err);
+    }
+  });
+
+  ipcMain.handle(
+    'jira:update-status-mapping',
+    async (
+      _event,
+      { statusId, categoryName }: { statusId: string; categoryName: string | null }
+    ) => {
+      try {
+        const prisma = getClient();
+        await updateStatusCategory(prisma, statusId, categoryName);
+      } catch (err) {
+        throw serializeError(err);
+      }
+    }
+  );
 }

@@ -84,6 +84,30 @@ export async function deleteTimeEntry(
   });
 }
 
+export interface UpdateTimeEntryInput {
+  startedAt?: Date;
+  timeSpentSeconds?: number;
+  description?: string;
+}
+
+export async function updateTimeEntry(
+  prisma: PrismaClient,
+  entryId: string,
+  data: UpdateTimeEntryInput
+): Promise<TimeEntryWithIssue> {
+  return prisma.timeEntry.update({
+    where: { id: entryId },
+    data: {
+      ...(data.startedAt != null && { startedAt: data.startedAt }),
+      ...(data.timeSpentSeconds != null && {
+        timeSpentSeconds: data.timeSpentSeconds,
+      }),
+      ...(data.description !== undefined && { description: data.description }),
+    },
+    include: timeEntryInclude,
+  });
+}
+
 export async function getLastTimeEntryFromIssue(
   prisma: PrismaClient,
   issueKey: string,

@@ -82,6 +82,33 @@ model Worklog {
   @@map("worklog")
 }
 
+model JiraStatusCategory {
+  name      String  @id // "To Do", "In Progress", "Done"
+  key       String  @unique // "new", "indeterminate", "done"
+  colorName String? @map("color_name")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  statuses JiraStatus[]
+
+  @@map("jira_status_category")
+}
+
+model JiraStatus {
+  id           String  @id // Jira's own status ID
+  name         String // e.g. "Code Review", "Cancelled"
+  categoryName String? @map("category_name") // FK → JiraStatusCategory.name
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  category JiraStatusCategory? @relation(fields: [categoryName], references: [name])
+
+  @@index([categoryName])
+  @@map("jira_status")
+}
+
 enum SyncStatus {
   LOCAL
   SYNCED

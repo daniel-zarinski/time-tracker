@@ -1,5 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
-import { CalendarDays, Home, ListTodo, Settings } from 'lucide-react';
+import {
+  CalendarDays,
+  Home,
+  ListTodo,
+  RefreshCw,
+  Settings,
+} from 'lucide-react';
 
 import type { CommandPaletteGroup } from '@time-tracker/ui';
 
@@ -63,6 +69,29 @@ export function useAppCommands(): {
           icon: Settings,
           shortcutKey: '5',
           onSelect: () => setActiveTab('settings'),
+        },
+      ],
+    },
+    {
+      heading: 'Sync Shortcuts',
+      items: [
+        {
+          id: 'sync-all-my-issues',
+          label: 'Sync all my issues',
+          icon: RefreshCw,
+          onSelect: () => window.jira.fetchMyIssues(),
+        },
+        {
+          id: 'sync-missing-issues',
+          label: 'Sync missing issues',
+          icon: RefreshCw,
+          onSelect: () => window.jira.fetchMissingIssues(),
+        },
+        {
+          id: 'sync-statuses',
+          label: 'Sync statuses',
+          icon: RefreshCw,
+          onSelect: () => window.jira.fetchStatuses(),
         },
       ],
     },

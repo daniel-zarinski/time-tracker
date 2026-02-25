@@ -2,6 +2,8 @@ import {
   getClient,
   PrismaClient,
   upsertJiraIssue,
+  upsertJiraStatusCategories,
+  upsertJiraStatuses,
 } from '@time-tracker/database';
 import type {
   JiraConfig,
@@ -24,6 +26,40 @@ function getStatusCategoryKey(
   if (cat == null) return undefined;
   if (typeof cat === 'string') return cat;
   return cat.key;
+}
+
+const STATUS_CATEGORY_KEY_TO_NAME: Record<string, string> = {
+  // Object-form keys (older API responses)
+  new: 'To Do',
+  indeterminate: 'In Progress',
+  done: 'Done',
+  // String-form values (current API responses)
+  TODO: 'To Do',
+  IN_PROGRESS: 'In Progress',
+  DONE: 'Done',
+};
+
+const STATUS_CATEGORY_TO_KEY: Record<string, string> = {
+  TODO: 'new',
+  IN_PROGRESS: 'indeterminate',
+  DONE: 'done',
+};
+
+function getStatusCategoryInfo(
+  cat: string | { key?: string; name?: string; colorName?: string } | undefined
+): { key?: string; name?: string; colorName?: string } {
+  if (cat == null) return {};
+  if (typeof cat === 'string') {
+    return {
+      key: STATUS_CATEGORY_TO_KEY[cat] ?? cat,
+      name: STATUS_CATEGORY_KEY_TO_NAME[cat],
+    };
+  }
+  return {
+    key: cat.key,
+    name: cat.name ?? (cat.key ? STATUS_CATEGORY_KEY_TO_NAME[cat.key] : undefined),
+    colorName: cat.colorName,
+  };
 }
 
 function normalizeBaseUrl(url: string): string {
@@ -204,29 +240,45 @@ export class JiraService {
   }
 
   async fetchStatuses(): Promise<JiraStatusInfo[]> {
-    const all: JiraStatusInfo[] = [];
-    let startAt = 0;
-    const maxResults = 100;
-    let hasMore = true;
+    const data = await this.client.getStatuses({ maxResults: '200' });
+    const values = (data.values ?? []) as JiraStatusRaw[];
 
-    while (hasMore) {
-      const data = await this.client.getStatuses({
-        startAt: String(startAt),
-        maxResults: String(maxResults),
-      });
-      const values = data.values ?? [];
-      for (const s of values as JiraStatusRaw[]) {
-        all.push({
-          id: s.id ?? '',
-          name: s.name ?? '',
-          statusCategory: getStatusCategoryKey(s.statusCategory),
+    const categoryMap = new Map<string, { name: string; key: string; colorName?: string }>();
+    const statuses: JiraStatusInfo[] = values.map((s) => {
+      const catInfo = getStatusCategoryInfo(s.statusCategory);
+      if (catInfo.name && catInfo.key) {
+        categoryMap.set(catInfo.name, {
+          name: catInfo.name,
+          key: catInfo.key,
+          colorName: catInfo.colorName,
         });
       }
-      startAt += values.length;
-      hasMore = values.length >= maxResults;
+      return {
+        id: s.id ?? '',
+        name: s.name ?? '',
+        statusCategory: getStatusCategoryKey(s.statusCategory),
+        statusCategoryName: catInfo.name,
+        colorName: catInfo.colorName,
+      };
+    });
+
+    // Persist categories and statuses to DB
+    const categories = Array.from(categoryMap.values());
+    if (categories.length > 0) {
+      await upsertJiraStatusCategories(this.prisma, categories);
+    }
+    if (statuses.length > 0) {
+      await upsertJiraStatuses(
+        this.prisma,
+        statuses.map((s) => ({
+          id: s.id,
+          name: s.name,
+          categoryName: s.statusCategoryName ?? null,
+        }))
+      );
     }
 
-    return all;
+    return statuses;
   }
 
   async fetchStatusesForKeys(keys: string[]): Promise<Record<string, string>> {

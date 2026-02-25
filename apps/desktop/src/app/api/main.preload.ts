@@ -31,6 +31,20 @@ const databaseApi: DatabaseApi = {
     ipcRenderer.invoke('database:get-active-time-entry'),
   deleteTimeEntry: (entryId: string) =>
     ipcRenderer.invoke('database:delete-time-entry', entryId),
+  updateTimeEntry: (
+    entryId: string,
+    updates: { startedAt?: Date; timeSpentSeconds?: number; description?: string }
+  ) => {
+    const payload: {
+      startedAt?: string;
+      timeSpentSeconds?: number;
+      description?: string;
+    } = {};
+    if (updates.startedAt != null) payload.startedAt = updates.startedAt.toISOString();
+    if (updates.timeSpentSeconds != null) payload.timeSpentSeconds = updates.timeSpentSeconds;
+    if (updates.description !== undefined) payload.description = updates.description;
+    return ipcRenderer.invoke('database:update-time-entry', entryId, payload);
+  },
 };
 
 const storeApi: StoreApi = {
@@ -60,6 +74,11 @@ const jiraApi: JiraApi = {
   fetchStatusesForKeys: (keys: string[]) =>
     ipcRenderer.invoke('jira:fetch-statuses-for-keys', keys),
   fetchMissingIssues: () => ipcRenderer.invoke('jira:fetch-missing-issues'),
+  getStatusMappings: () => ipcRenderer.invoke('jira:get-status-mappings'),
+  updateStatusMapping: (params: {
+    statusId: string;
+    categoryName: string | null;
+  }) => ipcRenderer.invoke('jira:update-status-mapping', params),
 };
 
 const tempoApi: TempoApi = {

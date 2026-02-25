@@ -78,6 +78,8 @@ export interface JiraStatusInfo {
   id: string;
   name: string;
   statusCategory?: string;
+  statusCategoryName?: string;
+  colorName?: string;
 }
 
 interface JiraStatusCategory {

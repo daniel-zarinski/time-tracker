@@ -54,6 +54,25 @@ export function App() {
     },
   });
 
+  const updateTimeEntryMutation = useMutation({
+    mutationFn: ({
+      entryId,
+      updates,
+    }: {
+      entryId: string;
+      updates: { startedAt?: Date; timeSpentSeconds?: number; description?: string };
+    }) => window.database.updateTimeEntry(entryId, updates),
+    onSuccess: () => {
+      setSelectedTimeEntry(null);
+      queryClient.invalidateQueries({ queryKey: ['time-entries'] });
+      queryClient.invalidateQueries({ queryKey: ['active-time-entry'] });
+      toast.success('Time entry updated');
+    },
+    onError: () => {
+      toast.error('Failed to update time entry', { position: 'bottom-center' });
+    },
+  });
+
   return (
     <div className="flex h-screen flex-col text-foreground">
       <Tabs
@@ -147,6 +166,16 @@ export function App() {
                 await startTrackingMutation.mutateAsync(key);
               }}
               onOpenInJira={(key) => window.electron.openJiraExternal(key)}
+              onSave={async (entryId, updates) => {
+                await updateTimeEntryMutation.mutateAsync({
+                  entryId,
+                  updates: {
+                    startedAt: updates.startedAt,
+                    timeSpentSeconds: updates.timeSpentSeconds,
+                    description: updates.description,
+                  },
+                });
+              }}
               onDelete={async (id) => {
                 await deleteTimeEntryMutation.mutateAsync(id);
               }}

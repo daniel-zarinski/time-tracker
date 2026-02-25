@@ -99,6 +99,21 @@ export function SettingsTab() {
     },
   });
 
+  const syncStatusesMutation = useMutation({
+    mutationFn: () => window.jira.fetchStatuses(),
+    onSuccess: (statuses) => {
+      toast.success(
+        `Synced ${statuses.length} status${statuses.length === 1 ? '' : 'es'}`,
+        { id: JIRA_TOAST_ID }
+      );
+    },
+    onError: (err: unknown) => {
+      const message =
+        err instanceof Error ? err.message : 'Failed to sync statuses';
+      toast.error(message, { id: JIRA_TOAST_ID });
+    },
+  });
+
   const fetchAllMyIssuesMutation = useMutation({
     mutationFn: () => window.jira.fetchMyIssues(),
     onSuccess: (issues) => {
@@ -454,6 +469,18 @@ export function SettingsTab() {
                   {fetchMissingIssuesMutation.isPending
                     ? 'Syncing…'
                     : 'Sync missing issues'}
+                </Button>
+                <Button
+                  variant="outline"
+                  type="button"
+                  size="sm"
+                  onClick={() => syncStatusesMutation.mutate()}
+                  disabled={syncStatusesMutation.isPending}
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  {syncStatusesMutation.isPending
+                    ? 'Syncing…'
+                    : 'Sync statuses'}
                 </Button>
               </Field>
             </FieldSet>

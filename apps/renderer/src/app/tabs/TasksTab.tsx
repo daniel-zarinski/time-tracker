@@ -54,6 +54,23 @@ export function TasksTab() {
     },
   });
 
+  const updateTimeEntryMutation = useMutation({
+    mutationFn: ({
+      entryId,
+      updates,
+    }: {
+      entryId: string;
+      updates: { startedAt?: Date; timeSpentSeconds?: number; description?: string };
+    }) => window.database.updateTimeEntry(entryId, updates),
+    onSuccess: () => {
+      timeEntriesQuery.refetch();
+      toast.success('Time entry updated');
+    },
+    onError: () => {
+      toast.error('Failed to update time entry');
+    },
+  });
+
   const entries = timeEntriesQuery.data ?? [];
   const activeEntry = entries.find((e) => e.timeSpentSeconds === null);
   const completedEntries = entries.filter((e) => e.timeSpentSeconds !== null);
@@ -101,9 +118,18 @@ export function TasksTab() {
           <li key={entry.id}>
             <TimeEntryCardDefault
               entry={entry}
-              // onOpenInJira={(key) => window.electron.openJiraExternal(key)}
               onOpenInJira={() => setSelectedIssue(entry.issue)}
               onResumeTimer={() => startTracking.mutateAsync(entry.issueKey)}
+              onSave={async (entryId, updates) => {
+                await updateTimeEntryMutation.mutateAsync({
+                  entryId,
+                  updates: {
+                    startedAt: updates.startedAt,
+                    timeSpentSeconds: updates.timeSpentSeconds,
+                    description: updates.description,
+                  },
+                });
+              }}
               onDelete={(id) => deleteTimeEntryMutation.mutateAsync(id)}
             />
           </li>

@@ -7,6 +7,7 @@ import type {
 } from '@time-tracker/jira';
 import type {
   JiraIssueWithParent,
+  JiraStatusWithCategory,
   TimeEntryWithIssue,
 } from '@time-tracker/database';
 
@@ -33,6 +34,10 @@ export interface DatabaseApi {
   }) => Promise<TimeEntryWithIssue[]>;
   getActiveTimeEntry: () => Promise<TimeEntryWithIssue | null>;
   deleteTimeEntry: (entryId: string) => Promise<void>;
+  updateTimeEntry: (
+    entryId: string,
+    updates: { startedAt?: Date; timeSpentSeconds?: number; description?: string }
+  ) => Promise<TimeEntryWithIssue>;
 }
 
 /** Store IPC API exposed to the renderer */
@@ -59,6 +64,11 @@ export interface JiraApi {
   fetchStatuses: () => Promise<JiraStatusInfo[]>;
   fetchStatusesForKeys: (keys: string[]) => Promise<Record<string, string>>;
   fetchMissingIssues: () => Promise<void>;
+  getStatusMappings: () => Promise<JiraStatusWithCategory[]>;
+  updateStatusMapping: (params: {
+    statusId: string;
+    categoryName: string | null;
+  }) => Promise<void>;
 }
 
 /** Tempo IPC API exposed to the renderer */

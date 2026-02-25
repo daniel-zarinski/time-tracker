@@ -8,6 +8,7 @@ import {
 import {
   EyeIcon,
   MoreHorizontalIcon,
+  PencilIcon,
   PlayIcon,
   Trash2Icon,
 } from 'lucide-react';
@@ -35,7 +36,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from '../ui/field';
+import { Input } from '../ui/input';
 import { Progress } from '../ui/progress';
+import { Textarea } from '../ui/textarea';
 
 export interface TimeEntryUpdates {
   startedAt?: Date;
@@ -43,6 +53,8 @@ export interface TimeEntryUpdates {
   timeSpentSeconds?: number;
   description?: string;
 }
+
+type CardState = 'default' | 'expanded' | 'edit';
 
 interface TimeEntryCardDefaultProps {
   entry: TimeEntryWithIssue;
@@ -68,16 +80,26 @@ function syncStatusStyles(status: string) {
   }
 }
 
+function toDatetimeLocal(date: Date): string {
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 16);
+}
+
 export function TimeEntryCardDefault({
   entry,
   hoursPerDay = 7,
   defaultExpanded = false,
   onResumeTimer,
+  onSave,
   onDelete,
   onOpenInJira,
   className,
 }: TimeEntryCardDefaultProps) {
-  const [expanded, setExpanded] = useState(defaultExpanded);
+  const [state, setState] = useState<CardState>(
+    defaultExpanded ? 'expanded' : 'default'
+  );
+  const expanded = state === 'expanded' || state === 'edit';
 
   const startDate = new Date(entry.startedAt);
   const duration = entry.timeSpentSeconds ?? 0;
@@ -85,6 +107,45 @@ export function TimeEntryCardDefault({
 
   const secondsPerDay = hoursPerDay * 3600;
   const progressValue = Math.min(100, (duration / secondsPerDay) * 100);
+
+  const [formStartedAt, setFormStartedAt] = useState(toDatetimeLocal(startDate));
+  const [formEndedAt, setFormEndedAt] = useState(toDatetimeLocal(endDate));
+  const [formDescription, setFormDescription] = useState(
+    entry.description ?? ''
+  );
+  const [isSaving, setIsSaving] = useState(false);
+
+  const formStartDate = new Date(formStartedAt);
+  const formEndDate = new Date(formEndedAt);
+  const formDurationSeconds = Math.max(
+    0,
+    Math.floor((formEndDate.getTime() - formStartDate.getTime()) / 1000)
+  );
+  const isValidRange = formEndDate >= formStartDate;
+
+  function handleCancelEdit() {
+    setFormStartedAt(toDatetimeLocal(startDate));
+    setFormEndedAt(toDatetimeLocal(endDate));
+    setFormDescription(entry.description ?? '');
+    setState('expanded');
+  }
+
+  async function handleSave() {
+    if (!isValidRange || !onSave) return;
+    setIsSaving(true);
+    try {
+      await onSave(entry.id, {
+        startedAt: formStartDate,
+        timeSpentSeconds: formDurationSeconds,
+        description: formDescription || undefined,
+      });
+      setState('default');
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  const issueKey = entry.issue.key ?? entry.issueKey;
 
   return (
     <Card
@@ -101,109 +162,205 @@ export function TimeEntryCardDefault({
         value={progressValue}
         className="h-1 rounded-none bg-primary/15"
       />
-      <Collapsible open={expanded} onOpenChange={setExpanded}>
-        <CollapsibleTrigger asChild>
-          <div className="cursor-pointer select-none">
-            <CardHeader className="px-3 py-2.5 gap-0.5">
-              <CardTitle className="flex items-center gap-1.5">
-                <Badge
-                  variant="outline"
-                  className="shrink-0 text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70"
-                >
-                  {entry.issue.key ?? entry.issueKey}
-                </Badge>
-              </CardTitle>
-              <CardDescription
-                className={cn('text-xs', !expanded && 'truncate')}
+      {state === 'edit' ? (
+        <>
+          <CardHeader className="px-3 py-2.5 gap-0.5 cursor-default">
+            <CardTitle className="flex items-center gap-1.5">
+              <Badge
+                variant="outline"
+                className="shrink-0 text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70"
               >
-                {entry.issue.summary ?? ''}
-              </CardDescription>
-              {!expanded && (
-                <CardAction>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon-xs"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <MoreHorizontalIcon className="size-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onOpenInJira?.(entry.issue.key ?? entry.issueKey);
-                        }}
-                      >
-                        <EyeIcon className="size-4" />
-                        View
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        variant="destructive"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDelete?.(entry.id);
-                        }}
-                      >
-                        <Trash2Icon className="size-4" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </CardAction>
-              )}
-            </CardHeader>
-          </div>
-        </CollapsibleTrigger>
-
-        <CardContent className="px-3 pt-0 pb-2.5 max-w-sm mx-auto">
-          <div className="flex items-center text-xs text-muted-foreground">
-            <span>{formatRelativeDate(startDate)}</span>
-            <span className="mx-auto">
-              {formatTime(startDate)} → {formatTime(endDate)}
-            </span>
-            <span className="font-bold text-foreground">
-              {formatDuration(duration)}
-            </span>
-          </div>
-        </CardContent>
-
-        <CollapsibleContent>
-          <div className="px-3 py-2 text-xs text-muted-foreground/50 italic">
-            {/* placeholder — future content TBD */}
-          </div>
+                {issueKey}
+              </Badge>
+            </CardTitle>
+            <CardDescription className="text-xs truncate">
+              {entry.issue.summary ?? ''}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="px-3 pt-0 pb-2.5">
+            <FieldSet>
+              <FieldLegend variant="label">Time</FieldLegend>
+              <FieldGroup>
+                <Field>
+                  <FieldLabel htmlFor="startedAt">Started</FieldLabel>
+                  <Input
+                    id="startedAt"
+                    type="datetime-local"
+                    value={formStartedAt}
+                    onChange={(e) => setFormStartedAt(e.target.value)}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="endedAt">Ended</FieldLabel>
+                  <Input
+                    id="endedAt"
+                    type="datetime-local"
+                    value={formEndedAt}
+                    onChange={(e) => setFormEndedAt(e.target.value)}
+                    aria-invalid={!isValidRange}
+                  />
+                  {!isValidRange && (
+                    <p className="text-destructive text-xs mt-1">
+                      End must be after start
+                    </p>
+                  )}
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="description">Description</FieldLabel>
+                  <Textarea
+                    id="description"
+                    value={formDescription}
+                    onChange={(e) => setFormDescription(e.target.value)}
+                    placeholder="Optional"
+                    rows={2}
+                  />
+                </Field>
+              </FieldGroup>
+            </FieldSet>
+          </CardContent>
           <CardFooter className="px-3 pb-2.5 gap-2">
             <Button
               variant="outline"
               size="xs"
-              onClick={() => onResumeTimer?.(entry.issue.key ?? entry.issueKey)}
+              onClick={handleCancelEdit}
+              disabled={isSaving}
             >
-              <PlayIcon className="size-3" />
-              Resume
+              Cancel
             </Button>
             <Button
-              variant="outline"
               size="xs"
-              onClick={() => onOpenInJira?.(entry.issue.key ?? entry.issueKey)}
+              onClick={handleSave}
+              disabled={!isValidRange || isSaving}
             >
-              <EyeIcon className="size-3" />
-              View
-            </Button>
-            <div className="flex-1" />
-            <Button
-              variant="destructive"
-              size="xs"
-              onClick={() => onDelete?.(entry.id)}
-            >
-              <Trash2Icon className="size-3" />
-              Delete
+              {isSaving ? 'Saving…' : 'Save'}
             </Button>
           </CardFooter>
-        </CollapsibleContent>
-      </Collapsible>
+        </>
+      ) : (
+        <Collapsible
+          open={state === 'expanded'}
+          onOpenChange={(open) => setState(open ? 'expanded' : 'default')}
+        >
+          <CollapsibleTrigger asChild>
+            <div className="cursor-pointer select-none">
+              <CardHeader className="px-3 py-2.5 gap-0.5">
+                <CardTitle className="flex items-center gap-1.5">
+                  <Badge
+                    variant="outline"
+                    className="shrink-0 text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70"
+                  >
+                    {issueKey}
+                  </Badge>
+                </CardTitle>
+                <CardDescription
+                  className={cn('text-xs', state !== 'expanded' && 'truncate')}
+                >
+                  {entry.issue.summary ?? ''}
+                </CardDescription>
+                {state === 'default' && (
+                  <CardAction>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <MoreHorizontalIcon className="size-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onOpenInJira?.(issueKey);
+                          }}
+                        >
+                          <EyeIcon className="size-4" />
+                          View
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setState('edit');
+                          }}
+                        >
+                          <PencilIcon className="size-4" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          variant="destructive"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete?.(entry.id);
+                          }}
+                        >
+                          <Trash2Icon className="size-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </CardAction>
+                )}
+              </CardHeader>
+            </div>
+          </CollapsibleTrigger>
+
+          <CardContent className="px-3 pt-0 pb-2.5 max-w-sm mx-auto">
+            <div className="flex items-center text-xs text-muted-foreground">
+              <span>{formatRelativeDate(startDate)}</span>
+              <span className="mx-auto">
+                {formatTime(startDate)} → {formatTime(endDate)}
+              </span>
+              <span className="font-bold text-foreground">
+                {formatDuration(duration)}
+              </span>
+            </div>
+          </CardContent>
+
+          <CollapsibleContent>
+            <div className="px-3 py-2 text-xs text-muted-foreground/50 italic">
+              {/* placeholder — future content TBD */}
+            </div>
+            <CardFooter className="px-3 pb-2.5 gap-2">
+              <Button
+                variant="outline"
+                size="xs"
+                onClick={() => onResumeTimer?.(issueKey)}
+              >
+                <PlayIcon className="size-3" />
+                Resume
+              </Button>
+              <Button
+                variant="outline"
+                size="xs"
+                onClick={() => onOpenInJira?.(issueKey)}
+              >
+                <EyeIcon className="size-3" />
+                View
+              </Button>
+              <Button
+                variant="outline"
+                size="xs"
+                onClick={() => setState('edit')}
+              >
+                <PencilIcon className="size-3" />
+                Edit
+              </Button>
+              <div className="flex-1" />
+              <Button
+                variant="destructive"
+                size="xs"
+                onClick={() => onDelete?.(entry.id)}
+              >
+                <Trash2Icon className="size-3" />
+                Delete
+              </Button>
+            </CardFooter>
+          </CollapsibleContent>
+        </Collapsible>
+      )}
     </Card>
   );
 }
