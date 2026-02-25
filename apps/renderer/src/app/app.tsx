@@ -10,7 +10,7 @@ import {
   TimeEntryCardDefault,
   Tabs,
   TabsContent,
-  Separator,
+
   toast,
 } from '@time-tracker/ui';
 
@@ -104,9 +104,7 @@ export function App() {
           </div>
         </header>
 
-        <Separator />
-
-        <main className="flex min-h-0 flex-1 flex-col" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+        <main className="flex min-h-0 flex-1 flex-col bg-muted" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
           <TabsContent value="home" className="overflow-y-auto">
             <HomeTab />
           </TabsContent>
