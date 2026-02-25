@@ -1,5 +1,6 @@
 import {
   CreateTimeEntryInputSchema,
+  CreateTimeEntryFormSchema,
   UpdateTimeEntryInputSchema,
 } from './time-entry';
 
@@ -28,6 +29,93 @@ describe('CreateTimeEntryInputSchema', () => {
 
   it('rejects non-string issueKey', () => {
     const result = CreateTimeEntryInputSchema.safeParse({ issueKey: 123 });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('CreateTimeEntryFormSchema', () => {
+  const validData = {
+    issueKey: 'PROJ-123',
+    date: new Date('2025-06-15'),
+    startTime: '09:00',
+    endTime: '10:30',
+  };
+
+  it('accepts valid input with all required fields', () => {
+    const result = CreateTimeEntryFormSchema.safeParse(validData);
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts valid input with optional description', () => {
+    const result = CreateTimeEntryFormSchema.safeParse({
+      ...validData,
+      description: 'Working on feature',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects empty issueKey', () => {
+    const result = CreateTimeEntryFormSchema.safeParse({
+      ...validData,
+      issueKey: '',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects missing issueKey', () => {
+    const { issueKey, ...rest } = validData;
+    const result = CreateTimeEntryFormSchema.safeParse(rest);
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects invalid startTime format', () => {
+    const result = CreateTimeEntryFormSchema.safeParse({
+      ...validData,
+      startTime: '9:00',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects invalid endTime format', () => {
+    const result = CreateTimeEntryFormSchema.safeParse({
+      ...validData,
+      endTime: 'abc',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects endTime equal to startTime', () => {
+    const result = CreateTimeEntryFormSchema.safeParse({
+      ...validData,
+      startTime: '10:00',
+      endTime: '10:00',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects endTime before startTime', () => {
+    const result = CreateTimeEntryFormSchema.safeParse({
+      ...validData,
+      startTime: '14:00',
+      endTime: '09:00',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts endTime one minute after startTime', () => {
+    const result = CreateTimeEntryFormSchema.safeParse({
+      ...validData,
+      startTime: '09:00',
+      endTime: '09:01',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects non-Date for date field', () => {
+    const result = CreateTimeEntryFormSchema.safeParse({
+      ...validData,
+      date: '2025-06-15',
+    });
     expect(result.success).toBe(false);
   });
 });

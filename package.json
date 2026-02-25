@@ -4,6 +4,7 @@
   "license": "MIT",
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
+    "add:component": "npx shadcn@latest add",
     "build": "nx run-many --target=build --all",
     "build:renderer": "nx build renderer",
     "build:desktop": "nx build desktop",
@@ -68,9 +69,10 @@
     "libs/*"
   ],
   "dependencies": {
+    "@base-ui/react": "^1.2.0",
+    "@hookform/resolvers": "^5.2.2",
     "@prisma/adapter-better-sqlite3": "^7.4.1",
     "@prisma/client": "^7.4.1",
-    "prisma": "^7.4.1",
     "@tanstack/react-query": "^5.90.21",
     "better-sqlite3": "^12.6.2",
     "class-variance-authority": "^0.7.1",
@@ -79,10 +81,12 @@
     "date-fns": "^4.1.0",
     "electron-store": "^11.0.2",
     "lucide-react": "^0.575.0",
+    "prisma": "^7.4.1",
     "radix-ui": "^1.4.3",
     "react": "^19.0.0",
     "react-day-picker": "^9.13.2",
     "react-dom": "^19.0.0",
+    "react-hook-form": "^7.71.2",
     "react-resizable-panels": "^4.6.5",
     "react-router-dom": "6.30.3",
     "shadcn": "^3.8.5",
