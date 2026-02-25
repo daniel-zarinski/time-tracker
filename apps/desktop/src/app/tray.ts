@@ -1,5 +1,4 @@
-import { Tray, Menu, nativeImage, BrowserWindow, app } from 'electron';
-import { join } from 'path';
+import { Tray, Menu, BrowserWindow, app } from 'electron';
 import {
   getClient,
   getActiveTimeEntry,
@@ -13,17 +12,13 @@ import type {
 } from '@time-tracker/database';
 import { getJiraConfig } from './store/config-store';
 import { TimeTrackingService } from './services/time-tracking-service';
+import { TrayIconProvider } from './tray-icon-provider';
 
 let tray: Tray | null = null;
 let updateInterval: ReturnType<typeof setInterval> | null = null;
+const trayIconProvider = new TrayIconProvider();
 
 const DEFAULT_ISSUE_LIMIT = 5;
-
-function getIconPath(): string {
-  return app.isPackaged
-    ? join(app.getAppPath(), 'assets', 'icon.png')
-    : join(__dirname, 'assets', 'icon.png');
-}
 
 async function getRunningEntry(): Promise<TimeEntryWithIssue | null> {
   try {
@@ -168,6 +163,7 @@ async function updateTray(): Promise<void> {
 
   try {
     const running = await getRunningEntry();
+    tray.setImage(trayIconProvider.getIcon(running !== null));
     if (running) {
       const elapsed = Date.now() - running.startedAt.getTime();
       const label =
@@ -185,12 +181,7 @@ async function updateTray(): Promise<void> {
 }
 
 export function createTray(): void {
-  const iconPath = getIconPath();
-  let trayIcon = nativeImage.createFromPath(iconPath);
-  trayIcon = trayIcon.resize({ width: 16, height: 16 });
-  if (process.platform === 'darwin') {
-    trayIcon.setTemplateImage(true);
-  }
+  const trayIcon = trayIconProvider.getIcon(false);
 
   tray = new Tray(trayIcon);
   tray.setToolTip('Tempo Tracker');

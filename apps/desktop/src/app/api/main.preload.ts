@@ -52,7 +52,7 @@ const storeApi: StoreApi = {
   set: (key: string, value: unknown) =>
     ipcRenderer.invoke('store:set', key, value),
   getJiraConfig: () => ipcRenderer.invoke('store:get-jira-config'),
-  setJiraConfig: (config: { domain: string; email: string; token: string }) =>
+  setJiraConfig: (config: { company: string; email: string; token: string }) =>
     ipcRenderer.invoke('store:set-jira-config', config),
   getTempoConfig: () => ipcRenderer.invoke('store:get-tempo-config'),
   setTempoConfig: (config: { token: string }) =>
@@ -60,7 +60,7 @@ const storeApi: StoreApi = {
 };
 
 const jiraApi: JiraApi = {
-  saveConfig: (config: { domain: string; email: string; token: string }) =>
+  saveConfig: (config: { company: string; email: string; token: string }) =>
     ipcRenderer.invoke('jira:save-config', config),
   testConnection: (config?: unknown) =>
     ipcRenderer.invoke('jira:test-connection', config),

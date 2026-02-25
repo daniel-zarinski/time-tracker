@@ -37,7 +37,7 @@ export function bootstrapJiraEvents(): void {
         const service = new JiraService(config);
         const myself = await service.testConnection();
         setJiraConfig({
-          domain: input.domain,
+          company: input.company,
           email: input.email,
           token: input.token,
           accountId: myself.accountId,
@@ -57,7 +57,7 @@ export function bootstrapJiraEvents(): void {
         const myself = await service.testConnection();
         const configToSave = input ?? getJiraConfig();
         if (
-          configToSave?.domain &&
+          configToSave?.company &&
           configToSave?.email &&
           configToSave?.token
         ) {

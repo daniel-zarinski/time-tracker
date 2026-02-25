@@ -15,7 +15,8 @@ const schema = {
   [JIRA_CONFIG_KEY]: {
     type: 'object',
     properties: {
-      domain: { type: 'string' },
+      company: { type: 'string' },
+      domain: { type: 'string' }, // legacy — migrated to company on read
       email: { type: 'string' },
       token: { type: 'string' },
       accountId: { type: 'string' },
@@ -36,44 +37,22 @@ export const configStore = new Store({
   schema,
 });
 
-function domainFromBaseUrl(baseUrl: string): string {
-  try {
-    const url = new URL(baseUrl);
-    const host = url.hostname;
-    return host.replace(/\.atlassian\.net$/, '') || '';
-  } catch {
-    return '';
-  }
-}
-
-function resolveDomain(raw: {
-  domain?: string;
-  baseUrl?: string;
-}): string | undefined {
-  if (typeof raw.domain === 'string' && raw.domain.trim()) {
-    return raw.domain.trim();
-  }
-  if (typeof raw.baseUrl === 'string' && raw.baseUrl.trim()) {
-    const d = domainFromBaseUrl(raw.baseUrl);
-    return d || undefined;
-  }
-  return undefined;
-}
-
 export function getJiraConfig(): JiraConfigInput | undefined {
   const raw = configStore.get(JIRA_CONFIG_KEY) as Record<string, unknown> | undefined;
   if (!raw || typeof raw !== 'object') return undefined;
 
-  const domain = resolveDomain(raw as { domain?: string; baseUrl?: string });
-  if (!domain) return undefined;
+  // Migrate legacy "domain" → "company"
+  const input = raw.company ? raw : { ...raw, company: raw.domain };
 
-  const result = JiraConfigInputSchema.safeParse({
-    domain,
-    email: raw.email,
-    token: raw.token,
-    accountId: raw.accountId || undefined,
-  });
-  return result.success ? result.data : undefined;
+  const result = JiraConfigInputSchema.safeParse(input);
+  if (!result.success) return undefined;
+
+  // Persist migration so legacy key is replaced
+  if (!raw.company && raw.domain) {
+    configStore.set(JIRA_CONFIG_KEY, result.data);
+  }
+
+  return result.data;
 }
 
 export function setJiraConfig(config: JiraConfigInput): void {

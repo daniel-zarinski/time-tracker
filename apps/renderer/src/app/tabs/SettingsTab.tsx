@@ -41,7 +41,7 @@ const TEMPO_HELP_URL =
 export function SettingsTab() {
   const queryClient = useQueryClient();
   const [email, setEmail] = useState('');
-  const [domain, setDomain] = useState('');
+  const [company, setCompany] = useState('');
   const [token, setToken] = useState('');
   const [tempoToken, setTempoToken] = useState('');
 
@@ -59,7 +59,7 @@ export function SettingsTab() {
   });
 
   const saveMutation = useMutation({
-    mutationFn: (config: { domain: string; email: string; token: string }) =>
+    mutationFn: (config: { company: string; email: string; token: string }) =>
       window.jira.saveConfig(config),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['jira', 'config'] });
@@ -82,7 +82,7 @@ export function SettingsTab() {
   });
 
   const testMutation = useMutation({
-    mutationFn: (config: { domain: string; email: string; token: string }) =>
+    mutationFn: (config: { company: string; email: string; token: string }) =>
       window.jira.testConnection(config),
   });
 
@@ -183,7 +183,7 @@ export function SettingsTab() {
     const config = configQuery.data;
     if (config) {
       setEmail(config.email);
-      setDomain(config.domain);
+      setCompany(config.company);
       setToken(config.token);
     }
   }, [configQuery.data]);
@@ -195,15 +195,15 @@ export function SettingsTab() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!domain.trim() || !email || !token) return;
-    saveMutation.mutate({ domain, email, token });
+    if (!company.trim() || !email || !token) return;
+    saveMutation.mutate({ company, email, token });
   }
 
   async function handleTestConnection() {
-    if (!domain.trim() || !email || !token) return;
+    if (!company.trim() || !email || !token) return;
     try {
       await toast
-        .promise(testMutation.mutateAsync({ domain, email, token }), {
+        .promise(testMutation.mutateAsync({ company, email, token }), {
           id: JIRA_TOAST_ID,
           loading: 'Testing connection…',
           success: 'Connected',
@@ -271,13 +271,13 @@ export function SettingsTab() {
                 </Field>
 
                 <Field>
-                  <FieldLabel htmlFor="jira-domain">Company Domain</FieldLabel>
+                  <FieldLabel htmlFor="jira-company">Company Domain</FieldLabel>
                   <InputGroup>
                     <InputGroupInput
-                      id="jira-domain"
+                      id="jira-company"
                       placeholder="mycompany"
-                      value={domain}
-                      onChange={(e) => setDomain(e.target.value)}
+                      value={company}
+                      onChange={(e) => setCompany(e.target.value)}
                     />
                     <InputGroupAddon align="inline-end">
                       <InputGroupText>.atlassian.net</InputGroupText>
@@ -370,9 +370,9 @@ export function SettingsTab() {
                       variant="link"
                       className="inline h-auto p-0 font-normal align-baseline ml-1 text-primary underline underline-offset-4 hover:text-primary/80"
                       onClick={() => {
-                        const domain = configQuery.data?.domain;
-                        const url = domain
-                          ? `https://${domain}.atlassian.net${TEMPO_API_INTEGRATION_PATH}`
+                        const co = configQuery.data?.company;
+                        const url = co
+                          ? `https://${co}.atlassian.net${TEMPO_API_INTEGRATION_PATH}`
                           : TEMPO_HELP_URL;
                         window.electron.openExternal(url);
                       }}

@@ -5,6 +5,7 @@
 
 import { app, ipcMain, shell } from 'electron';
 import { environment } from '../../environments/environment';
+import { jiraDomain } from '@time-tracker/schema';
 import {
   configStore,
   getJiraConfig,
@@ -24,8 +25,8 @@ ipcMain.handle('shell:open-external', (_, url: string) =>
 );
 ipcMain.handle('shell:open-jira-external', async (_, issueKey: string) => {
   const config = getJiraConfig();
-  if (config?.domain) {
-    const url = `https://${config.domain}.atlassian.net/browse/${issueKey}`;
+  if (config?.company) {
+    const url = `https://${jiraDomain(config.company)}/browse/${issueKey}`;
     await shell.openExternal(url);
   }
 });

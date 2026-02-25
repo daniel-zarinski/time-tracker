@@ -13,6 +13,7 @@ import type {
   JiraRawIssue,
   JiraStatusRaw,
 } from '@time-tracker/schema';
+import { jiraDomain } from '@time-tracker/schema';
 import type { JiraConfig, JiraProject } from '@time-tracker/jira';
 import { JiraApiError, JiraClient } from '@time-tracker/jira';
 import { getJiraIssuesUnsynced } from '@time-tracker/database';
@@ -52,38 +53,14 @@ function normalizeBaseUrl(url: string): string {
   return url.replace(/\/$/, '');
 }
 
-export function toJiraConfig(input: JiraConfigInput): JiraConfig {
-  const d = input.domain
-    .trim()
-    .toLowerCase()
-    .replace(/\.atlassian\.net$/i, '');
-  if (!d) throw new JiraApiError('Jira domain is required');
-  const baseUrl = `https://${d}.atlassian.net`;
-  return {
-    baseUrl,
-    email: input.email,
-    token: input.token,
-  };
-}
-
-export function validateConfig(config: JiraConfig): void {
-  if (!config?.baseUrl?.trim()) {
-    throw new JiraApiError('Jira base URL is required');
-  }
-  if (!config?.email?.trim()) {
-    throw new JiraApiError('Jira email is required');
-  }
-  if (!config?.token?.trim()) {
-    throw new JiraApiError('Jira API token is required');
-  }
-}
-
 export function resolveConfig(input?: JiraConfigInput): JiraConfig {
   const raw = input ?? getJiraConfig();
   if (!raw) throw new JiraApiError('Jira is not configured');
-  const config = toJiraConfig(raw);
-  validateConfig(config);
-  return config;
+  return {
+    baseUrl: `https://${jiraDomain(raw.company)}`,
+    email: raw.email,
+    token: raw.token,
+  };
 }
 
 const ISSUE_FIELDS =
