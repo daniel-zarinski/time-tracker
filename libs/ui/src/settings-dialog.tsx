@@ -23,15 +23,15 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from './ui/breadcrumb';
-import { Button } from './ui/button';
+} from './shadcn/breadcrumb';
+import { Button } from './shadcn/button';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
   DialogTrigger,
-} from './ui/dialog';
+} from './shadcn/dialog';
 import {
   Sidebar,
   SidebarContent,
@@ -41,7 +41,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-} from './ui/sidebar';
+} from './shadcn/sidebar';
 
 const data = {
   nav: [

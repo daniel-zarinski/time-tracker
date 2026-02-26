@@ -12,7 +12,7 @@ import {
   CommandItem,
   CommandList,
   CommandShortcut,
-} from './ui/command';
+} from './shadcn/command';
 
 export interface CommandPaletteItem {
   id: string;

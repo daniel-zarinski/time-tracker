@@ -9,8 +9,8 @@ import {
   ComboboxInput,
   ComboboxItem,
   ComboboxList,
-} from './ui/combobox';
-import { Item, ItemContent, ItemDescription, ItemTitle } from './ui/item';
+} from './shadcn/combobox';
+import { Item, ItemContent, ItemDescription, ItemTitle } from './shadcn/item';
 
 export interface ComboboxSelectItem {
   /** Unique value used for selection and form submission. */

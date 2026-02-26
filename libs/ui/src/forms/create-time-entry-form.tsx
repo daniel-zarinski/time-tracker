@@ -16,17 +16,17 @@ import { cn } from '@time-tracker/utils';
 import { CalendarIcon, Clock2Icon, TimerIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Button } from '../ui/button';
-import { Calendar } from '../ui/calendar';
-import { Field, FieldError, FieldLabel } from '../ui/field';
-import { Input } from '../ui/input';
+import { Button } from '../shadcn/button';
+import { Calendar } from '../shadcn/calendar';
+import { Field, FieldError, FieldLabel } from '../shadcn/field';
+import { Input } from '../shadcn/input';
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
-} from '../ui/input-group';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { Textarea } from '../ui/textarea';
+} from '../shadcn/input-group';
+import { Popover, PopoverContent, PopoverTrigger } from '../shadcn/popover';
+import { Textarea } from '../shadcn/textarea';
 
 interface CreateTimeEntryFormProps {
   onSubmit: (data: {

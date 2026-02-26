@@ -25,17 +25,17 @@ import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import type { ComboboxSelectItem } from '../combobox-select';
 import { ComboboxSelect } from '../combobox-select';
-import { Button } from '../ui/button';
-import { Calendar } from '../ui/calendar';
-import { CardContent, CardFooter } from '../ui/card';
-import { Field, FieldError, FieldLabel } from '../ui/field';
+import { Button } from '../shadcn/button';
+import { Calendar } from '../shadcn/calendar';
+import { CardContent, CardFooter } from '../shadcn/card';
+import { Field, FieldError, FieldLabel } from '../shadcn/field';
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
-} from '../ui/input-group';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { Textarea } from '../ui/textarea';
+} from '../shadcn/input-group';
+import { Popover, PopoverContent, PopoverTrigger } from '../shadcn/popover';
+import { Textarea } from '../shadcn/textarea';
 
 interface EditTimeEntryFormProps {
   entry: TimeEntryWithIssue;

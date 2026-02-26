@@ -12,10 +12,10 @@
   },
   "iconLibrary": "lucide",
   "aliases": {
-    "components": "libs/ui/src/components",
+    "components": "libs/ui/src",
     "utils": "@time-tracker/utils",
-    "ui": "libs/ui/src/components/ui",
+    "ui": "libs/ui/src/shadcn",
     "lib": "libs/ui/src/lib",
-    "hooks": "apps/renderer/src/hooks"
+    "hooks": "libs/hooks/src"
   }
 }

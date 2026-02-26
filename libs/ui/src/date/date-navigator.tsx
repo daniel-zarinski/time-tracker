@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '../ui/button';
+import { Button } from '../shadcn/button';
 
 interface DateNavigatorProps {
   label?: string;
