@@ -31,13 +31,13 @@ export function TimelineHeader({
       <div className="sticky top-0 z-30 flex items-center justify-between border-b border-border bg-background px-4 py-2">
         <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
           <PopoverTrigger asChild>
-            <button className="text-sm font-semibold hover:text-primary transition-colors">
+            <Button variant="ghost" size="sm" className="font-semibold">
               {date.toLocaleDateString('en-US', {
                 weekday: 'long',
                 month: 'long',
                 day: 'numeric',
               })}
-            </button>
+            </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
             <Calendar
