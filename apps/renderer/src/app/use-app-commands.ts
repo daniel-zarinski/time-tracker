@@ -18,7 +18,7 @@ export function useAppCommands(): {
   isLoading: boolean;
 } {
   const setActiveTab = useAppStore.use.setActiveTab();
-  const setSelectedIssue = useAppStore.use.setSelectedIssue();
+  const setSelectedIssueKey = useAppStore.use.setSelectedIssueKey();
 
   const getIssuesQuery = useQuery({
     queryKey: ['jira', 'my-issues'],
@@ -96,7 +96,7 @@ export function useAppCommands(): {
         id: issue.key,
         label: `${issue.key} ${issue.summary}`,
         keywords: [issue.key],
-        onSelect: () => setSelectedIssue(issue),
+        onSelect: () => setSelectedIssueKey(issue.key),
       })),
     },
   ];

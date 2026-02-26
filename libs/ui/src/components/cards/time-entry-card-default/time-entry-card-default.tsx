@@ -26,6 +26,7 @@ interface TimeEntryCardDefaultProps {
   onSave?: (entryId: string, updates: TimeEntryUpdates) => void | Promise<void>;
   onDelete?: (entryId: string) => void | Promise<void>;
   onOpenInJira?: (issueKey: string) => void | Promise<void>;
+  renderIssueKey?: (key: string) => React.ReactNode;
   className?: string;
 }
 
@@ -50,6 +51,7 @@ export function TimeEntryCardDefault({
   onSave,
   onDelete,
   onOpenInJira,
+  renderIssueKey,
   className,
 }: TimeEntryCardDefaultProps) {
   const [state, setState] = useState<'default' | 'expanded' | 'edit'>(
@@ -102,6 +104,7 @@ export function TimeEntryCardDefault({
             summary={entry.issue.summary ?? ''}
             truncate
             className="cursor-default"
+            renderIssueKey={renderIssueKey}
           />
           <EditTimeEntryForm
             entry={entry}
@@ -122,6 +125,7 @@ export function TimeEntryCardDefault({
                 issueKey={issueKey}
                 summary={entry.issue.summary ?? ''}
                 truncate={state !== 'expanded'}
+                renderIssueKey={renderIssueKey}
                 children={
                   state === 'default' ? (
                     <TimeEntryCardActionsDropdown

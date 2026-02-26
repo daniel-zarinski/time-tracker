@@ -19,6 +19,7 @@ import { Settings, AlertCircle, Inbox } from 'lucide-react';
 import { useAppStore } from '../store';
 import { toast } from 'sonner';
 
+
 const OTHER_STATUSES = [
   'DEV COMPLETED',
   'Done',
@@ -58,6 +59,7 @@ function sortStatuses(statuses: string[]): string[] {
 
 export function JiraIssuesTab() {
   const setActiveTab = useAppStore.use.setActiveTab();
+  const setSelectedIssueKey = useAppStore.use.setSelectedIssueKey();
 
   const getIssuesQuery = useQuery({
     queryKey: ['jira', 'my-issues'],
@@ -202,6 +204,7 @@ export function JiraIssuesTab() {
                 <JiraIssueCard
                   issue={issue}
                   onOpenInJira={(key) => window.electron.openJiraExternal(key)}
+                  onIssueKeyClick={(key) => setSelectedIssueKey(key)}
                   onTrackTime={async (key) => {
                     try {
                       const timeEntry = await window.timeTracking.startTracking(

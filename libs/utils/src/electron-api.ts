@@ -29,6 +29,7 @@ export interface DatabaseApi {
   getRelevantJiraIssues: (options?: {
     limit?: number;
   }) => Promise<JiraIssueWithParent[]>;
+  getJiraIssueByKey: (key: string) => Promise<JiraIssueWithParent | null>;
   getAllJiraIssues: () => Promise<JiraIssueWithParent[]>;
   getTimeEntries: (options?: {
     limit?: number;

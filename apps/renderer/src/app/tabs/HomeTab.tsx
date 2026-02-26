@@ -12,8 +12,10 @@ import {
   toast,
 } from '@time-tracker/ui';
 import { Inbox, PlayIcon } from 'lucide-react';
+import { useAppStore } from '../store';
 
 export function HomeTab() {
+  const setSelectedIssueKey = useAppStore.use.setSelectedIssueKey();
   const activeEntryQuery = useQuery({
     queryKey: ['active-time-entry'],
     queryFn: () => window.database.getActiveTimeEntry(),
@@ -69,6 +71,7 @@ export function HomeTab() {
           <TimeEntryCardActive
             entry={activeEntry}
             onStopTimer={stopTracking.mutateAsync}
+            onIssueKeyClick={(key) => setSelectedIssueKey(key)}
           />
           {issues.length > 0 && <Separator className="mt-3" />}
         </div>
@@ -82,6 +85,7 @@ export function HomeTab() {
                 issue={issue}
                 onOpenInJira={window.electron.openJiraExternal}
                 onTrackTime={startTracking.mutateAsync}
+                onIssueKeyClick={(key) => setSelectedIssueKey(key)}
                 headerAction={
                   <Button
                     size="icon-sm"

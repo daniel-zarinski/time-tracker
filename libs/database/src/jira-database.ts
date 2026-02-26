@@ -103,6 +103,16 @@ export async function upsertJiraIssue(
   }
 }
 
+export async function getJiraIssueByKey(
+  prisma: PrismaClient,
+  key: string
+): Promise<JiraIssueWithParent | null> {
+  return prisma.jiraIssue.findUnique({
+    where: { key },
+    include: { parent: true },
+  });
+}
+
 export async function getJiraIssues(
   prisma: PrismaClient
 ): Promise<JiraIssueWithParent[]> {

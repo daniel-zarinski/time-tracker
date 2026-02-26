@@ -21,6 +21,8 @@ const electronApi: ElectronApi = {
 const databaseApi: DatabaseApi = {
   getPath: () => ipcRenderer.invoke('database:get-path'),
   delete: () => ipcRenderer.invoke('database:delete'),
+  getJiraIssueByKey: (key: string) =>
+    ipcRenderer.invoke('database:get-jira-issue-by-key', key),
   getMyJiraIssues: () => ipcRenderer.invoke('database:get-my-jira-issues'),
   getRelevantJiraIssues: (options) =>
     ipcRenderer.invoke('database:get-relevant-jira-issues', options),

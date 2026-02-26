@@ -13,6 +13,7 @@ import {
   toast,
   type ComboboxSelectItem,
 } from '@time-tracker/ui';
+import type { JiraIssueWithParent } from '@time-tracker/database';
 
 import {
   HomeTab,
@@ -30,8 +31,8 @@ export function App() {
   const queryClient = useQueryClient();
   const activeTab = useAppStore.use.activeTab();
   const setActiveTab = useAppStore.use.setActiveTab();
-  const selectedIssue = useAppStore.use.selectedIssue();
-  const setSelectedIssue = useAppStore.use.setSelectedIssue();
+  const selectedIssueKey = useAppStore.use.selectedIssueKey();
+  const setSelectedIssueKey = useAppStore.use.setSelectedIssueKey();
   const selectedTimeEntry = useAppStore.use.selectedTimeEntry();
   const selectedTimeEntryView = useAppStore.use.selectedTimeEntryView();
   const setSelectedTimeEntry = useAppStore.use.setSelectedTimeEntry();
@@ -42,6 +43,12 @@ export function App() {
     queryKey: ['jira', 'my-issues'],
     queryFn: () => window.database.getMyJiraIssues(),
     retry: false,
+  });
+
+  const issueQuery = useQuery<JiraIssueWithParent | null>({
+    queryKey: ['jira-issue', selectedIssueKey],
+    queryFn: () => window.database.getJiraIssueByKey(selectedIssueKey!),
+    enabled: !!selectedIssueKey,
   });
 
   const issueItems: ComboboxSelectItem[] = React.useMemo(
@@ -58,7 +65,7 @@ export function App() {
   const startTrackingMutation = useMutation({
     mutationFn: (key: string) => window.timeTracking.startTracking(key),
     onSuccess: () => {
-      setSelectedIssue(null);
+      setSelectedIssueKey(null);
       setSelectedTimeEntry(null);
     },
     onError: () => {
@@ -159,22 +166,23 @@ export function App() {
       </Tabs>
 
       <Dialog
-        open={!!selectedIssue}
-        onOpenChange={(open) => !open && setSelectedIssue(null)}
+        open={!!selectedIssueKey}
+        onOpenChange={(open) => !open && setSelectedIssueKey(null)}
       >
         <DialogContent
           className="p-0 border-0 shadow-none gap-0 mx-auto max-w-md"
           showCloseButton
         >
-          {selectedIssue && (
+          {issueQuery.data && (
             <JiraIssueCard
-              issue={selectedIssue}
+              issue={issueQuery.data}
               defaultExpanded
               collapsible={false}
               onOpenInJira={(key) => window.electron.openJiraExternal(key)}
               onTrackTime={async (key) => {
                 await startTrackingMutation.mutateAsync(key);
               }}
+              onIssueKeyClick={(key) => setSelectedIssueKey(key)}
             />
           )}
         </DialogContent>
@@ -198,6 +206,7 @@ export function App() {
                 await startTrackingMutation.mutateAsync(key);
               }}
               onOpenInJira={(key) => window.electron.openJiraExternal(key)}
+              onIssueKeyClick={(key) => setSelectedIssueKey(key)}
               onSave={async (entryId, updates) => {
                 await updateTimeEntryMutation.mutateAsync({
                   entryId,

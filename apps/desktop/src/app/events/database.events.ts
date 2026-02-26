@@ -9,6 +9,7 @@ import {
   disconnect,
   getDatabasePath,
   getJiraIssuesByEmail,
+  getJiraIssueByKey,
   getJiraIssues,
   getRelevantJiraIssues,
   getTimeEntries,
@@ -115,6 +116,14 @@ ipcMain.handle('database:delete', async () => {
   }
   return { success: false, error: 'Database file not found' };
 });
+
+ipcMain.handle(
+  'database:get-jira-issue-by-key',
+  async (_event, key: string) => {
+    const client = getClient();
+    return getJiraIssueByKey(client, key);
+  }
+);
 
 ipcMain.handle('database:get-my-jira-issues', async () => {
   const config = resolveConfig();

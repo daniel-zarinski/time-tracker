@@ -15,6 +15,7 @@ import { TimelineGrid } from './TimelineGrid';
 
 export function TimelineTab() {
   const setSelectedTimeEntry = useAppStore.use.setSelectedTimeEntry();
+  const setSelectedIssueKey = useAppStore.use.setSelectedIssueKey();
   const [date, setDate] = React.useState(() => new Date());
   const containerRef = React.useRef<HTMLDivElement>(null);
   const olRef = React.useRef<HTMLOListElement>(null);
@@ -155,6 +156,7 @@ export function TimelineTab() {
         onEntryClick={(entry) => setSelectedTimeEntry(entry, { view: 'edit' })}
         onCreateEntry={(issueKey) => createEntryMutation.mutate(issueKey)}
         onClearSelection={clearSelection}
+        onIssueKeyClick={(key) => setSelectedIssueKey(key)}
       />
     </div>
   );

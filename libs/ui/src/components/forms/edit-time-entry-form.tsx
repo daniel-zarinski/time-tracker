@@ -133,14 +133,14 @@ export function EditTimeEntryForm({
             name="issueKey"
             control={control}
             render={({ field }) => {
-              const selected =
-                issues.find((i) => i.value === field.value) ?? null;
+              const defaultItem =
+                issues.find((i) => i.value === entry.issueKey) ?? null;
               return (
                 <Field className="col-span-2">
                   <FieldLabel className="text-xs">Jira Issue Key</FieldLabel>
                   <ComboboxSelect
                     items={issues}
-                    value={selected}
+                    defaultValue={defaultItem}
                     onValueChange={(item) => {
                       field.onChange(item?.value ?? '');
                     }}

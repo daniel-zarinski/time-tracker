@@ -16,7 +16,7 @@ import { useMemo } from 'react';
 import { useAppStore } from '../store';
 
 export function TasksTab() {
-  const setSelectedIssue = useAppStore.use.setSelectedIssue();
+  const setSelectedIssueKey = useAppStore.use.setSelectedIssueKey();
   const timeEntriesQuery = useQuery({
     queryKey: ['time-entries'],
     queryFn: () => window.database.getTimeEntries(),
@@ -132,6 +132,7 @@ export function TasksTab() {
           <TimeEntryCardActive
             entry={activeEntry}
             onStopTimer={stopTracking.mutateAsync}
+            onIssueKeyClick={(key) => setSelectedIssueKey(key)}
           />
           {completedEntries.length > 0 && <Separator className="mt-3" />}
         </div>
@@ -143,7 +144,8 @@ export function TasksTab() {
             <TimeEntryCardDefault
               entry={entry}
               issues={issueItems}
-              onOpenInJira={() => setSelectedIssue(entry.issue)}
+              onOpenInJira={() => window.electron.openJiraExternal(entry.issueKey)}
+              onIssueKeyClick={(key) => setSelectedIssueKey(key)}
               onResumeTimer={() => startTracking.mutateAsync(entry.issueKey)}
               onSave={async (entryId, updates) => {
                 await updateTimeEntryMutation.mutateAsync({

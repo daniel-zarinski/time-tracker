@@ -15,6 +15,7 @@ interface TimeEntryCardActiveProps {
   hoursPerDay?: number;
   onStopTimer?: (entryId: string) => void | Promise<void>;
   onCardClick?: () => void;
+  renderIssueKey?: (key: string) => React.ReactNode;
   className?: string;
 }
 
@@ -24,6 +25,7 @@ export function TimeEntryCardActive({
   className,
   onStopTimer,
   onCardClick,
+  renderIssueKey,
 }: TimeEntryCardActiveProps) {
   const [, setTick] = useState(0);
 
@@ -41,6 +43,8 @@ export function TimeEntryCardActive({
 
   const secondsPerDay = hoursPerDay * 3600;
   const progressValue = Math.min(100, (elapsedSeconds / secondsPerDay) * 100);
+
+  const issueKey = entry.issue.key ?? entry.issueKey;
 
   return (
     <Card
@@ -67,12 +71,16 @@ export function TimeEntryCardActive({
         </span> */}
 
         <div className="min-w-0 flex-1 flex flex-col gap-0.5">
-          <Badge
-            variant="outline"
-            className="shrink-0 w-fit text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70"
-          >
-            {entry.issue.key ?? entry.issueKey}
-          </Badge>
+          {renderIssueKey ? (
+            renderIssueKey(issueKey)
+          ) : (
+            <Badge
+              variant="outline"
+              className="shrink-0 w-fit text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70"
+            >
+              {issueKey}
+            </Badge>
+          )}
           <span className="text-sm text-foreground/90 wrap-break-word">
             {entry.issue.summary ?? ''}
           </span>
