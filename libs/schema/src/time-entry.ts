@@ -20,12 +20,13 @@ export const UpdateTimeEntryInputSchema = z.object({
   startedAt: z.date().optional(),
   timeSpentSeconds: z.number().optional(),
   description: z.string().optional(),
+  issueKey: z.string().optional(),
 });
 
 export type UpdateTimeEntryInput = z.infer<typeof UpdateTimeEntryInputSchema>;
 
-// E3. CreateTimeEntryFormSchema (react-hook-form validation)
-export const CreateTimeEntryFormSchema = z
+// E3. TimeEntryFormSchema (react-hook-form validation — shared by create & edit)
+export const TimeEntryFormSchema = z
   .object({
     issueKey: z.string().min(1, 'Issue key is required'),
     date: z.date(),
@@ -40,6 +41,9 @@ export const CreateTimeEntryFormSchema = z
     { message: 'End time must be after start time', path: ['endTime'] }
   );
 
-export type CreateTimeEntryFormValues = z.infer<
-  typeof CreateTimeEntryFormSchema
->;
+export type TimeEntryFormValues = z.infer<typeof TimeEntryFormSchema>;
+
+/** @deprecated Use TimeEntryFormSchema */
+export const CreateTimeEntryFormSchema = TimeEntryFormSchema;
+/** @deprecated Use TimeEntryFormValues */
+export type CreateTimeEntryFormValues = TimeEntryFormValues;

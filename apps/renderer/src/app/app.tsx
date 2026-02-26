@@ -10,14 +10,20 @@ import {
   TimeEntryCardDefault,
   Tabs,
   TabsContent,
-
   toast,
+  type ComboboxSelectItem,
 } from '@time-tracker/ui';
 
-import { HomeTab, TasksTab, SettingsTab, JiraIssuesTab, MainTabList } from './tabs';
+import {
+  HomeTab,
+  TasksTab,
+  SettingsTab,
+  JiraIssuesTab,
+  MainTabList,
+} from './tabs';
 import { useAppStore, TabValue } from './store';
 import { useAppCommands } from './use-app-commands';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { TimelineTab } from './tabs/timeline';
 
 export function App() {
@@ -31,6 +37,24 @@ export function App() {
   const setSelectedTimeEntry = useAppStore.use.setSelectedTimeEntry();
   const [commandOpen, setCommandOpen] = React.useState(false);
   const { commands } = useAppCommands();
+
+  const { data: jiraIssues = [] } = useQuery({
+    queryKey: ['jira', 'my-issues'],
+    queryFn: () => window.database.getMyJiraIssues(),
+    retry: false,
+  });
+
+  const issueItems: ComboboxSelectItem[] = React.useMemo(
+    () =>
+      jiraIssues
+        .filter((i) => i.key != null)
+        .map((i) => ({
+          value: i.key!,
+          label: i.key!,
+          description: i.summary ?? undefined,
+        })),
+    [jiraIssues]
+  );
   const startTrackingMutation = useMutation({
     mutationFn: (key: string) => window.timeTracking.startTracking(key),
     onSuccess: () => {
@@ -61,7 +85,11 @@ export function App() {
       updates,
     }: {
       entryId: string;
-      updates: { startedAt?: Date; timeSpentSeconds?: number; description?: string };
+      updates: {
+        startedAt?: Date;
+        timeSpentSeconds?: number;
+        description?: string;
+      };
     }) => window.database.updateTimeEntry(entryId, updates),
     onSuccess: () => {
       setSelectedTimeEntry(null);
@@ -104,7 +132,10 @@ export function App() {
           </div>
         </header>
 
-        <main className="flex min-h-0 flex-1 flex-col bg-muted" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+        <main
+          className="flex min-h-0 flex-1 flex-col bg-muted"
+          style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+        >
           <TabsContent value="home" className="overflow-y-auto">
             <HomeTab />
           </TabsContent>
@@ -160,6 +191,7 @@ export function App() {
           {selectedTimeEntry && (
             <TimeEntryCardDefault
               entry={selectedTimeEntry}
+              issues={issueItems}
               defaultExpanded
               defaultView={selectedTimeEntryView}
               onResumeTimer={async (key) => {
@@ -173,6 +205,7 @@ export function App() {
                     startedAt: updates.startedAt,
                     timeSpentSeconds: updates.timeSpentSeconds,
                     description: updates.description,
+                    // issueKey: updates.issueKey,
                   },
                 });
               }}

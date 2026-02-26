@@ -9,8 +9,10 @@ import {
   TimeEntryCardDefault,
   toast,
   Separator,
+  type ComboboxSelectItem,
 } from '@time-tracker/ui';
 import { Clock } from 'lucide-react';
+import { useMemo } from 'react';
 import { useAppStore } from '../store';
 
 export function TasksTab() {
@@ -20,6 +22,24 @@ export function TasksTab() {
     queryFn: () => window.database.getTimeEntries(),
     retry: false,
   });
+
+  const { data: jiraIssues = [] } = useQuery({
+    queryKey: ['jira', 'my-issues'],
+    queryFn: () => window.database.getMyJiraIssues(),
+    retry: false,
+  });
+
+  const issueItems: ComboboxSelectItem[] = useMemo(
+    () =>
+      jiraIssues
+        .filter((i) => i.key != null)
+        .map((i) => ({
+          value: i.key!,
+          label: i.key!,
+          description: i.summary ?? undefined,
+        })),
+    [jiraIssues]
+  );
   const startTracking = useMutation({
     mutationFn: (issueKey: string) =>
       window.timeTracking.startTracking(issueKey),
@@ -60,7 +80,11 @@ export function TasksTab() {
       updates,
     }: {
       entryId: string;
-      updates: { startedAt?: Date; timeSpentSeconds?: number; description?: string };
+      updates: {
+        startedAt?: Date;
+        timeSpentSeconds?: number;
+        description?: string;
+      };
     }) => window.database.updateTimeEntry(entryId, updates),
     onSuccess: () => {
       timeEntriesQuery.refetch();
@@ -118,6 +142,7 @@ export function TasksTab() {
           <li key={entry.id}>
             <TimeEntryCardDefault
               entry={entry}
+              issues={issueItems}
               onOpenInJira={() => setSelectedIssue(entry.issue)}
               onResumeTimer={() => startTracking.mutateAsync(entry.issueKey)}
               onSave={async (entryId, updates) => {
@@ -127,6 +152,7 @@ export function TasksTab() {
                     startedAt: updates.startedAt,
                     timeSpentSeconds: updates.timeSpentSeconds,
                     description: updates.description,
+                    // issueKey: updates.issueKey, // TODO: add this back in once implemented
                   },
                 });
               }}

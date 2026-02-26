@@ -2,6 +2,7 @@ import type { TimeEntryWithIssue } from '@time-tracker/database';
 import type { TimeEntryUpdates } from '@time-tracker/utils';
 import { cn } from '@time-tracker/utils';
 import { useState } from 'react';
+import type { ComboboxSelectItem } from '../../combobox-select';
 import { Card, CardContent } from '../../ui/card';
 import {
   Collapsible,
@@ -11,12 +12,13 @@ import {
 import { Progress } from '../../ui/progress';
 import { TimeEntryCardActionsDropdown } from './time-entry-card-actions';
 import { TimeEntryCardActionsFooter } from './time-entry-card-actions';
-import { TimeEntryCardEditForm } from './time-entry-card-edit-form';
+import { EditTimeEntryForm } from '../../forms/edit-time-entry-form';
 import { TimeEntryCardHeader } from './time-entry-card-header';
 import { TimeEntryCardSummary } from './time-entry-card-summary';
 
 interface TimeEntryCardDefaultProps {
   entry: TimeEntryWithIssue;
+  issues?: ComboboxSelectItem[];
   hoursPerDay?: number;
   defaultExpanded?: boolean;
   defaultView?: 'expanded' | 'edit';
@@ -40,6 +42,7 @@ function syncStatusStyles(status: string) {
 
 export function TimeEntryCardDefault({
   entry,
+  issues,
   hoursPerDay = 7,
   defaultExpanded = false,
   defaultView,
@@ -100,8 +103,9 @@ export function TimeEntryCardDefault({
             truncate
             className="cursor-default"
           />
-          <TimeEntryCardEditForm
+          <EditTimeEntryForm
             entry={entry}
+            issues={issues}
             onSave={handleSave}
             onCancel={handleCancelEdit}
             onDelete={onDelete}

@@ -3,4 +3,5 @@ export interface TimeEntryUpdates {
   endedAt?: Date
   timeSpentSeconds?: number
   description?: string
+  issueKey?: string
 }
