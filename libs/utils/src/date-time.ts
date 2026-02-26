@@ -1,44 +1,46 @@
 export { startOfDay, endOfDay } from 'date-fns';
+import {
+  format,
+  parse,
+  startOfDay,
+  addMinutes,
+  addSeconds,
+  differenceInMinutes,
+} from 'date-fns';
 
 export function toTimeString(date: Date): string {
-  const h = String(date.getHours()).padStart(2, '0');
-  const m = String(date.getMinutes()).padStart(2, '0');
-  return `${h}:${m}`;
+  return format(date, 'HH:mm');
 }
 
 export function timeStringToMinutes(time: string): number {
-  const parts = time.split(':').map(Number);
-  const h = parts[0] ?? 0;
-  const m = parts[1] ?? 0;
-  return h * 60 + m;
+  const ref = new Date(0);
+  const parsed = parse(time.trim(), 'H:mm', ref);
+  if (isNaN(parsed.getTime())) return 0;
+  return differenceInMinutes(parsed, startOfDay(parsed));
 }
 
 export function minutesToTimeString(totalMinutes: number): string {
+  const ref = new Date(0);
   const clamped = Math.max(0, Math.min(1439, Math.floor(totalMinutes)));
-  const h = String(Math.floor(clamped / 60)).padStart(2, '0');
-  const m = String(clamped % 60).padStart(2, '0');
-  return `${h}:${m}`;
+  const date = addMinutes(startOfDay(ref), clamped);
+  return format(date, 'HH:mm');
 }
 
 export function combineDateAndTime(date: Date, time: string): Date {
-  const result = new Date(date);
-  const minutes = timeStringToMinutes(time);
-  result.setHours(Math.floor(minutes / 60), minutes % 60, 0, 0);
-  return result;
+  return parse(time.trim(), 'H:mm', date);
 }
 
 export function formatDurationHHMM(seconds: number): string {
+  const ref = new Date(0);
   const total = Math.max(0, Math.floor(seconds));
-  const h = String(Math.floor(total / 3600)).padStart(2, '0');
-  const m = String(Math.floor((total % 3600) / 60)).padStart(2, '0');
-  return `${h}:${m}`;
+  const date = addSeconds(startOfDay(ref), total);
+  return format(date, 'HH:mm');
 }
 
 export function parseDurationHHMM(value: string): number | null {
-  const match = value.trim().match(/^(\d{1,2}):(\d{2})$/);
-  if (!match) return null;
-  const h = parseInt(match[1], 10);
-  const m = parseInt(match[2], 10);
-  if (m >= 60) return null;
-  return h * 3600 + m * 60;
+  const ref = new Date(0);
+  const parsed = parse(value.trim(), 'H:mm', ref);
+  if (isNaN(parsed.getTime())) return null;
+  if (parsed.getMinutes() >= 60) return null;
+  return parsed.getHours() * 3600 + parsed.getMinutes() * 60;
 }

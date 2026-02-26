@@ -12,6 +12,7 @@
     "moduleResolution": "bundler"
   },
   "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts"],
   "references": [
     { "path": "../database/tsconfig.lib.json" },
     { "path": "../jira/tsconfig.lib.json" },
