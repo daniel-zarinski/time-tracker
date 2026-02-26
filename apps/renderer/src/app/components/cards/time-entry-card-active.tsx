@@ -13,6 +13,7 @@ import {
   TooltipTrigger,
 } from '@time-tracker/ui';
 import { JiraIssueKeyBadge } from '../jira-issue-key-badge';
+import { JiraIssueTypeBadge } from '../jira-issue-type-badge';
 
 interface TimeEntryCardActiveProps {
   entry: TimeEntryWithIssue;
@@ -71,9 +72,7 @@ export function TimeEntryCardActive({
           <div className="flex flex-wrap items-center gap-1.5">
             <JiraIssueKeyBadge issueKey={issueKey} />
             {entry.issue.issueType && (
-              <Badge variant="outline" className="shrink-0 w-fit text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70">
-                {entry.issue.issueType}
-              </Badge>
+              <JiraIssueTypeBadge issueType={entry.issue.issueType} />
             )}
             <Badge variant="outline" className="shrink-0 w-fit text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70">
               {entry.issue.status ?? 'Unknown'}

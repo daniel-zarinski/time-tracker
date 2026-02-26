@@ -14,6 +14,7 @@ import { ChevronDownIcon, ExternalLinkIcon, TimerIcon } from 'lucide-react';
 import { cn } from '@time-tracker/utils';
 import type { JiraIssueWithParent } from '@time-tracker/database';
 import { JiraIssueKeyBadge } from '../jira-issue-key-badge';
+import { JiraIssueTypeBadge } from '../jira-issue-type-badge';
 
 interface JiraIssueCardHeaderProps {
   issue: JiraIssueWithParent;
@@ -60,9 +61,7 @@ function JiraIssueCardHeader({
         {showInlineBadges && (
           <>
             {issue.issueType && (
-              <Badge variant="outline" className={badgeClassName}>
-                {issue.issueType}
-              </Badge>
+              <JiraIssueTypeBadge issueType={issue.issueType} />
             )}
             <Badge variant="outline" className={badgeClassName}>
               {issue.status ?? 'Unknown'}
@@ -130,12 +129,7 @@ function JiraIssueCardContent({
           <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium">
             Type
           </span>
-          <Badge
-            variant="outline"
-            className="text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70 w-fit"
-          >
-            {issue.issueType ?? ''}
-          </Badge>
+          <JiraIssueTypeBadge issueType={issue.issueType ?? ''} />
         </div>
         <div className="flex flex-col gap-1 items-center">
           <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium">

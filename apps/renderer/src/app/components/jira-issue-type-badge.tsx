@@ -11,6 +11,7 @@ const issueTypeColors: Record<string, string> = {
     'border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400',
   Story:
     'border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400',
+  Bug: 'border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400',
   Epic: 'border-purple-500/30 bg-purple-500/10 text-purple-600 dark:text-purple-400',
   Initiative:
     'border-yellow-500/30 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400',
