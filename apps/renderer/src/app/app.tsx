@@ -17,8 +17,6 @@ import {
 } from '@time-tracker/hooks';
 
 import {
-  HomeTab,
-  TasksTab,
   SettingsTab,
   JiraIssuesTab,
   MainTabList,
@@ -92,14 +90,6 @@ export function App() {
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
         >
           <TabsContent value="home" className="overflow-y-auto">
-            <HomeTab />
-          </TabsContent>
-
-          <TabsContent value="tasks" className="overflow-y-auto">
-            <TasksTab />
-          </TabsContent>
-
-          <TabsContent value="timeline" className="overflow-y-auto">
             <TimelineTab />
           </TabsContent>
 

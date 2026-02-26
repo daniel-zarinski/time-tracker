@@ -18,7 +18,7 @@ export const useAppStore = createSelectors(
         }),
         {
           name: 'app-store',
-          version: 3,
+          version: 4,
           storage: createJSONStorage(() => localStorage),
           partialize: (state): PersistedState => ({
             elapsed: state.elapsed,
@@ -30,10 +30,16 @@ export const useAppStore = createSelectors(
             }
             const state = persisted as PersistedState;
             if (version < 2 && state.activeTab === 'home') {
-              return { ...state, activeTab: 'tasks' };
+              return { ...state, activeTab: 'tasks' as PersistedState['activeTab'] };
             }
             if (version < 3) {
               return { ...state, activeTab: 'home' };
+            }
+            if (version < 4) {
+              const tab = state.activeTab as string;
+              if (tab === 'tasks' || tab === 'timeline') {
+                return { ...state, activeTab: 'home' };
+              }
             }
             return state;
           },

@@ -13,6 +13,7 @@ import {
   TabsContent,
 } from '@time-tracker/ui';
 import {
+  useActiveTimeEntry,
   useJiraMyIssues,
   useJiraSyncMutations,
   useTimeEntryMutations,
@@ -21,6 +22,7 @@ import type { JiraIssueWithParent } from '@time-tracker/database';
 import { Settings, AlertCircle, Inbox } from 'lucide-react';
 import { useAppStore } from '../store';
 import { JiraIssueCard } from '../components/cards/jira-issue-card';
+import { TimeEntryCardActive } from '../components/cards/time-entry-card-active';
 
 const OTHER_STATUSES = [
   'DEV COMPLETED',
@@ -62,8 +64,11 @@ function sortStatuses(statuses: string[]): string[] {
 export function JiraIssuesTab() {
   const setActiveTab = useAppStore.use.setActiveTab();
   const getIssuesQuery = useJiraMyIssues();
+  const activeEntryQuery = useActiveTimeEntry();
   const { syncMyIssues } = useJiraSyncMutations();
-  const { startTracking } = useTimeEntryMutations();
+  const { startTracking, stopTracking } = useTimeEntryMutations();
+
+  const activeEntry = activeEntryQuery.data ?? null;
 
   const isConfigError =
     getIssuesQuery.isError &&
@@ -172,6 +177,14 @@ export function JiraIssuesTab() {
   return (
     <Tabs defaultValue={toTabValue(statuses[0])} className="flex flex-col">
       <div className="sticky top-0 z-30 bg-background">
+        {activeEntry && (
+          <div className="border-b border-border px-4 py-2 max-w-2xl mx-auto w-full">
+            <TimeEntryCardActive
+              entry={activeEntry}
+              onStopTimer={stopTracking.mutateAsync}
+            />
+          </div>
+        )}
         <ScrollArea
           className="w-full max-w-2xl mx-auto px-4 pb-2"
           orientation="horizontal"
@@ -197,7 +210,7 @@ export function JiraIssuesTab() {
                   onOpenInJira={(key) => window.electron.openJiraExternal(key)}
                   onTrackTime={async (key) => {
                     await startTracking.mutateAsync(key);
-                    setActiveTab('tasks');
+                    setActiveTab('home');
                   }}
                 />
               </li>

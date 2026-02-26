@@ -3,8 +3,6 @@ import { z } from 'zod';
 // H1. PersistedStateSchema
 export const TabValueSchema = z.enum([
   'home',
-  'tasks',
-  'timeline',
   'jira-issues',
   'settings',
 ]);
