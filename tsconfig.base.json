@@ -23,6 +23,7 @@
       "@time-tracker/ui": ["libs/ui/src/index.ts"],
       "@time-tracker/utils": ["libs/utils/src/index.ts"],
       "@time-tracker/database": ["libs/database/src/index.ts"],
+      "@time-tracker/hooks": ["libs/hooks/src/index.ts"],
       "@time-tracker/tempo": ["libs/tempo/src/index.ts"],
       "@time-tracker/schema": ["libs/schema/src/index.ts"]
     }

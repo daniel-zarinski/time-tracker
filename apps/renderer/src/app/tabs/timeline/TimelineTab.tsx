@@ -1,6 +1,12 @@
 import * as React from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ComboboxSelectItem } from '@time-tracker/ui';
+import {
+  useTimeEntries,
+  useJiraMyIssues,
+  useTimeEntryMutations,
+  queryKeys,
+} from '@time-tracker/hooks';
 import { useAppStore } from '../../store';
 import {
   getEntriesWithGrid,
@@ -10,7 +16,6 @@ import {
   formatSelection,
 } from './timeline-utils';
 import { useTimelineDrag } from './use-timeline-drag';
-import { useTimeEntryMutations } from '../../../hooks/use-time-entry-mutations';
 import { TimelineHeader } from './TimelineHeader';
 import { TimelineGrid } from './TimelineGrid';
 import { TimelineListView } from './TimelineListView';
@@ -36,17 +41,8 @@ export function TimelineTab() {
     handlePointerUp,
   } = useTimelineDrag(olRef);
 
-  const { data: entries = [] } = useQuery({
-    queryKey: ['time-entries'],
-    queryFn: () => window.database.getTimeEntries(),
-    retry: false,
-  });
-
-  const { data: jiraIssues = [] } = useQuery({
-    queryKey: ['jira', 'my-issues'],
-    queryFn: () => window.database.getMyJiraIssues(),
-    retry: false,
-  });
+  const { data: entries = [] } = useTimeEntries();
+  const { data: jiraIssues = [] } = useJiraMyIssues();
 
   const issueItems: ComboboxSelectItem[] = React.useMemo(
     () =>
@@ -74,7 +70,7 @@ export function TimelineTab() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['time-entries'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.all });
       clearSelection();
     },
   });

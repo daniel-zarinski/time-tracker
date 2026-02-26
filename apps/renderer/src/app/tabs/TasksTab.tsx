@@ -1,30 +1,26 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   Empty,
   EmptyHeader,
   EmptyTitle,
   EmptyDescription,
   EmptyMedia,
-  toast,
   type ComboboxSelectItem,
 } from '@time-tracker/ui';
+import {
+  useTimeEntries,
+  useJiraMyIssues,
+  useTimeEntryMutations,
+} from '@time-tracker/hooks';
 import { Clock } from 'lucide-react';
 import { useMemo } from 'react';
 import { TimeEntryCardActive } from '../components/cards/time-entry-card-active';
 import { TimeEntryCardDefault } from '../components/cards/time-entry-card-default';
 
 export function TasksTab() {
-  const timeEntriesQuery = useQuery({
-    queryKey: ['time-entries'],
-    queryFn: () => window.database.getTimeEntries(),
-    retry: false,
-  });
-
-  const { data: jiraIssues = [] } = useQuery({
-    queryKey: ['jira', 'my-issues'],
-    queryFn: () => window.database.getMyJiraIssues(),
-    retry: false,
-  });
+  const timeEntriesQuery = useTimeEntries();
+  const { data: jiraIssues = [] } = useJiraMyIssues();
+  const { startTracking, stopTracking, deleteTimeEntry, updateTimeEntry } =
+    useTimeEntryMutations();
 
   const issueItems: ComboboxSelectItem[] = useMemo(
     () =>
@@ -37,60 +33,6 @@ export function TasksTab() {
         })),
     [jiraIssues]
   );
-  const startTracking = useMutation({
-    mutationFn: (issueKey: string) =>
-      window.timeTracking.startTracking(issueKey),
-    onSuccess: () => {
-      timeEntriesQuery.refetch();
-      toast.success('Time entry started');
-    },
-    onError: () => {
-      toast.error('Failed to start time entry');
-    },
-  });
-
-  const stopTracking = useMutation({
-    mutationFn: (id: string) => window.timeTracking.stopTracking(id),
-    onSuccess: () => {
-      timeEntriesQuery.refetch();
-      toast.success('Time entry stopped');
-    },
-    onError: () => {
-      toast.error('Failed to stop time entry');
-    },
-  });
-
-  const deleteTimeEntryMutation = useMutation({
-    mutationFn: (entryId: string) => window.database.deleteTimeEntry(entryId),
-    onSuccess: () => {
-      timeEntriesQuery.refetch();
-      toast.success('Time entry deleted');
-    },
-    onError: () => {
-      toast.error('Failed to delete time entry');
-    },
-  });
-
-  const updateTimeEntryMutation = useMutation({
-    mutationFn: ({
-      entryId,
-      updates,
-    }: {
-      entryId: string;
-      updates: {
-        startedAt?: Date;
-        timeSpentSeconds?: number;
-        description?: string;
-      };
-    }) => window.database.updateTimeEntry(entryId, updates),
-    onSuccess: () => {
-      timeEntriesQuery.refetch();
-      toast.success('Time entry updated');
-    },
-    onError: () => {
-      toast.error('Failed to update time entry');
-    },
-  });
 
   const entries = timeEntriesQuery.data ?? [];
   const activeEntry = entries.find((e) => e.timeSpentSeconds === null);
@@ -143,17 +85,16 @@ export function TasksTab() {
                 onOpenInJira={() => window.electron.openJiraExternal(entry.issueKey)}
                 onResumeTimer={() => startTracking.mutateAsync(entry.issueKey)}
                 onSave={async (entryId, updates) => {
-                  await updateTimeEntryMutation.mutateAsync({
+                  await updateTimeEntry.mutateAsync({
                     entryId,
                     updates: {
                       startedAt: updates.startedAt,
                       timeSpentSeconds: updates.timeSpentSeconds,
                       description: updates.description,
-                      // issueKey: updates.issueKey, // TODO: add this back in once implemented
                     },
                   });
                 }}
-                onDelete={(id) => deleteTimeEntryMutation.mutateAsync(id)}
+                onDelete={(id) => deleteTimeEntry.mutateAsync(id)}
               />
             </li>
           ))}

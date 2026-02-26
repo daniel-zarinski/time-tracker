@@ -1,12 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from '@time-tracker/ui';
+import { toast } from 'sonner';
+import { queryKeys } from '../query-keys';
 
 export function useTimeEntryMutations() {
   const queryClient = useQueryClient();
 
   const invalidate = () => {
-    queryClient.invalidateQueries({ queryKey: ['time-entries'] });
-    queryClient.invalidateQueries({ queryKey: ['active-time-entry'] });
+    queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.all });
+    queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.active });
   };
 
   const startTracking = useMutation({

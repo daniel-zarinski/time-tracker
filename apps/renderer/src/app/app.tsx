@@ -8,10 +8,13 @@ import {
   DialogContent,
   Tabs,
   TabsContent,
-  toast,
   type ComboboxSelectItem,
 } from '@time-tracker/ui';
-import type { JiraIssueWithParent } from '@time-tracker/database';
+import {
+  useJiraMyIssues,
+  useJiraIssue,
+  useTimeEntryMutations,
+} from '@time-tracker/hooks';
 
 import {
   HomeTab,
@@ -22,13 +25,11 @@ import {
 } from './tabs';
 import { useAppStore, TabValue } from './store';
 import { useAppCommands } from './use-app-commands';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { TimelineTab } from './tabs/timeline';
 import { JiraIssueCard } from './components/cards/jira-issue-card';
 import { TimeEntryCardDefault } from './components/cards/time-entry-card-default';
 
 export function App() {
-  const queryClient = useQueryClient();
   const activeTab = useAppStore.use.activeTab();
   const setActiveTab = useAppStore.use.setActiveTab();
   const selectedIssueKey = useAppStore.use.selectedIssueKey();
@@ -39,17 +40,10 @@ export function App() {
   const [commandOpen, setCommandOpen] = React.useState(false);
   const { commands } = useAppCommands();
 
-  const { data: jiraIssues = [] } = useQuery({
-    queryKey: ['jira', 'my-issues'],
-    queryFn: () => window.database.getMyJiraIssues(),
-    retry: false,
-  });
-
-  const issueQuery = useQuery<JiraIssueWithParent | null>({
-    queryKey: ['jira-issue', selectedIssueKey],
-    queryFn: () => window.database.getJiraIssueByKey(selectedIssueKey!),
-    enabled: !!selectedIssueKey,
-  });
+  const { data: jiraIssues = [] } = useJiraMyIssues();
+  const issueQuery = useJiraIssue(selectedIssueKey);
+  const { startTracking, deleteTimeEntry, updateTimeEntry } =
+    useTimeEntryMutations();
 
   const issueItems: ComboboxSelectItem[] = React.useMemo(
     () =>
@@ -62,52 +56,6 @@ export function App() {
         })),
     [jiraIssues]
   );
-  const startTrackingMutation = useMutation({
-    mutationFn: (key: string) => window.timeTracking.startTracking(key),
-    onSuccess: () => {
-      setSelectedIssueKey(null);
-      setSelectedTimeEntry(null);
-    },
-    onError: () => {
-      toast.error('Failed to start time entry', { position: 'bottom-center' });
-    },
-  });
-
-  const deleteTimeEntryMutation = useMutation({
-    mutationFn: (entryId: string) => window.database.deleteTimeEntry(entryId),
-    onSuccess: () => {
-      setSelectedTimeEntry(null);
-      queryClient.invalidateQueries({ queryKey: ['time-entries'] });
-      queryClient.invalidateQueries({ queryKey: ['active-time-entry'] });
-      toast.success('Time entry deleted');
-    },
-    onError: () => {
-      toast.error('Failed to delete time entry', { position: 'bottom-center' });
-    },
-  });
-
-  const updateTimeEntryMutation = useMutation({
-    mutationFn: ({
-      entryId,
-      updates,
-    }: {
-      entryId: string;
-      updates: {
-        startedAt?: Date;
-        timeSpentSeconds?: number;
-        description?: string;
-      };
-    }) => window.database.updateTimeEntry(entryId, updates),
-    onSuccess: () => {
-      setSelectedTimeEntry(null);
-      queryClient.invalidateQueries({ queryKey: ['time-entries'] });
-      queryClient.invalidateQueries({ queryKey: ['active-time-entry'] });
-      toast.success('Time entry updated');
-    },
-    onError: () => {
-      toast.error('Failed to update time entry', { position: 'bottom-center' });
-    },
-  });
 
   return (
     <div className="flex h-screen flex-col text-foreground">
@@ -180,7 +128,9 @@ export function App() {
               collapsible={false}
               onOpenInJira={(key) => window.electron.openJiraExternal(key)}
               onTrackTime={async (key) => {
-                await startTrackingMutation.mutateAsync(key);
+                await startTracking.mutateAsync(key);
+                setSelectedIssueKey(null);
+                setSelectedTimeEntry(null);
               }}
             />
           )}
@@ -202,22 +152,25 @@ export function App() {
               defaultExpanded
               defaultView={selectedTimeEntryView}
               onResumeTimer={async (key) => {
-                await startTrackingMutation.mutateAsync(key);
+                await startTracking.mutateAsync(key);
+                setSelectedIssueKey(null);
+                setSelectedTimeEntry(null);
               }}
               onOpenInJira={(key) => window.electron.openJiraExternal(key)}
               onSave={async (entryId, updates) => {
-                await updateTimeEntryMutation.mutateAsync({
+                await updateTimeEntry.mutateAsync({
                   entryId,
                   updates: {
                     startedAt: updates.startedAt,
                     timeSpentSeconds: updates.timeSpentSeconds,
                     description: updates.description,
-                    // issueKey: updates.issueKey,
                   },
                 });
+                setSelectedTimeEntry(null);
               }}
               onDelete={async (id) => {
-                await deleteTimeEntryMutation.mutateAsync(id);
+                await deleteTimeEntry.mutateAsync(id);
+                setSelectedTimeEntry(null);
               }}
             />
           )}

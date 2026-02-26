@@ -1,4 +1,3 @@
-import { useQuery } from '@tanstack/react-query';
 import {
   CalendarDays,
   Home,
@@ -8,6 +7,7 @@ import {
 } from 'lucide-react';
 
 import type { CommandPaletteGroup } from '@time-tracker/ui';
+import { useJiraMyIssues } from '@time-tracker/hooks';
 
 import { useAppStore } from './store';
 
@@ -20,11 +20,7 @@ export function useAppCommands(): {
   const setActiveTab = useAppStore.use.setActiveTab();
   const setSelectedIssueKey = useAppStore.use.setSelectedIssueKey();
 
-  const getIssuesQuery = useQuery({
-    queryKey: ['jira', 'my-issues'],
-    queryFn: () => window.database.getMyJiraIssues(),
-    retry: false,
-  });
+  const getIssuesQuery = useJiraMyIssues();
 
   const issues = (getIssuesQuery.data ?? []).filter(
     (i): i is typeof i & { key: string } => i.key != null

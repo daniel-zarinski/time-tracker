@@ -1,4 +1,3 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Button,
   Input,
@@ -18,8 +17,17 @@ import {
   InputGroupAddon,
   InputGroupInput,
   InputGroupText,
-  toast,
 } from '@time-tracker/ui';
+import {
+  useJiraConfig,
+  useTempoConfig,
+  useDatabasePath,
+  useJiraConfigMutations,
+  useTempoConfigMutations,
+  useJiraSyncMutations,
+  useTempoSyncMutations,
+  useDatabaseMutations,
+} from '@time-tracker/hooks';
 import {
   Clock,
   Database,
@@ -30,154 +38,29 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-const JIRA_TOAST_ID = 'jira-settings';
-const TEMPO_TOAST_ID = 'tempo-settings';
-
 const TEMPO_API_INTEGRATION_PATH =
   '/plugins/servlet/ac/io.tempo.jira/tempo-app#!/configuration/api-integration';
 const TEMPO_HELP_URL =
   'https://help.tempo.io/planner/latest/using-rest-api-integrations';
 
 export function SettingsTab() {
-  const queryClient = useQueryClient();
   const [email, setEmail] = useState('');
   const [company, setCompany] = useState('');
   const [token, setToken] = useState('');
   const [tempoToken, setTempoToken] = useState('');
 
-  const configQuery = useQuery({
-    queryKey: ['jira', 'config'],
-    queryFn: () => window.store.getJiraConfig(),
-  });
-  const dbPathQuery = useQuery({
-    queryKey: ['database', 'path'],
-    queryFn: () => window.database.getPath(),
-  });
-  const tempoConfigQuery = useQuery({
-    queryKey: ['tempo', 'config'],
-    queryFn: () => window.store.getTempoConfig(),
-  });
+  const configQuery = useJiraConfig();
+  const dbPathQuery = useDatabasePath();
+  const tempoConfigQuery = useTempoConfig();
 
-  const saveMutation = useMutation({
-    mutationFn: (config: { company: string; email: string; token: string }) =>
-      window.jira.saveConfig(config),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['jira', 'config'] });
-      toast.success('Settings saved', { id: JIRA_TOAST_ID });
-    },
-    onError: (err: unknown) => {
-      const message =
-        err instanceof Error ? err.message : 'Failed to save Jira settings';
-      toast.error(message, { id: JIRA_TOAST_ID });
-    },
-  });
-
-  const saveTempoMutation = useMutation({
-    mutationFn: (config: { token: string }) =>
-      window.store.setTempoConfig(config),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tempo', 'config'] });
-      toast.success('Settings saved', { id: TEMPO_TOAST_ID });
-    },
-  });
-
-  const testMutation = useMutation({
-    mutationFn: (config: { company: string; email: string; token: string }) =>
-      window.jira.testConnection(config),
-  });
-
-  const fetchMissingIssuesMutation = useMutation({
-    mutationFn: () => window.jira.fetchMissingIssues(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['jira'] });
-      toast.success('Missing issues synced', { id: JIRA_TOAST_ID });
-    },
-    onError: (err: unknown) => {
-      const message =
-        err instanceof Error ? err.message : 'Failed to sync missing issues';
-      toast.error(message, { id: JIRA_TOAST_ID });
-    },
-  });
-
-  const syncStatusesMutation = useMutation({
-    mutationFn: () => window.jira.fetchStatuses(),
-    onSuccess: (statuses) => {
-      toast.success(
-        `Synced ${statuses.length} status${statuses.length === 1 ? '' : 'es'}`,
-        { id: JIRA_TOAST_ID }
-      );
-    },
-    onError: (err: unknown) => {
-      const message =
-        err instanceof Error ? err.message : 'Failed to sync statuses';
-      toast.error(message, { id: JIRA_TOAST_ID });
-    },
-  });
-
-  const fetchAllMyIssuesMutation = useMutation({
-    mutationFn: () => window.jira.fetchMyIssues(),
-    onSuccess: (issues) => {
-      queryClient.invalidateQueries({ queryKey: ['jira'] });
-      toast.success(
-        `Synced ${issues.length} issue${issues.length === 1 ? '' : 's'}`,
-        { id: JIRA_TOAST_ID }
-      );
-    },
-    onError: (err: unknown) => {
-      const message =
-        err instanceof Error ? err.message : 'Failed to fetch issues';
-      toast.error(message, { id: JIRA_TOAST_ID });
-    },
-  });
-
-  const testTempoMutation = useMutation({
-    mutationFn: (config?: { token: string }) =>
-      window.tempo.testConnection(config),
-  });
-
-  const syncWorklogsMutation = useMutation({
-    mutationFn: () => window.tempo.syncWorklogs(),
-    onSuccess: (count) => {
-      const message =
-        count === 0
-          ? 'No worklogs found for the last 14 days'
-          : `Synced ${count} worklog${count === 1 ? '' : 's'}`;
-      toast.success(message, { id: TEMPO_TOAST_ID });
-    },
-    onError: (err: unknown) => {
-      const message =
-        err instanceof Error
-          ? err.message
-          : typeof err === 'object' && err !== null && 'message' in err
-          ? String((err as { message: unknown }).message)
-          : 'Failed to sync worklogs';
-      toast.error(message, { id: TEMPO_TOAST_ID });
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: () => window.database.delete(),
-    onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ['database', 'path'] });
-      if (result.success) {
-        toast.success('Database deleted. Restart the app to continue.', {
-          id: JIRA_TOAST_ID,
-          position: 'bottom-center',
-        });
-      } else {
-        toast.error(result.error ?? 'Failed to delete database', {
-          id: JIRA_TOAST_ID,
-          position: 'bottom-center',
-        });
-      }
-    },
-    onError: () => {
-      toast.error('Failed to delete database', {
-        id: JIRA_TOAST_ID,
-        position: 'bottom-center',
-      });
-    },
-  });
+  const { save: saveJira, testConnection: testJiraConnection } =
+    useJiraConfigMutations();
+  const { save: saveTempo, testConnection: testTempoConnection } =
+    useTempoConfigMutations();
+  const { fetchAllMyIssues, fetchMissingIssues, syncStatuses } =
+    useJiraSyncMutations();
+  const { syncWorklogs } = useTempoSyncMutations();
+  const { deleteDatabase } = useDatabaseMutations();
 
   useEffect(() => {
     const config = configQuery.data;
@@ -193,30 +76,18 @@ export function SettingsTab() {
     setTempoToken(config?.token ?? '');
   }, [tempoConfigQuery.data]);
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!company.trim() || !email || !token) return;
-    saveMutation.mutate({ company, email, token });
+    saveJira.mutate({ company, email, token });
   }
 
-  async function handleTestConnection() {
+  function handleTestConnection() {
     if (!company.trim() || !email || !token) return;
-    try {
-      await toast
-        .promise(testMutation.mutateAsync({ company, email, token }), {
-          id: JIRA_TOAST_ID,
-          loading: 'Testing connection…',
-          success: 'Connected',
-          error: 'Connection failed',
-        })
-        .unwrap();
-      queryClient.invalidateQueries({ queryKey: ['jira', 'config'] });
-    } catch {
-      // Toast handles error display
-    }
+    testJiraConnection.mutate({ company, email, token });
   }
 
-  async function handleDeleteDatabase() {
+  function handleDeleteDatabase() {
     if (
       !window.confirm(
         'Delete all time entries and persisted data? This cannot be undone.'
@@ -224,7 +95,7 @@ export function SettingsTab() {
     ) {
       return;
     }
-    deleteMutation.mutate();
+    deleteDatabase.mutate();
   }
 
   const dbPath = dbPathQuery.data ?? null;
@@ -314,13 +185,13 @@ export function SettingsTab() {
                 <FieldSeparator />
 
                 <Field orientation="horizontal">
-                  <Button type="submit" disabled={saveMutation.isPending}>
+                  <Button type="submit" disabled={saveJira.isPending}>
                     Save
                   </Button>
                   <Button
                     variant="outline"
                     type="button"
-                    disabled={testMutation.isPending}
+                    disabled={testJiraConnection.isPending}
                     onClick={handleTestConnection}
                   >
                     Test Connection
@@ -350,7 +221,7 @@ export function SettingsTab() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              saveTempoMutation.mutate({ token: tempoToken });
+              saveTempo.mutate({ token: tempoToken });
             }}
           >
             <FieldGroup>
@@ -383,33 +254,16 @@ export function SettingsTab() {
                 </Field>
                 <FieldSeparator />
                 <Field orientation="horizontal">
-                  <Button type="submit" disabled={saveTempoMutation.isPending}>
+                  <Button type="submit" disabled={saveTempo.isPending}>
                     Save
                   </Button>
                   <Button
                     variant="outline"
                     type="button"
-                    disabled={testTempoMutation.isPending}
-                    onClick={async () => {
+                    disabled={testTempoConnection.isPending}
+                    onClick={() => {
                       if (!tempoToken.trim()) return;
-                      try {
-                        await toast
-                          .promise(
-                            testTempoMutation.mutateAsync({
-                              token: tempoToken,
-                            }),
-                            {
-                              id: TEMPO_TOAST_ID,
-                              loading: 'Testing connection…',
-                              success: 'Connected',
-                              error: (err: Error) =>
-                                err?.message ?? 'Connection failed',
-                            }
-                          )
-                          .unwrap();
-                      } catch {
-                        // Toast handles error display
-                      }
+                      testTempoConnection.mutate({ token: tempoToken });
                     }}
                   >
                     Test Connection
@@ -450,11 +304,11 @@ export function SettingsTab() {
                   variant="outline"
                   type="button"
                   size="sm"
-                  onClick={() => fetchAllMyIssuesMutation.mutate()}
-                  disabled={fetchAllMyIssuesMutation.isPending}
+                  onClick={() => fetchAllMyIssues.mutate()}
+                  disabled={fetchAllMyIssues.isPending}
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
-                  {fetchAllMyIssuesMutation.isPending
+                  {fetchAllMyIssues.isPending
                     ? 'Syncing…'
                     : 'Sync all my issues'}
                 </Button>
@@ -462,11 +316,11 @@ export function SettingsTab() {
                   variant="outline"
                   type="button"
                   size="sm"
-                  onClick={() => fetchMissingIssuesMutation.mutate()}
-                  disabled={fetchMissingIssuesMutation.isPending}
+                  onClick={() => fetchMissingIssues.mutate()}
+                  disabled={fetchMissingIssues.isPending}
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
-                  {fetchMissingIssuesMutation.isPending
+                  {fetchMissingIssues.isPending
                     ? 'Syncing…'
                     : 'Sync missing issues'}
                 </Button>
@@ -474,11 +328,11 @@ export function SettingsTab() {
                   variant="outline"
                   type="button"
                   size="sm"
-                  onClick={() => syncStatusesMutation.mutate()}
-                  disabled={syncStatusesMutation.isPending}
+                  onClick={() => syncStatuses.mutate()}
+                  disabled={syncStatuses.isPending}
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
-                  {syncStatusesMutation.isPending
+                  {syncStatuses.isPending
                     ? 'Syncing…'
                     : 'Sync statuses'}
                 </Button>
@@ -496,17 +350,11 @@ export function SettingsTab() {
                   variant="outline"
                   type="button"
                   size="sm"
-                  onClick={async () => {
-                    try {
-                      await syncWorklogsMutation.mutateAsync();
-                    } catch {
-                      // onError handles toast
-                    }
-                  }}
-                  disabled={syncWorklogsMutation.isPending}
+                  onClick={() => syncWorklogs.mutate()}
+                  disabled={syncWorklogs.isPending}
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
-                  {syncWorklogsMutation.isPending
+                  {syncWorklogs.isPending
                     ? 'Syncing…'
                     : 'Sync worklogs'}
                 </Button>
@@ -562,7 +410,7 @@ export function SettingsTab() {
                   variant="destructive"
                   type="button"
                   size="sm"
-                  disabled={deleteMutation.isPending}
+                  disabled={deleteDatabase.isPending}
                   onClick={handleDeleteDatabase}
                 >
                   <Trash2 className="h-4 w-4 mr-2" />

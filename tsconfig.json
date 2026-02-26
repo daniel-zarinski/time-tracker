@@ -26,6 +26,9 @@
     },
     {
       "path": "./libs/schema"
+    },
+    {
+      "path": "./libs/hooks"
     }
   ]
 }

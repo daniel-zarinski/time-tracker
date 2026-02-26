@@ -1,4 +1,3 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   Button,
   Empty,
@@ -6,47 +5,20 @@ import {
   EmptyTitle,
   EmptyDescription,
   EmptyMedia,
-  toast,
 } from '@time-tracker/ui';
+import {
+  useActiveTimeEntry,
+  useJiraRelevantIssues,
+  useTimeEntryMutations,
+} from '@time-tracker/hooks';
 import { Inbox, PlayIcon } from 'lucide-react';
 import { JiraIssueCard } from '../components/cards/jira-issue-card';
 import { TimeEntryCardActive } from '../components/cards/time-entry-card-active';
 
 export function HomeTab() {
-  const activeEntryQuery = useQuery({
-    queryKey: ['active-time-entry'],
-    queryFn: () => window.database.getActiveTimeEntry(),
-    retry: false,
-  });
-
-  const jiraIssuesQuery = useQuery({
-    queryKey: ['jira', 'relevant-issues'],
-    queryFn: () => window.database.getRelevantJiraIssues({ limit: 5 }),
-    retry: false,
-  });
-
-  const startTracking = useMutation({
-    mutationFn: (issueKey: string) =>
-      window.timeTracking.startTracking(issueKey),
-    onSuccess: () => {
-      activeEntryQuery.refetch();
-      toast.success('Time entry started');
-    },
-    onError: () => {
-      toast.error('Failed to start time entry');
-    },
-  });
-
-  const stopTracking = useMutation({
-    mutationFn: (id: string) => window.timeTracking.stopTracking(id),
-    onSuccess: () => {
-      activeEntryQuery.refetch();
-      toast.success('Time entry stopped');
-    },
-    onError: () => {
-      toast.error('Failed to stop time entry');
-    },
-  });
+  const activeEntryQuery = useActiveTimeEntry();
+  const jiraIssuesQuery = useJiraRelevantIssues();
+  const { startTracking, stopTracking } = useTimeEntryMutations();
 
   const activeEntry = activeEntryQuery.data ?? null;
   const issues = jiraIssuesQuery.data ?? [];

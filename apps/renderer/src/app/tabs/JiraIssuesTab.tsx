@@ -1,4 +1,3 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   Button,
   ScrollArea,
@@ -13,10 +12,14 @@ import {
   TabsTrigger,
   TabsContent,
 } from '@time-tracker/ui';
+import {
+  useJiraMyIssues,
+  useJiraSyncMutations,
+  useTimeEntryMutations,
+} from '@time-tracker/hooks';
 import type { JiraIssueWithParent } from '@time-tracker/database';
 import { Settings, AlertCircle, Inbox } from 'lucide-react';
 import { useAppStore } from '../store';
-import { toast } from 'sonner';
 import { JiraIssueCard } from '../components/cards/jira-issue-card';
 
 const OTHER_STATUSES = [
@@ -58,19 +61,9 @@ function sortStatuses(statuses: string[]): string[] {
 
 export function JiraIssuesTab() {
   const setActiveTab = useAppStore.use.setActiveTab();
-
-  const getIssuesQuery = useQuery({
-    queryKey: ['jira', 'my-issues'],
-    queryFn: () => window.database.getMyJiraIssues(),
-    retry: false,
-  });
-  const fetchMyIssuesQuery = useMutation({
-    mutationKey: ['jira', 'sync-my-issues'],
-    mutationFn: () => window.jira.syncMyIssues(),
-    onSuccess: () => {
-      getIssuesQuery.refetch();
-    },
-  });
+  const getIssuesQuery = useJiraMyIssues();
+  const { syncMyIssues } = useJiraSyncMutations();
+  const { startTracking } = useTimeEntryMutations();
 
   const isConfigError =
     getIssuesQuery.isError &&
@@ -166,8 +159,8 @@ export function JiraIssuesTab() {
         <EmptyContent>
           <Button
             variant="outline"
-            onClick={() => fetchMyIssuesQuery.mutate()}
-            disabled={fetchMyIssuesQuery.isPending}
+            onClick={() => syncMyIssues.mutate()}
+            disabled={syncMyIssues.isPending}
           >
             Fetch issues
           </Button>
@@ -203,17 +196,8 @@ export function JiraIssuesTab() {
                   issue={issue}
                   onOpenInJira={(key) => window.electron.openJiraExternal(key)}
                   onTrackTime={async (key) => {
-                    try {
-                      const timeEntry = await window.timeTracking.startTracking(
-                        key
-                      );
-                      toast.success(`Started tracking ${timeEntry.issueKey}`);
-                      setActiveTab('tasks');
-                    } catch (error) {
-                      toast.error(`Failed to start tracking ${key}: ${error}`, {
-                        position: 'bottom-center',
-                      });
-                    }
+                    await startTracking.mutateAsync(key);
+                    setActiveTab('tasks');
                   }}
                 />
               </li>
