@@ -96,6 +96,13 @@ export function TimelineGrid({
             {entriesWithLayout.map(
               ({ entry, gridRowStart, gridRowSpan, column, totalColumns }) => {
                 const isActive = entry.timeSpentSeconds == null;
+                const entryEnd = entry.timeSpentSeconds
+                  ? new Date(
+                      new Date(entry.startedAt).getTime() +
+                        entry.timeSpentSeconds * 1000
+                    )
+                  : null;
+
                 return (
                   <li
                     key={entry.id}
@@ -121,13 +128,15 @@ export function TimelineGrid({
                       style={
                         totalColumns > 1
                           ? {
-                              left: `calc(${
-                                (column / totalColumns) * 100
-                              }% + ${column === 0 ? '22px' : '0.25rem'})`,
+                              left: `calc(${(column / totalColumns) * 100}% + ${
+                                column === 0 ? '22px' : '0.25rem'
+                              })`,
                               right: `calc(${
                                 ((totalColumns - column - 1) / totalColumns) *
                                 100
-                              }% + ${column === totalColumns - 1 ? '22px' : '0.25rem'})`,
+                              }% + ${
+                                column === totalColumns - 1 ? '22px' : '0.25rem'
+                              })`,
                             }
                           : undefined
                       }
@@ -142,9 +151,10 @@ export function TimelineGrid({
                           </span>
                         )}
                       </p>
-                      {gridRowSpan >= 3 && (
+                      {gridRowSpan >= 2 && (
                         <p className="mt-0.5 text-[10px] text-primary/60">
                           {formatEntryTime(new Date(entry.startedAt))}
+                          {entryEnd ? ` - ${formatEntryTime(entryEnd)}` : ''}
                         </p>
                       )}
                     </button>
@@ -162,7 +172,7 @@ export function TimelineGrid({
                   gridColumn: '1',
                 }}
               >
-                <div className="pointer-events-auto absolute inset-y-1 inset-x-[9px] flex items-center justify-center rounded-lg border border-dashed border-primary/40 bg-primary/10">
+                <div className="pointer-events-auto absolute inset-y-1 inset-x-[22px] flex items-center justify-center rounded-lg border border-dashed border-primary/40 bg-primary/10">
                   <span className="text-xs font-medium text-primary/70">
                     {formatEntryTime(formattedSelection.startTime)} –{' '}
                     {formatEntryTime(formattedSelection.endTime)} (

@@ -79,7 +79,7 @@ export function App() {
       <Tabs
         value={activeTab}
         onValueChange={(v) => setActiveTab(v as TabValue)}
-        className="flex h-full flex-col"
+        className="flex h-full flex-col gap-0"
       >
         <header
           className="sticky top-0 z-40 flex items-center justify-between bg-background pt-2"

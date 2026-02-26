@@ -25,7 +25,7 @@ export function TimelineHeader({
   return (
     <>
       {/* Header */}
-      <div className="sticky top-0 z-30 flex items-center justify-between border-b border-border bg-background px-4 py-3">
+      <div className="sticky top-0 z-30 flex items-center justify-between border-b border-border bg-background px-4 py-2">
         <div className="flex items-center gap-1">
           <h2 className="text-sm font-semibold">
             {date.toLocaleDateString('en-US', {
@@ -49,7 +49,7 @@ export function TimelineHeader({
       </div>
 
       {/* Week day selector */}
-      <div className="sticky top-[49px] z-30 flex items-center border-b border-border bg-background px-2 py-2">
+      <div className="sticky top-[41px] z-30 flex items-center border-b border-border bg-background px-2 py-2">
         <Button
           variant="ghost"
           size="icon"
