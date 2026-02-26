@@ -37,9 +37,8 @@ export function TimelineHeader({
   const [calendarOpen, setCalendarOpen] = React.useState(false);
 
   return (
-    <>
-      {/* Header */}
-      <div className="sticky top-0 z-30 flex items-center justify-between border-b border-border bg-background px-4 py-2">
+    <div className="sticky top-0 z-30 border-b border-border bg-background">
+      <div className="flex items-center justify-between px-4 py-2">
         <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
           <PopoverTrigger asChild>
             <Button variant="ghost" size="sm" className="font-semibold">
@@ -81,17 +80,14 @@ export function TimelineHeader({
         </Tabs>
       </div>
 
-      {/* Week day selector */}
-      <div className="sticky top-[41px] z-30 border-b border-border bg-background">
-        <WeekDaySelector
-          weekDays={weekDays}
-          selectedDate={date}
-          today={today}
-          onSelectDay={onSelectDay}
-          onPreviousWeek={onPreviousWeek}
-          onNextWeek={onNextWeek}
-        />
-      </div>
-    </>
+      <WeekDaySelector
+        weekDays={weekDays}
+        selectedDate={date}
+        today={today}
+        onSelectDay={onSelectDay}
+        onPreviousWeek={onPreviousWeek}
+        onNextWeek={onNextWeek}
+      />
+    </div>
   );
 }

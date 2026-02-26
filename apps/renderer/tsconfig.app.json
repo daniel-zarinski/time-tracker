@@ -43,6 +43,9 @@
     },
     {
       "path": "../../libs/ui/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/hooks/tsconfig.lib.json"
     }
   ]
 }
