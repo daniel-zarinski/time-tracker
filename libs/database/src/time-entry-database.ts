@@ -116,3 +116,18 @@ export async function getTimeEntryById(prisma: PrismaClient, entryId: string) {
     include: timeEntryInclude,
   });
 }
+
+export async function getTotalTimeSpentSecondsForDay(
+  prisma: PrismaClient,
+  startOfDay: Date,
+  endOfDay: Date
+): Promise<number> {
+  const result = await prisma.timeEntry.aggregate({
+    where: {
+      startedAt: { gte: startOfDay, lte: endOfDay },
+      timeSpentSeconds: { not: null },
+    },
+    _sum: { timeSpentSeconds: true },
+  });
+  return result._sum.timeSpentSeconds ?? 0;
+}

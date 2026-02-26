@@ -1,13 +1,9 @@
+export { startOfDay, endOfDay } from 'date-fns';
+
 export function toTimeString(date: Date): string {
   const h = String(date.getHours()).padStart(2, '0');
   const m = String(date.getMinutes()).padStart(2, '0');
   return `${h}:${m}`;
-}
-
-export function startOfDay(date: Date): Date {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  return d;
 }
 
 export function timeStringToMinutes(time: string): number {

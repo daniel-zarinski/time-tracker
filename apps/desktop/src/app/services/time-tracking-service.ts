@@ -3,9 +3,11 @@ import {
   getActiveTimeEntry,
   createTimeEntry,
   stopTimeEntry,
-  getLastTimeEntryFromIssue as getLastTimeEntryFromIssueDb,
+  getLastTimeEntryFromIssue as _getLastTimeEntryFromIssue,
   getTimeEntryById,
+  getTotalTimeSpentSecondsForDay as _getTotalTimeSpentSecondsForDay,
 } from '@time-tracker/database';
+import { startOfDay, endOfDay } from '@time-tracker/utils';
 import type { SyncStatus } from '@prisma/client';
 import type { TimeEntryWithIssue } from '@time-tracker/database';
 
@@ -26,7 +28,13 @@ export class TimeTrackingService {
   }
 
   async getLastTimeEntryFromIssue(issueKey: string, syncStatus?: SyncStatus) {
-    return getLastTimeEntryFromIssueDb(getClient(), issueKey, syncStatus);
+    return _getLastTimeEntryFromIssue(getClient(), issueKey, syncStatus);
+  }
+
+  async getTotalTimeSpentSecondsForDay(date: Date): Promise<number> {
+    const start = startOfDay(date);
+    const end = endOfDay(date);
+    return _getTotalTimeSpentSecondsForDay(getClient(), start, end);
   }
 
   async stopTracking(entryId: string): Promise<TimeEntryWithIssue> {
