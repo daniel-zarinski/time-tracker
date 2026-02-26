@@ -7,18 +7,14 @@
     "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
     "emitDeclarationOnly": false,
     "forceConsistentCasingInFileNames": true,
-    "types": ["node"]
+    "types": ["node"],
+    "module": "esnext",
+    "moduleResolution": "bundler"
   },
   "include": ["src/**/*.ts"],
   "references": [
-    {
-      "path": "../database/tsconfig.lib.json"
-    },
-    {
-      "path": "../jira/tsconfig.lib.json"
-    },
-    {
-      "path": "../schema/tsconfig.lib.json"
-    }
+    { "path": "../database/tsconfig.lib.json" },
+    { "path": "../jira/tsconfig.lib.json" },
+    { "path": "../schema/tsconfig.lib.json" }
   ]
 }

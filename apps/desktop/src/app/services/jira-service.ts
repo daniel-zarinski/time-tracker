@@ -43,7 +43,7 @@ function parseStatusCategory(
   const isObj = typeof cat === 'object';
   const key = isObj ? cat.key : cat;
   const name =
-    isObj && cat.name != null ? cat.name : (key && CATEGORY_KEY_TO_NAME[key]);
+    isObj && cat.name != null ? cat.name : key && CATEGORY_KEY_TO_NAME[key];
   const colorName = isObj ? cat.colorName : undefined;
 
   return { key, name, colorName };

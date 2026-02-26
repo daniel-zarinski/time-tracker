@@ -9,6 +9,8 @@ import type {
   TimeEntryWithIssue,
   JiraIssueWithParent,
 } from '@time-tracker/database';
+import { truncateText } from '@time-tracker/utils';
+import { MENU_MAX_LENGTH } from './constants';
 import { getJiraConfig } from './store/config-store';
 import { TimeTrackingService } from './services/time-tracking-service';
 import { TrayIconProvider } from './tray-icon-provider';
@@ -83,7 +85,8 @@ function formatElapsed(ms: number): string {
 function formatIssueLabel(issue: JiraIssueWithParent): string {
   const key = issue.key ?? '';
   const summary = issue.summary?.trim() ?? '';
-  return summary ? `${key}: ${summary}` : key || 'Unknown';
+  const full = summary ? `${key}: ${summary}` : key || 'Unknown';
+  return truncateText(full, MENU_MAX_LENGTH);
 }
 
 function showMainWindow(): void {
@@ -166,8 +169,10 @@ async function updateTray(): Promise<void> {
     tray.setImage(trayIconProvider.getIcon(running !== null));
     if (running) {
       const elapsed = Date.now() - running.startedAt.getTime();
-      const label =
-        running.issue.summary?.trim() || running.issueKey || 'Unknown';
+      const label = truncateText(
+        running.issue.summary?.trim() || running.issueKey || 'Unknown',
+        MENU_MAX_LENGTH
+      );
       tray.setTitle(` ${formatElapsed(elapsed)}`);
       tray.setToolTip(`${label} - ${formatElapsed(elapsed)}`);
     } else {

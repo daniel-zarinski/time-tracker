@@ -7,6 +7,8 @@ export const WINDOW = {
   maxHeight: 1080,
 } as const;
 
+export const MENU_MAX_LENGTH = 50;
+
 export const rendererAppPort = 4200;
 export const rendererAppName = 'Time Tracker'; // options.name.split('-')[0] + '-web'
 export const electronAppName = 'Time Tracker';
