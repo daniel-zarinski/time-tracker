@@ -1,6 +1,6 @@
 import type { TimeEntryWithIssue } from '@time-tracker/database';
 import type { TimeEntryUpdates } from '@time-tracker/utils';
-import { cn } from '@time-tracker/utils';
+import { cn, SECONDS_PER_WORKDAY } from '@time-tracker/utils';
 import { useState } from 'react';
 import {
   Card,
@@ -20,7 +20,6 @@ import { TimeEntryCardSummary } from './time-entry-card-summary';
 interface TimeEntryCardDefaultProps {
   entry: TimeEntryWithIssue;
   issues?: ComboboxSelectItem[];
-  hoursPerDay?: number;
   defaultExpanded?: boolean;
   defaultView?: 'expanded' | 'edit';
   onResumeTimer?: (issueKey: string) => unknown | Promise<unknown>;
@@ -44,7 +43,6 @@ function syncStatusStyles(status: string) {
 export function TimeEntryCardDefault({
   entry,
   issues,
-  hoursPerDay = 7,
   defaultExpanded = false,
   defaultView,
   onResumeTimer,
@@ -66,8 +64,7 @@ export function TimeEntryCardDefault({
   const duration = entry.timeSpentSeconds ?? 0;
   const endDate = new Date(startDate.getTime() + duration * 1000);
 
-  const secondsPerDay = hoursPerDay * 3600;
-  const progressValue = Math.min(100, (duration / secondsPerDay) * 100);
+  const progressValue = Math.min(100, (duration / SECONDS_PER_WORKDAY) * 100);
 
   const issueKey = entry.issue.key ?? entry.issueKey;
 

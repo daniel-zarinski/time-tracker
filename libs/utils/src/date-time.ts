@@ -37,6 +37,9 @@ export function formatDurationHHMM(seconds: number): string {
   return format(date, 'HH:mm');
 }
 
+export const HOURS_PER_DAY = 7;
+export const SECONDS_PER_WORKDAY = HOURS_PER_DAY * 3600;
+
 export function parseDurationHHMM(value: string): number | null {
   const ref = new Date(0);
   const parsed = parse(value.trim(), 'H:mm', ref);

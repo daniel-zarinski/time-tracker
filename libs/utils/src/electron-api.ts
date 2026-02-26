@@ -19,6 +19,7 @@ export interface TimeTrackingApi {
     description?: string
   ) => Promise<TimeEntryWithIssue>;
   stopTracking: (entryId: string) => Promise<void>;
+  getTotalSecondsForDay: (date: Date) => Promise<number>;
 }
 
 /** Database IPC API exposed to the renderer */

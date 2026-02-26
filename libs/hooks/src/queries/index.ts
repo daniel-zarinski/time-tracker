@@ -1,5 +1,6 @@
 export { useActiveTimeEntry } from './use-active-time-entry';
 export { useTimeEntries } from './use-time-entries';
+export { useWeekDayProgress } from './use-day-total-seconds';
 export { useJiraMyIssues } from './use-jira-my-issues';
 export { useJiraRelevantIssues } from './use-jira-relevant-issues';
 export { useJiraIssue } from './use-jira-issue';

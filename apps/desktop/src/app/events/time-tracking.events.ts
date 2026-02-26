@@ -19,3 +19,11 @@ ipcMain.handle('time-tracking:stop', async (_, entryId: string) => {
   const timeTrackingService = new TimeTrackingService();
   return timeTrackingService.stopTracking(entryId);
 });
+
+ipcMain.handle(
+  'time-tracking:get-total-seconds-for-day',
+  async (_, date: string) => {
+    const timeTrackingService = new TimeTrackingService();
+    return timeTrackingService.getTotalTimeSpentSecondsForDay(new Date(date));
+  }
+);

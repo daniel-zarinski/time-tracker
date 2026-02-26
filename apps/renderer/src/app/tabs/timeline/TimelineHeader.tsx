@@ -10,6 +10,7 @@ import {
   TabsTrigger,
   WeekDaySelector,
 } from '@time-tracker/ui';
+import { useWeekDayProgress } from '@time-tracker/hooks';
 import { LayoutGrid, List } from 'lucide-react';
 import { TimelineView } from './timeline-types';
 
@@ -35,6 +36,7 @@ export function TimelineHeader({
   onSelectDay,
 }: TimelineHeaderProps) {
   const [calendarOpen, setCalendarOpen] = React.useState(false);
+  const dayProgress = useWeekDayProgress(weekDays);
 
   return (
     <div className="sticky top-0 z-30 border-b border-border bg-background">
@@ -84,6 +86,7 @@ export function TimelineHeader({
         weekDays={weekDays}
         selectedDate={date}
         today={today}
+        dayProgress={dayProgress}
         onSelectDay={onSelectDay}
         onPreviousWeek={onPreviousWeek}
         onNextWeek={onNextWeek}

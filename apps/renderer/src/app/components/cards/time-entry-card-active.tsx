@@ -1,5 +1,5 @@
 import type { TimeEntryWithIssue } from '@time-tracker/database';
-import { cn, formatDurationTimer } from '@time-tracker/utils';
+import { cn, formatDurationTimer, SECONDS_PER_WORKDAY } from '@time-tracker/utils';
 import { SquareIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import {
@@ -17,7 +17,6 @@ import { JiraIssueTypeBadge } from '../jira-issue-type-badge';
 
 interface TimeEntryCardActiveProps {
   entry: TimeEntryWithIssue;
-  hoursPerDay?: number;
   onStopTimer?: (entryId: string) => void | Promise<void>;
   onCardClick?: () => void;
   className?: string;
@@ -25,7 +24,6 @@ interface TimeEntryCardActiveProps {
 
 export function TimeEntryCardActive({
   entry,
-  hoursPerDay = 7,
   className,
   onStopTimer,
   onCardClick,
@@ -44,8 +42,7 @@ export function TimeEntryCardActive({
       (new Date().getTime() - new Date(entry.startedAt).getTime()) / 1000
     );
 
-  const secondsPerDay = hoursPerDay * 3600;
-  const progressValue = Math.min(100, (elapsedSeconds / secondsPerDay) * 100);
+  const progressValue = Math.min(100, (elapsedSeconds / SECONDS_PER_WORKDAY) * 100);
 
   const issueKey = entry.issue.key ?? entry.issueKey;
 

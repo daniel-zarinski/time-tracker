@@ -95,6 +95,11 @@ const timeTrackingApi: TimeTrackingApi = {
     ipcRenderer.invoke('time-tracking:start', issueKey, description),
   stopTracking: (entryId: string) =>
     ipcRenderer.invoke('time-tracking:stop', entryId),
+  getTotalSecondsForDay: (date: Date) =>
+    ipcRenderer.invoke(
+      'time-tracking:get-total-seconds-for-day',
+      date.toISOString()
+    ),
 };
 
 contextBridge.exposeInMainWorld('electron', electronApi);

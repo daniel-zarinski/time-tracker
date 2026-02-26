@@ -54,8 +54,11 @@ export function EditTimeEntryForm({
   onDelete,
   className,
 }: EditTimeEntryFormProps) {
+  const isOngoing = entry.timeSpentSeconds == null;
   const startDate = new Date(entry.startedAt);
-  const duration = entry.timeSpentSeconds ?? 0;
+  const duration = isOngoing
+    ? Math.floor((Date.now() - startDate.getTime()) / 1000)
+    : entry.timeSpentSeconds ?? 0;
   const endDate = new Date(startDate.getTime() + duration * 1000);
 
   const {
@@ -117,7 +120,7 @@ export function EditTimeEntryForm({
     await onSave(entry.id, {
       issueKey: data.issueKey !== entry.issueKey ? data.issueKey : undefined,
       startedAt: newStartedAt,
-      timeSpentSeconds: newTimeSpent,
+      timeSpentSeconds: isOngoing ? undefined : newTimeSpent,
       description: data.description || undefined,
     });
   }
@@ -165,11 +168,15 @@ export function EditTimeEntryForm({
             render={({ field }) => (
               <Field>
                 <FieldLabel className="text-xs">Date</FieldLabel>
-                <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                <Popover open={isOngoing ? false : calendarOpen} onOpenChange={setCalendarOpen}>
                   <PopoverTrigger asChild>
                     <button
                       type="button"
-                      className="flex h-7 w-full items-center gap-2 rounded-md border border-input px-2.5 text-xs shadow-xs hover:bg-accent transition-colors"
+                      disabled={isOngoing}
+                      className={cn(
+                        'flex h-7 w-full items-center gap-2 rounded-md border border-input px-2.5 text-xs shadow-xs hover:bg-accent transition-colors',
+                        isOngoing && 'opacity-50 cursor-not-allowed'
+                      )}
                     >
                       <CalendarIcon className="size-3 text-muted-foreground shrink-0" />
                       <span className="truncate">
@@ -207,7 +214,7 @@ export function EditTimeEntryForm({
             <FieldLabel htmlFor="edit-duration" className="text-xs">
               Duration
             </FieldLabel>
-            <InputGroup className="h-7">
+            <InputGroup className={cn('h-7', isOngoing && 'opacity-50 cursor-not-allowed')}>
               <InputGroupInput
                 id="edit-duration"
                 type="text"
@@ -217,6 +224,7 @@ export function EditTimeEntryForm({
                 onBlur={handleDurationBlur}
                 placeholder="HH:MM"
                 className="h-7 text-xs"
+                disabled={isOngoing}
               />
               <InputGroupAddon align="inline-end">
                 <TimerIcon className="size-3" />
@@ -260,11 +268,12 @@ export function EditTimeEntryForm({
                 <FieldLabel htmlFor="edit-endTime" className="text-xs">
                   End Time
                 </FieldLabel>
-                <InputGroup className="h-7">
+                <InputGroup className={cn('h-7', isOngoing && 'opacity-50 cursor-not-allowed')}>
                   <InputGroupInput
                     id="edit-endTime"
                     type="time"
                     className="h-7 text-xs appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                    disabled={isOngoing}
                     {...field}
                   />
                   <InputGroupAddon align="inline-end">

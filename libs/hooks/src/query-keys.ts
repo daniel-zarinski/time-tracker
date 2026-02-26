@@ -2,6 +2,7 @@ export const queryKeys = {
   timeEntries: {
     all: ['time-entries'] as const,
     active: ['active-time-entry'] as const,
+    dayTotal: (dateKey: string) => ['time-entries', 'day-total', dateKey] as const,
   },
   jira: {
     all: ['jira'] as const,
