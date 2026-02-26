@@ -112,7 +112,7 @@ export function TimelineGrid({
                         onEntryClick(entry);
                       }}
                       className={cn(
-                        'pointer-events-auto absolute inset-y-0.5 inset-x-[9px] max-w-[75%] overflow-hidden rounded-lg border px-2 pt-0 pb-2 text-left transition-colors',
+                        'pointer-events-auto absolute inset-y-0.5 inset-x-[22px] overflow-hidden rounded-lg border px-2 pt-0 pb-2 text-left transition-colors',
                         isActive
                           ? 'border-l-4 border-accent bg-primary/15 animate-pulse'
                           : 'border border-primary/20 bg-primary/10 hover:bg-primary/15',
@@ -123,11 +123,11 @@ export function TimelineGrid({
                           ? {
                               left: `calc(${
                                 (column / totalColumns) * 100
-                              }% + 0.25rem)`,
+                              }% + ${column === 0 ? '22px' : '0.25rem'})`,
                               right: `calc(${
                                 ((totalColumns - column - 1) / totalColumns) *
                                 100
-                              }% + 0.25rem)`,
+                              }% + ${column === totalColumns - 1 ? '22px' : '0.25rem'})`,
                             }
                           : undefined
                       }
