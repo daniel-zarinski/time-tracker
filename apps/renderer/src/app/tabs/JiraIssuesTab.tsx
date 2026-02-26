@@ -35,9 +35,11 @@ const OTHER_STATUS_SET = new Set(OTHER_STATUSES);
 
 const STATUS_ORDER = [
   'In Progress',
+  'To Do',
   'New',
   'Code Review',
-  'To Do',
+  'In Test',
+  'To Test',
   'Other',
 ] as const;
 
