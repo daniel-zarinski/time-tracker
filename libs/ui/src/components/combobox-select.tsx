@@ -56,6 +56,9 @@ export interface ComboboxSelectProps<T extends ComboboxSelectItem> {
   name?: string;
   /** Required for form submission. @default false */
   required?: boolean;
+
+  /** Container element for the combobox portal. Use to render inside a Dialog. */
+  container?: HTMLElement | null;
 }
 
 export function ComboboxSelect<T extends ComboboxSelectItem>({
@@ -72,6 +75,7 @@ export function ComboboxSelect<T extends ComboboxSelectItem>({
   className,
   name,
   required = false,
+  container,
 }: ComboboxSelectProps<T>) {
   return (
     <Combobox
@@ -91,7 +95,7 @@ export function ComboboxSelect<T extends ComboboxSelectItem>({
         disabled={disabled}
         className={className}
       />
-      <ComboboxContent>
+      <ComboboxContent container={container}>
         <ComboboxList>
           {(item: T) => (
             <ComboboxItem key={item.value} value={item} disabled={item.disabled}>

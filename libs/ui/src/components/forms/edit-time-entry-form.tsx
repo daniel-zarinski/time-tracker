@@ -21,7 +21,7 @@ import {
   TimerIcon,
   Trash2Icon,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import type { ComboboxSelectItem } from '../combobox-select';
 import { ComboboxSelect } from '../combobox-select';
@@ -82,6 +82,7 @@ export function EditTimeEntryForm({
   const endMinutes = timeStringToMinutes(endTime);
   const durationSeconds = Math.max(0, (endMinutes - startMinutes) * 60);
 
+  const formRef = useRef<HTMLFormElement>(null);
   const [durationInput, setDurationInput] = useState('');
   const [isDurationFocused, setIsDurationFocused] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
@@ -123,6 +124,7 @@ export function EditTimeEntryForm({
 
   return (
     <form
+      ref={formRef}
       onSubmit={handleSubmit(onFormSubmit)}
       className={cn('flex flex-col gap-0', className)}
     >
@@ -146,6 +148,7 @@ export function EditTimeEntryForm({
                     }}
                     placeholder="Search issues..."
                     className="h-7 text-xs"
+                    container={formRef.current}
                   />
                   <FieldError className="text-xs">
                     {errors.issueKey?.message}

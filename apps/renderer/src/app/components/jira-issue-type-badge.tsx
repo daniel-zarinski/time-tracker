@@ -1,7 +1,7 @@
 import { cn } from '@time-tracker/utils';
 
 interface JiraIssueTypeBadgeProps {
-  issueType: string;
+  issueType?: string | null;
   className?: string;
 }
 
@@ -10,7 +10,7 @@ const issueTypeColors: Record<string, string> = {
   'Sub-task':
     'border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400',
   Story:
-    'border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400',
+    'border-green-500/30 bg-green-300/10 text-green-600 dark:text-green-400',
   Bug: 'border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400',
   Epic: 'border-purple-500/30 bg-purple-500/10 text-purple-600 dark:text-purple-400',
   Initiative:
@@ -28,11 +28,11 @@ export function JiraIssueTypeBadge({
   issueType,
   className,
 }: JiraIssueTypeBadgeProps) {
+  if (!issueType) return null;
+
   const colorStyles = issueTypeColors[issueType] ?? defaultColor;
 
   return (
-    <span className={cn(baseStyles, colorStyles, className)}>
-      {issueType}
-    </span>
+    <span className={cn(baseStyles, colorStyles, className)}>{issueType}</span>
   );
 }

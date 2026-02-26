@@ -71,9 +71,7 @@ export function TimeEntryCardActive({
         <div className="min-w-0 flex-1 flex flex-col gap-0.5">
           <div className="flex flex-wrap items-center gap-1.5">
             <JiraIssueKeyBadge issueKey={issueKey} />
-            {entry.issue.issueType && (
-              <JiraIssueTypeBadge issueType={entry.issue.issueType} />
-            )}
+            <JiraIssueTypeBadge issueType={entry.issue.issueType} />
             <Badge variant="outline" className="shrink-0 w-fit text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70">
               {entry.issue.status ?? 'Unknown'}
             </Badge>

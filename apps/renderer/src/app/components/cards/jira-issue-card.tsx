@@ -60,9 +60,7 @@ function JiraIssueCardHeader({
         <JiraIssueKeyBadge issueKey={issue.key ?? '—'} />
         {showInlineBadges && (
           <>
-            {issue.issueType && (
-              <JiraIssueTypeBadge issueType={issue.issueType} />
-            )}
+            <JiraIssueTypeBadge issueType={issue.issueType} />
             <Badge variant="outline" className={badgeClassName}>
               {issue.status ?? 'Unknown'}
             </Badge>
@@ -129,7 +127,7 @@ function JiraIssueCardContent({
           <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium">
             Type
           </span>
-          <JiraIssueTypeBadge issueType={issue.issueType ?? ''} />
+          <JiraIssueTypeBadge issueType={issue.issueType} />
         </div>
         <div className="flex flex-col gap-1 items-center">
           <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium">
