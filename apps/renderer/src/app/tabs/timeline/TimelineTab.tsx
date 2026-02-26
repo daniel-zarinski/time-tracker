@@ -12,9 +12,11 @@ import {
 import { useTimelineDrag } from './use-timeline-drag';
 import { TimelineHeader } from './TimelineHeader';
 import { TimelineGrid } from './TimelineGrid';
+import { TimelineView } from './timeline-types';
 export function TimelineTab() {
   const setSelectedTimeEntry = useAppStore.use.setSelectedTimeEntry();
   const [date, setDate] = React.useState(() => new Date());
+  const [view, setView] = React.useState(TimelineView.Timeline);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const olRef = React.useRef<HTMLOListElement>(null);
 
@@ -84,14 +86,17 @@ export function TimelineTab() {
   const today = React.useMemo(() => new Date(), []);
   const isToday = isSameDay(date, today);
 
-  const navWeek = React.useCallback(
-    (delta: number) => {
-      const next = new Date(date);
-      next.setDate(next.getDate() + delta * 7);
-      setDate(next);
-    },
-    [date]
-  );
+  const previousWeek = React.useCallback(() => {
+    const next = new Date(date);
+    next.setDate(next.getDate() - 7);
+    setDate(next);
+  }, [date]);
+
+  const nextWeek = React.useCallback(() => {
+    const next = new Date(date);
+    next.setDate(next.getDate() + 7);
+    setDate(next);
+  }, [date]);
 
   // Clear selection on date change
   React.useEffect(() => {
@@ -125,7 +130,10 @@ export function TimelineTab() {
         date={date}
         today={today}
         weekDays={weekDays}
-        onNavWeek={navWeek}
+        view={view}
+        onViewChange={setView}
+        onPreviousWeek={previousWeek}
+        onNextWeek={nextWeek}
         onSelectDay={setDate}
       />
       <TimelineGrid

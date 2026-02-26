@@ -5,14 +5,22 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  Tabs,
+  TabsList,
+  TabsTrigger,
   WeekDaySelector,
 } from '@time-tracker/ui';
+import { LayoutGrid, List } from 'lucide-react';
+import { TimelineView } from './timeline-types';
 
 interface TimelineHeaderProps {
   date: Date;
   today: Date;
   weekDays: Date[];
-  onNavWeek: (delta: number) => void;
+  view: TimelineView;
+  onViewChange: (view: TimelineView) => void;
+  onPreviousWeek: () => void;
+  onNextWeek: () => void;
   onSelectDay: (date: Date) => void;
 }
 
@@ -20,7 +28,10 @@ export function TimelineHeader({
   date,
   today,
   weekDays,
-  onNavWeek,
+  view,
+  onViewChange,
+  onPreviousWeek,
+  onNextWeek,
   onSelectDay,
 }: TimelineHeaderProps) {
   const [calendarOpen, setCalendarOpen] = React.useState(false);
@@ -53,9 +64,21 @@ export function TimelineHeader({
             />
           </PopoverContent>
         </Popover>
-        <Button variant="ghost" size="sm">
-          List View
-        </Button>
+        <Tabs
+          value={view}
+          onValueChange={(v) => onViewChange(v as TimelineView)}
+        >
+          <TabsList variant="line">
+            <TabsTrigger value={TimelineView.Timeline}>
+              <LayoutGrid className="size-3.5" />
+              Timeline
+            </TabsTrigger>
+            <TabsTrigger value={TimelineView.List}>
+              <List className="size-3.5" />
+              List
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* Week day selector */}
@@ -65,7 +88,8 @@ export function TimelineHeader({
           selectedDate={date}
           today={today}
           onSelectDay={onSelectDay}
-          onNavigateWeek={onNavWeek}
+          onPreviousWeek={onPreviousWeek}
+          onNextWeek={onNextWeek}
         />
       </div>
     </>

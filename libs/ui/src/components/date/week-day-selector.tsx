@@ -17,7 +17,8 @@ interface WeekDaySelectorProps {
   selectedDate: Date;
   today: Date;
   onSelectDay: (date: Date) => void;
-  onNavigateWeek: (delta: number) => void;
+  onPreviousWeek: () => void;
+  onNextWeek: () => void;
 }
 
 export function WeekDaySelector({
@@ -25,7 +26,8 @@ export function WeekDaySelector({
   selectedDate,
   today,
   onSelectDay,
-  onNavigateWeek,
+  onPreviousWeek,
+  onNextWeek,
 }: WeekDaySelectorProps) {
   return (
     <div className="flex items-center px-2 py-2">
@@ -33,7 +35,7 @@ export function WeekDaySelector({
         variant="ghost"
         size="icon"
         className="size-7"
-        onClick={() => onNavigateWeek(-1)}
+        onClick={onPreviousWeek}
       >
         <ChevronLeft className="size-3.5" />
       </Button>
@@ -69,7 +71,7 @@ export function WeekDaySelector({
         variant="ghost"
         size="icon"
         className="size-7"
-        onClick={() => onNavigateWeek(1)}
+        onClick={onNextWeek}
       >
         <ChevronRight className="size-3.5" />
       </Button>
