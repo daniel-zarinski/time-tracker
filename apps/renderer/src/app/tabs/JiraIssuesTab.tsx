@@ -18,7 +18,9 @@ import type { JiraIssueWithParent } from '@time-tracker/database';
 import { Settings, AlertCircle, Inbox } from 'lucide-react';
 import { useAppStore } from '../store';
 import { toast } from 'sonner';
+import { JiraIssueKeyBadge } from '../components/jira-issue-key-badge';
 
+const renderIssueKey = (key: string) => <JiraIssueKeyBadge issueKey={key} />;
 
 const OTHER_STATUSES = [
   'DEV COMPLETED',
@@ -59,7 +61,6 @@ function sortStatuses(statuses: string[]): string[] {
 
 export function JiraIssuesTab() {
   const setActiveTab = useAppStore.use.setActiveTab();
-  const setSelectedIssueKey = useAppStore.use.setSelectedIssueKey();
 
   const getIssuesQuery = useQuery({
     queryKey: ['jira', 'my-issues'],
@@ -204,7 +205,7 @@ export function JiraIssuesTab() {
                 <JiraIssueCard
                   issue={issue}
                   onOpenInJira={(key) => window.electron.openJiraExternal(key)}
-                  onIssueKeyClick={(key) => setSelectedIssueKey(key)}
+                  renderIssueKey={renderIssueKey}
                   onTrackTime={async (key) => {
                     try {
                       const timeEntry = await window.timeTracking.startTracking(

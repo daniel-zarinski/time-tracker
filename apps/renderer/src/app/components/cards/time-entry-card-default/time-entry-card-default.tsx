@@ -2,17 +2,18 @@ import type { TimeEntryWithIssue } from '@time-tracker/database';
 import type { TimeEntryUpdates } from '@time-tracker/utils';
 import { cn } from '@time-tracker/utils';
 import { useState } from 'react';
-import type { ComboboxSelectItem } from '../../combobox-select';
-import { Card, CardContent } from '../../ui/card';
 import {
+  Card,
+  CardContent,
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '../../ui/collapsible';
-import { Progress } from '../../ui/progress';
+  EditTimeEntryForm,
+  Progress,
+  type ComboboxSelectItem,
+} from '@time-tracker/ui';
 import { TimeEntryCardActionsDropdown } from './time-entry-card-actions';
 import { TimeEntryCardActionsFooter } from './time-entry-card-actions';
-import { EditTimeEntryForm } from '../../forms/edit-time-entry-form';
 import { TimeEntryCardHeader } from './time-entry-card-header';
 import { TimeEntryCardSummary } from './time-entry-card-summary';
 
@@ -26,7 +27,6 @@ interface TimeEntryCardDefaultProps {
   onSave?: (entryId: string, updates: TimeEntryUpdates) => void | Promise<void>;
   onDelete?: (entryId: string) => void | Promise<void>;
   onOpenInJira?: (issueKey: string) => void | Promise<void>;
-  renderIssueKey?: (key: string) => React.ReactNode;
   className?: string;
 }
 
@@ -51,7 +51,6 @@ export function TimeEntryCardDefault({
   onSave,
   onDelete,
   onOpenInJira,
-  renderIssueKey,
   className,
 }: TimeEntryCardDefaultProps) {
   const [state, setState] = useState<'default' | 'expanded' | 'edit'>(
@@ -104,7 +103,6 @@ export function TimeEntryCardDefault({
             summary={entry.issue.summary ?? ''}
             truncate
             className="cursor-default"
-            renderIssueKey={renderIssueKey}
           />
           <EditTimeEntryForm
             entry={entry}
@@ -125,7 +123,6 @@ export function TimeEntryCardDefault({
                 issueKey={issueKey}
                 summary={entry.issue.summary ?? ''}
                 truncate={state !== 'expanded'}
-                renderIssueKey={renderIssueKey}
                 children={
                   state === 'default' ? (
                     <TimeEntryCardActionsDropdown

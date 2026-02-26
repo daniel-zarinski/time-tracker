@@ -1,15 +1,19 @@
 import { useState } from 'react';
-import { Button } from '../ui/button';
-import { Card, CardHeader, CardContent, CardFooter } from '../ui/card';
-import { Badge } from '../ui/badge';
 import {
+  Badge,
+  Button,
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
   Collapsible,
   CollapsibleTrigger,
   CollapsibleContent,
-} from '../ui/collapsible';
+} from '@time-tracker/ui';
 import { ChevronDownIcon, ExternalLinkIcon, TimerIcon } from 'lucide-react';
 import { cn } from '@time-tracker/utils';
 import type { JiraIssueWithParent } from '@time-tracker/database';
+import { JiraIssueKeyBadge } from '../jira-issue-key-badge';
 
 interface JiraIssueCardHeaderProps {
   issue: JiraIssueWithParent;
@@ -17,13 +21,11 @@ interface JiraIssueCardHeaderProps {
   expanded?: boolean;
   headerAction?: React.ReactNode;
   showInlineBadges?: boolean;
-  renderIssueKey?: (key: string) => React.ReactNode;
 }
 
 interface JiraIssueCardContentProps {
   issue: JiraIssueWithParent;
   parentLabel: string;
-  renderIssueKey?: (key: string) => React.ReactNode;
 }
 
 interface JiraIssueCardFooterProps {
@@ -36,7 +38,6 @@ export interface JiraIssueCardProps {
   issue: JiraIssueWithParent;
   onOpenInJira?: (issueKey: string) => void | Promise<void>;
   onTrackTime?: (issueKey: string) => void | Promise<unknown>;
-  renderIssueKey?: (key: string) => React.ReactNode;
   defaultExpanded?: boolean;
   collapsible?: boolean;
   headerAction?: React.ReactNode;
@@ -45,28 +46,17 @@ export interface JiraIssueCardProps {
 const badgeClassName =
   'shrink-0 w-fit text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70';
 
-function defaultIssueKeyBadge(key: string) {
-  return (
-    <Badge variant="outline" className={badgeClassName}>
-      {key}
-    </Badge>
-  );
-}
-
 function JiraIssueCardHeader({
   issue,
   showChevron = false,
   expanded = false,
   headerAction,
   showInlineBadges = false,
-  renderIssueKey,
 }: JiraIssueCardHeaderProps) {
-  const renderKey = renderIssueKey ?? defaultIssueKeyBadge;
-
   const keyAndSummary = (
     <div className="flex min-w-0 flex-1 flex-col gap-0.5">
       <div className="flex flex-wrap items-center gap-1.5">
-        {renderKey(issue.key ?? '—')}
+        <JiraIssueKeyBadge issueKey={issue.key ?? '—'} />
         {showInlineBadges && (
           <>
             {issue.issueType && (
@@ -119,10 +109,7 @@ function JiraIssueCardHeader({
 function JiraIssueCardContent({
   issue,
   parentLabel,
-  renderIssueKey,
 }: JiraIssueCardContentProps) {
-  const renderKey = renderIssueKey ?? defaultIssueKeyBadge;
-
   return (
     <CardContent className="px-3 pt-0 pb-0">
       <div className="flex flex-col gap-1 items-start mb-2 min-w-0 w-full overflow-hidden">
@@ -130,7 +117,7 @@ function JiraIssueCardContent({
           <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium shrink-0">
             Parent {parentLabel}
           </span>
-          {renderKey(issue.epicKey ?? '')}
+          <JiraIssueKeyBadge issueKey={issue.epicKey ?? ''} />
         </div>
         {issue.parent?.summary && (
           <span className="text-xs text-muted-foreground/80 truncate w-full min-w-0 block">
@@ -210,7 +197,6 @@ export function JiraIssueCard({
   defaultExpanded,
   onOpenInJira,
   onTrackTime,
-  renderIssueKey,
   collapsible = true,
   headerAction,
 }: JiraIssueCardProps) {
@@ -226,7 +212,7 @@ export function JiraIssueCard({
 
   const contentAndFooter = (
     <>
-      <JiraIssueCardContent issue={issue} parentLabel={parentLabel} renderIssueKey={renderIssueKey} />
+      <JiraIssueCardContent issue={issue} parentLabel={parentLabel} />
       <JiraIssueCardFooter
         issueKey={issue.key ?? ''}
         onOpenInJira={onOpenInJira}
@@ -255,7 +241,6 @@ export function JiraIssueCard({
             expanded={showDetails}
             headerAction={effectiveHeaderAction}
             showInlineBadges={!showDetails}
-            renderIssueKey={renderIssueKey}
           />
           <CollapsibleContent>{contentAndFooter}</CollapsibleContent>
         </Collapsible>
@@ -266,7 +251,6 @@ export function JiraIssueCard({
             showChevron={false}
             headerAction={effectiveHeaderAction}
             showInlineBadges={false}
-            renderIssueKey={renderIssueKey}
           />
           {contentAndFooter}
         </>

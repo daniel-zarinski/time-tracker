@@ -5,15 +5,15 @@ import {
   PlayIcon,
   Trash2Icon,
 } from 'lucide-react'
-import { Button } from '../../ui/button'
-import { CardFooter } from '../../ui/card'
 import {
+  Button,
+  CardFooter,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '../../ui/dropdown-menu'
+} from '@time-tracker/ui'
 
 interface TimeEntryCardActionsDropdownProps {
   onView: () => void

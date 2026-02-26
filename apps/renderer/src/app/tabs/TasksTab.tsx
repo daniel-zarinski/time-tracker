@@ -8,15 +8,15 @@ import {
   TimeEntryCardActive,
   TimeEntryCardDefault,
   toast,
-  Separator,
   type ComboboxSelectItem,
 } from '@time-tracker/ui';
 import { Clock } from 'lucide-react';
 import { useMemo } from 'react';
-import { useAppStore } from '../store';
+import { JiraIssueKeyBadge } from '../components/jira-issue-key-badge';
+
+const renderIssueKey = (key: string) => <JiraIssueKeyBadge issueKey={key} />;
 
 export function TasksTab() {
-  const setSelectedIssueKey = useAppStore.use.setSelectedIssueKey();
   const timeEntriesQuery = useQuery({
     queryKey: ['time-entries'],
     queryFn: () => window.database.getTimeEntries(),
@@ -126,43 +126,44 @@ export function TasksTab() {
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-4 flex flex-col gap-3">
+    <div className="w-full max-w-2xl mx-auto flex flex-col">
       {activeEntry && (
-        <div className="sticky top-0 z-10 bg-background pb-1">
+        <div className="sticky top-0 z-30 border-b border-border bg-background px-4 py-2">
           <TimeEntryCardActive
             entry={activeEntry}
             onStopTimer={stopTracking.mutateAsync}
-            onIssueKeyClick={(key) => setSelectedIssueKey(key)}
+            renderIssueKey={renderIssueKey}
           />
-          {completedEntries.length > 0 && <Separator className="mt-3" />}
         </div>
       )}
 
-      <ul className="flex flex-col gap-2">
-        {completedEntries.map((entry) => (
-          <li key={entry.id}>
-            <TimeEntryCardDefault
-              entry={entry}
-              issues={issueItems}
-              onOpenInJira={() => window.electron.openJiraExternal(entry.issueKey)}
-              onIssueKeyClick={(key) => setSelectedIssueKey(key)}
-              onResumeTimer={() => startTracking.mutateAsync(entry.issueKey)}
-              onSave={async (entryId, updates) => {
-                await updateTimeEntryMutation.mutateAsync({
-                  entryId,
-                  updates: {
-                    startedAt: updates.startedAt,
-                    timeSpentSeconds: updates.timeSpentSeconds,
-                    description: updates.description,
-                    // issueKey: updates.issueKey, // TODO: add this back in once implemented
-                  },
-                });
-              }}
-              onDelete={(id) => deleteTimeEntryMutation.mutateAsync(id)}
-            />
-          </li>
-        ))}
-      </ul>
+      <div className="p-4 flex flex-col gap-3">
+        <ul className="flex flex-col gap-2">
+          {completedEntries.map((entry) => (
+            <li key={entry.id}>
+              <TimeEntryCardDefault
+                entry={entry}
+                issues={issueItems}
+                onOpenInJira={() => window.electron.openJiraExternal(entry.issueKey)}
+                renderIssueKey={renderIssueKey}
+                onResumeTimer={() => startTracking.mutateAsync(entry.issueKey)}
+                onSave={async (entryId, updates) => {
+                  await updateTimeEntryMutation.mutateAsync({
+                    entryId,
+                    updates: {
+                      startedAt: updates.startedAt,
+                      timeSpentSeconds: updates.timeSpentSeconds,
+                      description: updates.description,
+                      // issueKey: updates.issueKey, // TODO: add this back in once implemented
+                    },
+                  });
+                }}
+                onDelete={(id) => deleteTimeEntryMutation.mutateAsync(id)}
+              />
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

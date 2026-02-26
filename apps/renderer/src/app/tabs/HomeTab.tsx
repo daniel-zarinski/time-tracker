@@ -8,14 +8,14 @@ import {
   EmptyMedia,
   JiraIssueCard,
   TimeEntryCardActive,
-  Separator,
   toast,
 } from '@time-tracker/ui';
 import { Inbox, PlayIcon } from 'lucide-react';
-import { useAppStore } from '../store';
+import { JiraIssueKeyBadge } from '../components/jira-issue-key-badge';
+
+const renderIssueKey = (key: string) => <JiraIssueKeyBadge issueKey={key} />;
 
 export function HomeTab() {
-  const setSelectedIssueKey = useAppStore.use.setSelectedIssueKey();
   const activeEntryQuery = useQuery({
     queryKey: ['active-time-entry'],
     queryFn: () => window.database.getActiveTimeEntry(),
@@ -65,57 +65,58 @@ export function HomeTab() {
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-4 flex flex-col gap-3">
+    <div className="w-full max-w-2xl mx-auto flex flex-col">
       {activeEntry && (
-        <div className="sticky top-0 z-10 bg-background pb-1">
+        <div className="sticky top-0 z-30 border-b border-border bg-background px-4 py-2">
           <TimeEntryCardActive
             entry={activeEntry}
             onStopTimer={stopTracking.mutateAsync}
-            onIssueKeyClick={(key) => setSelectedIssueKey(key)}
+            renderIssueKey={renderIssueKey}
           />
-          {issues.length > 0 && <Separator className="mt-3" />}
         </div>
       )}
 
-      {issues.length > 0 ? (
-        <ul className="flex flex-col gap-2">
-          {issues.map((issue) => (
-            <li key={issue.id}>
-              <JiraIssueCard
-                issue={issue}
-                onOpenInJira={window.electron.openJiraExternal}
-                onTrackTime={startTracking.mutateAsync}
-                onIssueKeyClick={(key) => setSelectedIssueKey(key)}
-                headerAction={
-                  <Button
-                    size="icon-sm"
-                    variant="default"
-                    className="shrink-0"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      startTracking.mutate(issue.key ?? '');
-                    }}
-                  >
-                    <PlayIcon className="size-4" />
-                  </Button>
-                }
-              />
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <Empty className="w-full max-w-md mx-auto">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <Inbox />
-            </EmptyMedia>
-            <EmptyTitle>No Jira issues</EmptyTitle>
-            <EmptyDescription>
-              Fetch issues from the Jira Issues tab to get started.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      )}
+      <div className="p-4 flex flex-col gap-3">
+        {issues.length > 0 ? (
+          <ul className="flex flex-col gap-2">
+            {issues.map((issue) => (
+              <li key={issue.id}>
+                <JiraIssueCard
+                  issue={issue}
+                  onOpenInJira={window.electron.openJiraExternal}
+                  onTrackTime={startTracking.mutateAsync}
+                  renderIssueKey={renderIssueKey}
+                  headerAction={
+                    <Button
+                      size="icon-sm"
+                      variant="default"
+                      className="shrink-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        startTracking.mutate(issue.key ?? '');
+                      }}
+                    >
+                      <PlayIcon className="size-4" />
+                    </Button>
+                  }
+                />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <Empty className="w-full max-w-md mx-auto">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Inbox />
+              </EmptyMedia>
+              <EmptyTitle>No Jira issues</EmptyTitle>
+              <EmptyDescription>
+                Fetch issues from the Jira Issues tab to get started.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        )}
+      </div>
     </div>
   );
 }
