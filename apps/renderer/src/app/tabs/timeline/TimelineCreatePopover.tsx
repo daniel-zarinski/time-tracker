@@ -1,8 +1,5 @@
 import * as React from 'react';
 import {
-  Popover,
-  PopoverAnchor,
-  PopoverContent,
   Combobox,
   ComboboxInput,
   ComboboxContent,
@@ -32,72 +29,62 @@ export function TimelineCreatePopover({
   const [selected, setSelected] = React.useState<ComboboxSelectItem | null>(
     null
   );
-  const contentRef = React.useRef<HTMLDivElement | null>(null);
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
 
   return (
-    <Popover open>
-      <PopoverAnchor className="absolute inset-0" />
-      <PopoverContent
-        ref={contentRef}
-        side="top"
-        align="center"
-        sideOffset={8}
-        className="w-72 p-2"
-        onOpenAutoFocus={(e) => {
-          e.preventDefault();
-          const input = (e.currentTarget as HTMLElement).querySelector('input');
-          input?.focus();
-        }}
+    <div
+      ref={containerRef}
+      className="absolute bottom-full left-1/2 z-50 mb-2 w-72 -translate-x-1/2 rounded-md border bg-popover p-2 text-popover-foreground shadow-md"
+      onPointerDown={(e) => e.stopPropagation()}
+    >
+      <Combobox
+        items={issues}
+        value={selected}
+        onValueChange={(value) => setSelected(value)}
+        autoHighlight
       >
-        <Combobox
-          items={issues}
-          value={selected}
-          onValueChange={(value) => setSelected(value)}
-          autoHighlight
+        <ComboboxInput
+          placeholder="Search issues..."
+          showTrigger={false}
+          autoFocus
         >
-          <ComboboxInput
-            placeholder="Search issues..."
-            showClear
-            showTrigger={false}
-          >
-            <InputGroupAddon align="inline-end">
-              <InputGroupButton onClick={onCancel}>Cancel</InputGroupButton>
-              <InputGroupButton
-                variant="secondary"
-                disabled={!selected}
-                onClick={() => {
-                  if (selected) onSubmit(selected.value);
-                }}
+          <InputGroupAddon align="inline-end">
+            <InputGroupButton onClick={onCancel}>Cancel</InputGroupButton>
+            <InputGroupButton
+              variant="secondary"
+              disabled={!selected}
+              onClick={() => {
+                if (selected) onSubmit(selected.value);
+              }}
+            >
+              Save
+            </InputGroupButton>
+          </InputGroupAddon>
+        </ComboboxInput>
+        <ComboboxContent anchor={containerRef}>
+          <ComboboxList>
+            {(item: ComboboxSelectItem) => (
+              <ComboboxItem
+                key={item.value}
+                value={item}
+                disabled={item.disabled}
               >
-                Save
-              </InputGroupButton>
-            </InputGroupAddon>
-          </ComboboxInput>
-          <ComboboxContent anchor={contentRef}>
-            <ComboboxList>
-              {(item: ComboboxSelectItem) => (
-                <ComboboxItem
-                  key={item.value}
-                  value={item}
-                  disabled={item.disabled}
-                >
-                  <Item className="gap-1 p-0">
-                    <ItemContent>
-                      <ItemTitle className="whitespace-nowrap">
-                        {item.label}
-                      </ItemTitle>
-                      {item.description && (
-                        <ItemDescription>{item.description}</ItemDescription>
-                      )}
-                    </ItemContent>
-                  </Item>
-                </ComboboxItem>
-              )}
-            </ComboboxList>
-            <ComboboxEmpty>No results found.</ComboboxEmpty>
-          </ComboboxContent>
-        </Combobox>
-      </PopoverContent>
-    </Popover>
+                <Item className="gap-1 p-0">
+                  <ItemContent>
+                    <ItemTitle className="whitespace-nowrap">
+                      {item.label}
+                    </ItemTitle>
+                    {item.description && (
+                      <ItemDescription>{item.description}</ItemDescription>
+                    )}
+                  </ItemContent>
+                </Item>
+              </ComboboxItem>
+            )}
+          </ComboboxList>
+          <ComboboxEmpty>No results found.</ComboboxEmpty>
+        </ComboboxContent>
+      </Combobox>
+    </div>
   );
 }
