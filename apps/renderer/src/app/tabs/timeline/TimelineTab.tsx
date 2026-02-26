@@ -84,15 +84,6 @@ export function TimelineTab() {
   const today = React.useMemo(() => new Date(), []);
   const isToday = isSameDay(date, today);
 
-  const nav = React.useCallback(
-    (delta: number) => {
-      const next = new Date(date);
-      next.setDate(next.getDate() + delta);
-      setDate(next);
-    },
-    [date]
-  );
-
   const navWeek = React.useCallback(
     (delta: number) => {
       const next = new Date(date);
@@ -134,10 +125,8 @@ export function TimelineTab() {
         date={date}
         today={today}
         weekDays={weekDays}
-        onNav={nav}
         onNavWeek={navWeek}
         onSelectDay={setDate}
-        onToday={() => setDate(new Date())}
       />
       <TimelineGrid
         olRef={olRef}

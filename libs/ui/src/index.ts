@@ -1,4 +1,5 @@
 export * from './components/combobox-select';
+export * from './components/date';
 export * from './components/command-palette';
 export * from './components/forms';
 export * from './components/theme-provider';
