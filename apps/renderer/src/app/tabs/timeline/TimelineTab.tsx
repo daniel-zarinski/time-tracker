@@ -10,9 +10,12 @@ import {
   formatSelection,
 } from './timeline-utils';
 import { useTimelineDrag } from './use-timeline-drag';
+import { useTimeEntryMutations } from '../../../hooks/use-time-entry-mutations';
 import { TimelineHeader } from './TimelineHeader';
 import { TimelineGrid } from './TimelineGrid';
+import { TimelineListView } from './TimelineListView';
 import { TimelineView } from './timeline-types';
+
 export function TimelineTab() {
   const setSelectedTimeEntry = useAppStore.use.setSelectedTimeEntry();
   const [date, setDate] = React.useState(() => new Date());
@@ -21,6 +24,8 @@ export function TimelineTab() {
   const olRef = React.useRef<HTMLOListElement>(null);
 
   const queryClient = useQueryClient();
+  const { startTracking, stopTracking, deleteTimeEntry, updateTimeEntry } =
+    useTimeEntryMutations();
 
   const {
     selection,
@@ -74,6 +79,11 @@ export function TimelineTab() {
     },
   });
 
+  const filteredEntries = React.useMemo(
+    () => entries.filter((e) => isSameDay(new Date(e.startedAt), date)),
+    [entries, date]
+  );
+
   const entriesWithGrid = React.useMemo(
     () => getEntriesWithGrid(entries, date),
     [entries, date]
@@ -103,8 +113,10 @@ export function TimelineTab() {
     clearSelection();
   }, [date, clearSelection]);
 
-  // Auto-scroll to current time on mount / date change
+  // Auto-scroll to current time on mount / date change (timeline view only)
   React.useEffect(() => {
+    if (view !== TimelineView.Timeline) return;
+
     const container = containerRef.current;
     if (!container) return;
 
@@ -122,7 +134,7 @@ export function TimelineTab() {
     requestAnimationFrame(() => {
       scrollParent.scrollTop = scrollTarget;
     });
-  }, [date]);
+  }, [date, view]);
 
   return (
     <div className="flex flex-col">
@@ -136,22 +148,43 @@ export function TimelineTab() {
         onNextWeek={nextWeek}
         onSelectDay={setDate}
       />
-      <TimelineGrid
-        olRef={olRef}
-        containerRef={containerRef}
-        entriesWithLayout={entriesWithLayout}
-        selection={selection}
-        isDragging={isDragging}
-        isToday={isToday}
-        date={date}
-        issues={issueItems}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onEntryClick={(entry) => setSelectedTimeEntry(entry, { view: 'edit' })}
-        onCreateEntry={(issueKey) => createEntryMutation.mutate(issueKey)}
-        onClearSelection={clearSelection}
-      />
+      {view === TimelineView.Timeline ? (
+        <TimelineGrid
+          olRef={olRef}
+          containerRef={containerRef}
+          entriesWithLayout={entriesWithLayout}
+          selection={selection}
+          isDragging={isDragging}
+          isToday={isToday}
+          date={date}
+          issues={issueItems}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onEntryClick={(entry) => setSelectedTimeEntry(entry, { view: 'edit' })}
+          onCreateEntry={(issueKey) => createEntryMutation.mutate(issueKey)}
+          onClearSelection={clearSelection}
+        />
+      ) : (
+        <TimelineListView
+          entries={filteredEntries}
+          issues={issueItems}
+          onStopTracking={(id) => stopTracking.mutateAsync(id)}
+          onStartTracking={(issueKey) => startTracking.mutateAsync(issueKey)}
+          onUpdateEntry={(entryId, updates) =>
+            updateTimeEntry.mutateAsync({
+              entryId,
+              updates: {
+                startedAt: updates.startedAt,
+                timeSpentSeconds: updates.timeSpentSeconds,
+                description: updates.description,
+              },
+            })
+          }
+          onDeleteEntry={(id) => deleteTimeEntry.mutateAsync(id)}
+          onOpenInJira={(issueKey) => window.electron.openJiraExternal(issueKey)}
+        />
+      )}
     </div>
   );
 }
