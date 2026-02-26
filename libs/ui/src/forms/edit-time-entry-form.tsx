@@ -202,6 +202,28 @@ export function EditTimeEntryForm({
             )}
           />
 
+          {/* Duration (computed, not a form field) */}
+          <Field>
+            <FieldLabel htmlFor="edit-duration" className="text-xs">
+              Duration
+            </FieldLabel>
+            <InputGroup className="h-7">
+              <InputGroupInput
+                id="edit-duration"
+                type="text"
+                value={durationInput}
+                onChange={(e) => setDurationInput(e.target.value)}
+                onFocus={() => setIsDurationFocused(true)}
+                onBlur={handleDurationBlur}
+                placeholder="HH:MM"
+                className="h-7 text-xs"
+              />
+              <InputGroupAddon align="inline-end">
+                <TimerIcon className="size-3" />
+              </InputGroupAddon>
+            </InputGroup>
+          </Field>
+
           {/* Start Time */}
           <Controller
             name="startTime"
@@ -255,28 +277,6 @@ export function EditTimeEntryForm({
               </Field>
             )}
           />
-
-          {/* Duration (computed, not a form field) */}
-          <Field>
-            <FieldLabel htmlFor="edit-duration" className="text-xs">
-              Duration
-            </FieldLabel>
-            <InputGroup className="h-7">
-              <InputGroupInput
-                id="edit-duration"
-                type="text"
-                value={durationInput}
-                onChange={(e) => setDurationInput(e.target.value)}
-                onFocus={() => setIsDurationFocused(true)}
-                onBlur={handleDurationBlur}
-                placeholder="HH:MM"
-                className="h-7 text-xs"
-              />
-              <InputGroupAddon align="inline-end">
-                <TimerIcon className="size-3" />
-              </InputGroupAddon>
-            </InputGroup>
-          </Field>
 
           {/* Description — col-span-2 */}
           <Controller
