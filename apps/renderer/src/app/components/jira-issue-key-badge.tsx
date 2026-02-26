@@ -3,6 +3,7 @@ import { useAppStore } from '../store';
 
 interface JiraIssueKeyBadgeProps {
   issueKey: string;
+  interactive?: boolean;
   className?: string;
 }
 
@@ -17,6 +18,7 @@ const selectedStyles =
 
 export function JiraIssueKeyBadge({
   issueKey,
+  interactive = true,
   className,
 }: JiraIssueKeyBadgeProps) {
   const selectedIssueKey = useAppStore.use.selectedIssueKey();
@@ -24,9 +26,9 @@ export function JiraIssueKeyBadge({
 
   const isSelected = selectedIssueKey === issueKey;
 
-  if (isSelected) {
+  if (!interactive || isSelected) {
     return (
-      <span className={cn(baseStyles, selectedStyles, className)}>
+      <span className={cn(baseStyles, interactive && isSelected && selectedStyles, className)}>
         {issueKey}
       </span>
     );

@@ -12,10 +12,6 @@ import {
 import { useTimelineDrag } from './use-timeline-drag';
 import { TimelineHeader } from './TimelineHeader';
 import { TimelineGrid } from './TimelineGrid';
-import { JiraIssueKeyBadge } from '../../components/jira-issue-key-badge';
-
-const renderIssueKey = (key: string) => <JiraIssueKeyBadge issueKey={key} />;
-
 export function TimelineTab() {
   const setSelectedTimeEntry = useAppStore.use.setSelectedTimeEntry();
   const [date, setDate] = React.useState(() => new Date());
@@ -158,7 +154,6 @@ export function TimelineTab() {
         onEntryClick={(entry) => setSelectedTimeEntry(entry, { view: 'edit' })}
         onCreateEntry={(issueKey) => createEntryMutation.mutate(issueKey)}
         onClearSelection={clearSelection}
-        renderIssueKey={renderIssueKey}
       />
     </div>
   );

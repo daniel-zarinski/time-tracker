@@ -5,16 +5,13 @@ import {
   EmptyTitle,
   EmptyDescription,
   EmptyMedia,
-  TimeEntryCardActive,
-  TimeEntryCardDefault,
   toast,
   type ComboboxSelectItem,
 } from '@time-tracker/ui';
 import { Clock } from 'lucide-react';
 import { useMemo } from 'react';
-import { JiraIssueKeyBadge } from '../components/jira-issue-key-badge';
-
-const renderIssueKey = (key: string) => <JiraIssueKeyBadge issueKey={key} />;
+import { TimeEntryCardActive } from '../components/cards/time-entry-card-active';
+import { TimeEntryCardDefault } from '../components/cards/time-entry-card-default';
 
 export function TasksTab() {
   const timeEntriesQuery = useQuery({
@@ -132,7 +129,6 @@ export function TasksTab() {
           <TimeEntryCardActive
             entry={activeEntry}
             onStopTimer={stopTracking.mutateAsync}
-            renderIssueKey={renderIssueKey}
           />
         </div>
       )}
@@ -145,7 +141,6 @@ export function TasksTab() {
                 entry={entry}
                 issues={issueItems}
                 onOpenInJira={() => window.electron.openJiraExternal(entry.issueKey)}
-                renderIssueKey={renderIssueKey}
                 onResumeTimer={() => startTracking.mutateAsync(entry.issueKey)}
                 onSave={async (entryId, updates) => {
                   await updateTimeEntryMutation.mutateAsync({

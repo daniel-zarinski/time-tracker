@@ -29,7 +29,6 @@ interface TimelineGridProps {
   onEntryClick: (entry: TimeEntryWithIssue) => void;
   onCreateEntry: (issueKey: string) => void | Promise<void>;
   onClearSelection: () => void;
-  renderIssueKey?: (key: string) => React.ReactNode;
 }
 
 export function TimelineGrid({
@@ -46,7 +45,6 @@ export function TimelineGrid({
   onEntryClick,
   onCreateEntry,
   onClearSelection,
-  renderIssueKey,
   issues,
 }: TimelineGridProps) {
   const formattedSelection = React.useMemo(() => {
@@ -146,11 +144,7 @@ export function TimelineGrid({
                       }
                     >
                       <p className="truncate text-xs text-primary flex items-center">
-                        {renderIssueKey ? (
-                          renderIssueKey(issueKey)
-                        ) : (
-                          <span className="font-semibold">{issueKey}</span>
-                        )}
+                        <span className="font-semibold">{issueKey}</span>
                         {entry.issue.summary && (
                           <span className="ml-1.5 text-primary/60">
                             {entry.issue.summary}

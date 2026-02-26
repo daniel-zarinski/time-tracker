@@ -6,14 +6,11 @@ import {
   EmptyTitle,
   EmptyDescription,
   EmptyMedia,
-  JiraIssueCard,
-  TimeEntryCardActive,
   toast,
 } from '@time-tracker/ui';
 import { Inbox, PlayIcon } from 'lucide-react';
-import { JiraIssueKeyBadge } from '../components/jira-issue-key-badge';
-
-const renderIssueKey = (key: string) => <JiraIssueKeyBadge issueKey={key} />;
+import { JiraIssueCard } from '../components/cards/jira-issue-card';
+import { TimeEntryCardActive } from '../components/cards/time-entry-card-active';
 
 export function HomeTab() {
   const activeEntryQuery = useQuery({
@@ -71,7 +68,6 @@ export function HomeTab() {
           <TimeEntryCardActive
             entry={activeEntry}
             onStopTimer={stopTracking.mutateAsync}
-            renderIssueKey={renderIssueKey}
           />
         </div>
       )}
@@ -85,7 +81,6 @@ export function HomeTab() {
                   issue={issue}
                   onOpenInJira={window.electron.openJiraExternal}
                   onTrackTime={startTracking.mutateAsync}
-                  renderIssueKey={renderIssueKey}
                   headerAction={
                     <Button
                       size="icon-sm"

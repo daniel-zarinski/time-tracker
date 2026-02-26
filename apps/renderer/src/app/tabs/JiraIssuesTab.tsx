@@ -8,7 +8,6 @@ import {
   EmptyDescription,
   EmptyContent,
   EmptyMedia,
-  JiraIssueCard,
   Tabs,
   TabsList,
   TabsTrigger,
@@ -18,9 +17,7 @@ import type { JiraIssueWithParent } from '@time-tracker/database';
 import { Settings, AlertCircle, Inbox } from 'lucide-react';
 import { useAppStore } from '../store';
 import { toast } from 'sonner';
-import { JiraIssueKeyBadge } from '../components/jira-issue-key-badge';
-
-const renderIssueKey = (key: string) => <JiraIssueKeyBadge issueKey={key} />;
+import { JiraIssueCard } from '../components/cards/jira-issue-card';
 
 const OTHER_STATUSES = [
   'DEV COMPLETED',
@@ -205,7 +202,6 @@ export function JiraIssuesTab() {
                 <JiraIssueCard
                   issue={issue}
                   onOpenInJira={(key) => window.electron.openJiraExternal(key)}
-                  renderIssueKey={renderIssueKey}
                   onTrackTime={async (key) => {
                     try {
                       const timeEntry = await window.timeTracking.startTracking(

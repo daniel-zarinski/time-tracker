@@ -6,8 +6,6 @@ import {
   CommandPalette,
   Dialog,
   DialogContent,
-  JiraIssueCard,
-  TimeEntryCardDefault,
   Tabs,
   TabsContent,
   toast,
@@ -26,9 +24,8 @@ import { useAppStore, TabValue } from './store';
 import { useAppCommands } from './use-app-commands';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { TimelineTab } from './tabs/timeline';
-import { JiraIssueKeyBadge } from './components/jira-issue-key-badge';
-
-const renderIssueKey = (key: string) => <JiraIssueKeyBadge issueKey={key} />;
+import { JiraIssueCard } from './components/cards/jira-issue-card';
+import { TimeEntryCardDefault } from './components/cards/time-entry-card-default';
 
 export function App() {
   const queryClient = useQueryClient();
@@ -185,7 +182,6 @@ export function App() {
               onTrackTime={async (key) => {
                 await startTrackingMutation.mutateAsync(key);
               }}
-              renderIssueKey={renderIssueKey}
             />
           )}
         </DialogContent>
@@ -209,7 +205,6 @@ export function App() {
                 await startTrackingMutation.mutateAsync(key);
               }}
               onOpenInJira={(key) => window.electron.openJiraExternal(key)}
-              renderIssueKey={renderIssueKey}
               onSave={async (entryId, updates) => {
                 await updateTimeEntryMutation.mutateAsync({
                   entryId,
