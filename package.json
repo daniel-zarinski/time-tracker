@@ -2,6 +2,7 @@
   "name": "time-tracker",
   "version": "0.0.0",
   "license": "MIT",
+  "author": "Daniel Zarinski <daniel.zarinski@gmail.com>",
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
     "clean": "nx reset && rm -rf dist .nx/cache node_modules/.cache/nx",

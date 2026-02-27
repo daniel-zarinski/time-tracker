@@ -71,7 +71,8 @@
         "frontendProject": "renderer",
         "sourcePath": "dist/apps",
         "outputPath": "dist/executables"
-      }
+      },
+      "dependsOn": ["^build:production"]
     }
   }
 }

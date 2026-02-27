@@ -1,6 +1,7 @@
 'use client';
 import { cn } from '@time-tracker/utils';
 import { motion, Transition } from 'motion/react';
+import { useEffect, useState } from 'react';
 
 const BORDER_TRAIL_VARIANTS = {
   default: {
@@ -39,11 +40,27 @@ export function BorderTrail({
   };
 
   const variantConfig = BORDER_TRAIL_VARIANTS[variant];
+  const [key, setKey] = useState(0);
+  useEffect(() => {
+    const h = () => {
+      if (document.visibilityState === 'visible') setKey((k) => k + 1);
+    };
+    document.addEventListener('visibilitychange', h);
+    if (document.visibilityState === 'visible') {
+      requestAnimationFrame(() => setKey((k) => k + 1));
+    }
+    return () => document.removeEventListener('visibilitychange', h);
+  }, []);
 
   return (
     <div className="pointer-events-none absolute inset-0 rounded-[inherit] border border-transparent [mask-clip:padding-box,border-box] [mask-composite:intersect] [mask-image:linear-gradient(transparent,transparent),linear-gradient(#000,#000)]">
       <motion.div
-        className={cn('absolute aspect-square', variantConfig.className, className)}
+        key={key}
+        className={cn(
+          'absolute aspect-square',
+          variantConfig.className,
+          className
+        )}
         style={{
           width: size,
           offsetPath: `rect(0 auto auto 0 round ${size}px)`,

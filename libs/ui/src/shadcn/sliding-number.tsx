@@ -8,16 +8,13 @@ import {
   motionValue,
 } from 'motion/react';
 import useMeasure from 'react-use-measure';
-import { EASE_CUBIC } from '../constants';
-
-const TRANSITION = { duration: 0.35, ease: EASE_CUBIC };
 
 function Digit({ value, place }: { value: number; place: number }) {
   const valueRoundedToPlace = Math.floor(value / place) % 10;
   const animatedValue = motionValue(valueRoundedToPlace);
 
   useEffect(() => {
-    animate(animatedValue, valueRoundedToPlace, TRANSITION);
+    animate(animatedValue, valueRoundedToPlace);
   }, [animatedValue, valueRoundedToPlace]);
 
   return (

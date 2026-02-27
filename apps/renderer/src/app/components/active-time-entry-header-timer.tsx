@@ -46,19 +46,6 @@ export function ActiveTimeEntryHeaderTimer() {
   const startedAtStr = new Date(entry.startedAt).toLocaleTimeString();
   const tooltipContent = issueKey ? issueKey : `Started at ${startedAtStr}`;
 
-  const timerContent = (
-    <span className="shrink-0 font-bold text-primary text-sm font-mono flex items-center">
-      <SlidingNumber value={Math.floor(elapsedSeconds / 3600)} padStart />
-      <span>:</span>
-      <SlidingNumber
-        value={Math.floor((elapsedSeconds % 3600) / 60)}
-        padStart
-      />
-      <span>:</span>
-      <SlidingNumber value={elapsedSeconds % 60} padStart />
-    </span>
-  );
-
   return (
     <MotionConfig transition={DEFAULT_TRANSITION}>
       <div
@@ -84,7 +71,21 @@ export function ActiveTimeEntryHeaderTimer() {
         >
           <div className="flex items-center gap-1 pl-1.5 pr-0.5 py-1">
             <Tooltip>
-              <TooltipTrigger asChild>{timerContent}</TooltipTrigger>
+              <TooltipTrigger asChild>
+                <span className="shrink-0 font-bold text-primary text-sm font-mono flex items-center">
+                  <SlidingNumber
+                    value={Math.floor(elapsedSeconds / 3600)}
+                    padStart
+                  />
+                  <span>:</span>
+                  <SlidingNumber
+                    value={Math.floor((elapsedSeconds % 3600) / 60)}
+                    padStart
+                  />
+                  <span>:</span>
+                  <SlidingNumber value={elapsedSeconds % 60} padStart />
+                </span>
+              </TooltipTrigger>
               <TooltipContent side="left">{tooltipContent}</TooltipContent>
             </Tooltip>
             {isOpen && (
