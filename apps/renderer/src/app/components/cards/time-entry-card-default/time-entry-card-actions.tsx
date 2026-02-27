@@ -63,14 +63,12 @@ interface TimeEntryCardActionsFooterProps {
   onResume?: () => void
   onView: () => void
   onEdit: () => void
-  onDelete: () => void
 }
 
 export function TimeEntryCardActionsFooter({
   onResume,
   onView,
   onEdit,
-  onDelete,
 }: TimeEntryCardActionsFooterProps) {
   return (
     <CardFooter className="px-3 pb-2.5 gap-2">
@@ -87,11 +85,6 @@ export function TimeEntryCardActionsFooter({
       <Button variant="outline" size="xs" onClick={onEdit}>
         <PencilIcon className="size-3" />
         Edit
-      </Button>
-      <div className="flex-1" />
-      <Button variant="destructive" size="xs" onClick={onDelete}>
-        <Trash2Icon className="size-3" />
-        Delete
       </Button>
     </CardFooter>
   )
