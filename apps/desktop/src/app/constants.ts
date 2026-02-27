@@ -1,9 +1,9 @@
 export const WINDOW = {
   defaultWidth: 600,
   defaultHeight: 600,
-  minWidth: 540,
+  minWidth: 500,
   minHeight: 300,
-  maxWidth: 1920,
+  maxWidth: 1920, // TODO: Set max width to 700 or 1000
   maxHeight: 1080,
 } as const;
 
