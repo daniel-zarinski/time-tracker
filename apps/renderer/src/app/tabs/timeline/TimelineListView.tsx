@@ -1,6 +1,6 @@
 import type { TimeEntryWithIssue } from '@time-tracker/database';
-import type { TimeEntryUpdates } from '@time-tracker/utils';
 import type { ComboboxSelectItem } from '@time-tracker/ui';
+import { useTimeEntryMutations } from '@time-tracker/hooks';
 import {
   AnimatedGroup,
   Empty,
@@ -23,23 +23,16 @@ interface TimelineListViewProps {
   entries: TimeEntryWithIssue[];
   issues: ComboboxSelectItem[];
   dateKey: string;
-  onStopTracking: (id: string) => void;
-  onStartTracking: (issueKey: string) => void;
-  onUpdateEntry: (entryId: string, updates: TimeEntryUpdates) => void;
-  onDeleteEntry: (id: string) => void;
-  onOpenInJira: (issueKey: string) => void;
 }
 
 export function TimelineListView({
   entries,
   issues,
   dateKey,
-  onStopTracking,
-  onStartTracking,
-  onUpdateEntry,
-  onDeleteEntry,
-  onOpenInJira,
 }: TimelineListViewProps) {
+  const { startTracking, stopTracking, updateTimeEntry, deleteTimeEntry } =
+    useTimeEntryMutations();
+
   const activeEntry = entries.find((e) => e.timeSpentSeconds === null);
   const completedEntries = entries.filter((e) => e.timeSpentSeconds !== null);
 
@@ -65,7 +58,7 @@ export function TimelineListView({
         <div className="sticky top-0 z-30 border-b border-border bg-background px-4 py-2">
           <TimeEntryCardActive
             entry={activeEntry}
-            onStopTimer={onStopTracking}
+            onStopTimer={(id) => stopTracking.mutate(id)}
           />
         </div>
       )}
@@ -77,10 +70,12 @@ export function TimelineListView({
               key={entry.id}
               entry={entry}
               issues={issues}
-              onOpenInJira={() => onOpenInJira(entry.issueKey)}
-              onResumeTimer={() => onStartTracking(entry.issueKey)}
-              onSave={(entryId, updates) => onUpdateEntry(entryId, updates)}
-              onDelete={(id) => onDeleteEntry(id)}
+              onOpenInJira={() => window.electron.openJiraExternal(entry.issueKey)}
+              onResumeTimer={() => startTracking.mutate(entry.issueKey)}
+              onSave={(entryId, updates) =>
+                updateTimeEntry.mutate({ entryId, updates })
+              }
+              onDelete={(id) => deleteTimeEntry.mutate(id)}
             />
           ))}
         </AnimatedGroup>

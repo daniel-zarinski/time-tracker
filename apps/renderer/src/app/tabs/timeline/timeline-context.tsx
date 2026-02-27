@@ -1,12 +1,17 @@
-import * as React from 'react';
+import type { TimeEntryWithIssue } from '@time-tracker/database';
+import { useTimeEntryMutations } from '@time-tracker/hooks';
 import type { ComboboxSelectItem } from '@time-tracker/ui';
 import type { TimeEntryUpdates } from '@time-tracker/utils';
+import * as React from 'react';
 import {
   type EntryWithLayout,
   type FormattedSelection,
+  computeEntryLayout,
   formatSelection,
+  getEntriesWithGrid,
+  isSameDay,
 } from './timeline-utils';
-import type { Selection } from './use-timeline-drag';
+import { useTimelineDrag } from './use-timeline-drag';
 
 interface TimelineContextValue {
   // Refs
@@ -24,57 +29,57 @@ interface TimelineContextValue {
   clearSelection: () => void;
   // Entry data
   entriesWithLayout: EntryWithLayout[];
-  isToday: boolean;
   issues: ComboboxSelectItem[];
+  date: Date;
   // Entry action callbacks
   onSaveEntry: (entryId: string, updates: TimeEntryUpdates) => Promise<void>;
   onDeleteEntry: (entryId: string) => Promise<void>;
-  onCreateEntry: (issueKey: string) => void | Promise<void>;
+  onCreateEntry: (issueKey: string) => void;
 }
 
 const TimelineContext = React.createContext<TimelineContextValue | null>(null);
 
 interface TimelineProviderProps {
-  olRef: React.RefObject<HTMLOListElement | null>;
-  containerRef: React.RefObject<HTMLDivElement | null>;
-  selection: Selection | null;
-  hoveredRow: number | null;
-  isDragging: boolean;
   date: Date;
-  handlePointerDown: (e: React.PointerEvent<HTMLOListElement>) => void;
-  handlePointerMove: (e: React.PointerEvent<HTMLOListElement>) => void;
-  handlePointerUp: (e: React.PointerEvent<HTMLOListElement>) => void;
-  handlePointerLeave: () => void;
-  clearSelection: () => void;
-  entriesWithLayout: EntryWithLayout[];
-  isToday: boolean;
+  entries: TimeEntryWithIssue[];
   issues: ComboboxSelectItem[];
-  onSaveEntry: (entryId: string, updates: TimeEntryUpdates) => Promise<void>;
-  onDeleteEntry: (entryId: string) => Promise<void>;
-  onCreateEntry: (issueKey: string) => void | Promise<void>;
   children: React.ReactNode;
 }
 
 export function TimelineProvider({
-  olRef,
-  containerRef,
-  selection,
-  hoveredRow,
-  isDragging,
   date,
-  handlePointerDown,
-  handlePointerMove,
-  handlePointerUp,
-  handlePointerLeave,
-  clearSelection,
-  entriesWithLayout,
-  isToday,
+  entries,
   issues,
-  onSaveEntry,
-  onDeleteEntry,
-  onCreateEntry,
   children,
 }: TimelineProviderProps) {
+  const olRef = React.useRef<HTMLOListElement>(null);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  const {
+    selection,
+    isDragging,
+    hoveredRow,
+    clearSelection,
+    handlePointerDown,
+    handlePointerMove,
+    handlePointerUp,
+    handlePointerLeave,
+  } = useTimelineDrag(olRef);
+
+  const { updateTimeEntry, deleteTimeEntry, createTimeEntry } =
+    useTimeEntryMutations();
+
+  // Compute layout
+  const entriesWithGrid = React.useMemo(
+    () => getEntriesWithGrid(entries, date),
+    [entries, date]
+  );
+  const entriesWithLayout = React.useMemo(
+    () => computeEntryLayout(entriesWithGrid),
+    [entriesWithGrid]
+  );
+
+  // Derive formatted selection / hover
   const formattedSelection = React.useMemo(() => {
     if (!selection) return null;
     return formatSelection(selection, date);
@@ -83,58 +88,93 @@ export function TimelineProvider({
   const formattedHover: FormattedSelection | null = React.useMemo(() => {
     if (hoveredRow == null || selection) return null;
 
-    const isOverActiveEntry = entriesWithLayout.some(
-      ({ entry, gridRowStart, gridRowSpan }) =>
-        entry.timeSpentSeconds == null &&
+    const isOverEntry = entriesWithLayout.some(
+      ({ gridRowStart, gridRowSpan }) =>
         hoveredRow >= gridRowStart &&
         hoveredRow < gridRowStart + gridRowSpan
     );
-    if (isOverActiveEntry) return null;
+    if (isOverEntry) return null;
 
     return formatSelection({ startRow: hoveredRow, endRow: hoveredRow }, date);
   }, [hoveredRow, selection, date, entriesWithLayout]);
 
-  const value = React.useMemo<TimelineContextValue>(
-    () => ({
-      olRef,
-      containerRef,
-      handlePointerDown,
-      handlePointerMove,
-      handlePointerUp,
-      handlePointerLeave,
-      formattedSelection,
-      formattedHover,
-      isDragging,
-      clearSelection,
-      entriesWithLayout,
-      isToday,
-      issues,
-      onSaveEntry,
-      onDeleteEntry,
-      onCreateEntry,
-    }),
-    [
-      olRef,
-      containerRef,
-      handlePointerDown,
-      handlePointerMove,
-      handlePointerUp,
-      handlePointerLeave,
-      formattedSelection,
-      formattedHover,
-      isDragging,
-      clearSelection,
-      entriesWithLayout,
-      isToday,
-      issues,
-      onSaveEntry,
-      onDeleteEntry,
-      onCreateEntry,
-    ]
+  // Entry action callbacks
+  const onSaveEntry = React.useCallback(
+    async (entryId: string, updates: TimeEntryUpdates) => {
+      await updateTimeEntry.mutateAsync({ entryId, updates });
+    },
+    [updateTimeEntry]
   );
 
+  const onDeleteEntry = React.useCallback(
+    async (id: string) => {
+      await deleteTimeEntry.mutateAsync(id);
+    },
+    [deleteTimeEntry]
+  );
+
+  const onCreateEntry = React.useCallback(
+    (issueKey: string) => {
+      if (!selection) return;
+      const sel = formatSelection(selection, date);
+      const timeSpentSeconds = Math.round(
+        (sel.endTime.getTime() - sel.startTime.getTime()) / 1000
+      );
+      createTimeEntry.mutate(
+        { issueKey, startedAt: sel.startTime, timeSpentSeconds },
+        { onSuccess: () => clearSelection() }
+      );
+    },
+    [selection, date, createTimeEntry, clearSelection]
+  );
+
+  // Clear selection on date change
+  React.useEffect(() => {
+    clearSelection();
+  }, [date, clearSelection]);
+
+  // Auto-scroll to current time on mount / date change
+  React.useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const scrollParent = container.closest('[data-slot="tabs-content"]');
+    if (!scrollParent) return;
+
+    const now = new Date();
+    const scrollHour = isSameDay(date, now)
+      ? Math.max(0, now.getHours() - 1)
+      : 8;
+
+    const pxPerHalfHour = 44.8;
+    const scrollTarget = scrollHour * 2 * pxPerHalfHour;
+
+    requestAnimationFrame(() => {
+      scrollParent.scrollTop = scrollTarget;
+    });
+  }, [date]);
+
   return (
-    <TimelineContext.Provider value={value}>
+    <TimelineContext.Provider
+      value={{
+        olRef,
+        containerRef,
+        formattedSelection,
+        formattedHover,
+        isDragging,
+        entriesWithLayout,
+        issues,
+        date,
+        handlePointerDown,
+        handlePointerMove,
+        handlePointerUp,
+        handlePointerLeave,
+        clearSelection,
+        onSaveEntry,
+        onDeleteEntry,
+        onCreateEntry,
+      }}
+    >
       {children}
     </TimelineContext.Provider>
   );
@@ -143,7 +183,9 @@ export function TimelineProvider({
 function useTimelineContext() {
   const ctx = React.useContext(TimelineContext);
   if (!ctx) {
-    throw new Error('useTimeline* hooks must be used within a TimelineProvider');
+    throw new Error(
+      'useTimeline* hooks must be used within a TimelineProvider'
+    );
   }
   return ctx;
 }
@@ -160,7 +202,7 @@ export function useTimelineInteraction() {
     formattedSelection: ctx.formattedSelection,
     formattedHover: ctx.formattedHover,
     entriesWithLayout: ctx.entriesWithLayout,
-    isToday: ctx.isToday,
+    date: ctx.date,
   };
 }
 

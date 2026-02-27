@@ -1,10 +1,12 @@
 import { InView } from '@time-tracker/ui';
-import { QUARTER_HOUR_ROWS } from './timeline-utils';
+import { isSameDay } from 'date-fns';
+import { useMemo } from 'react';
 import { CurrentTimeIndicator } from './CurrentTimeIndicator';
 import { TimelineEntryDialog } from './TimelineEntryDialog';
-import { TimelineTimeLabels } from './TimelineTimeLabels';
 import { TimelineSelectionHighlight } from './TimelineSelectionHighlight';
+import { TimelineTimeLabels } from './TimelineTimeLabels';
 import { useTimelineInteraction } from './timeline-context';
+import { QUARTER_HOUR_ROWS } from './timeline-utils';
 
 export function TimelineGrid() {
   const {
@@ -17,8 +19,9 @@ export function TimelineGrid() {
     formattedSelection,
     formattedHover,
     entriesWithLayout,
-    isToday,
+    date,
   } = useTimelineInteraction();
+  const isToday = useMemo(() => isSameDay(new Date(), date), [date]);
 
   return (
     <div ref={containerRef}>

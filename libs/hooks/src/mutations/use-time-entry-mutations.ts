@@ -65,5 +65,37 @@ export function useTimeEntryMutations() {
     },
   });
 
-  return { startTracking, stopTracking, deleteTimeEntry, updateTimeEntry };
+  const createTimeEntry = useMutation({
+    mutationFn: async ({
+      issueKey,
+      startedAt,
+      timeSpentSeconds,
+    }: {
+      issueKey: string;
+      startedAt: Date;
+      timeSpentSeconds: number;
+    }) => {
+      const entry = await window.timeTracking.startTracking(issueKey);
+      await window.database.updateTimeEntry(entry.id, {
+        startedAt,
+        timeSpentSeconds,
+      });
+      return entry;
+    },
+    onSuccess: () => {
+      invalidate();
+      toast.success('Time entry created');
+    },
+    onError: () => {
+      toast.error('Failed to create time entry');
+    },
+  });
+
+  return {
+    startTracking,
+    stopTracking,
+    deleteTimeEntry,
+    updateTimeEntry,
+    createTimeEntry,
+  };
 }
