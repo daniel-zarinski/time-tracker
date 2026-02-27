@@ -1,7 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useRef, useState } from 'react';
-import { useInView } from 'motion/react';
+import { Fragment, useEffect, useState } from 'react';
 import {
   AnimatedGroup,
   AnimatedNumber,
@@ -20,21 +19,19 @@ import {
 import type { TimeEntryWithIssue } from '@time-tracker/database';
 
 function AnimatedDurationTotal({ totalSeconds }: { totalSeconds: number }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref);
   const [displaySeconds, setDisplaySeconds] = useState(0);
 
   useEffect(() => {
-    if (isInView) setDisplaySeconds(totalSeconds);
-  }, [isInView, totalSeconds]);
+    setDisplaySeconds(totalSeconds);
+  }, [totalSeconds]);
 
   const springOptions = {
     bounce: 0,
-    duration: 2000,
+    duration: 1500,
   };
 
   return (
-    <span ref={ref} className="inline-flex items-baseline tabular-nums">
+    <span className="inline-flex min-w-[11ch] items-baseline justify-end tabular-nums">
       <AnimatedNumber
         value={displaySeconds}
         springOptions={springOptions}
@@ -69,7 +66,7 @@ export function JiraIssueTimeEntriesTable({
           <TableHead className="h-7 px-1.5 text-muted-foreground font-medium">
             End time
           </TableHead>
-          <TableHead className="h-7 px-1.5 text-muted-foreground font-medium text-right">
+          <TableHead className="h-7 min-w-[11ch] px-1.5 text-muted-foreground font-medium text-right">
             Duration
           </TableHead>
         </TableRow>
@@ -97,7 +94,7 @@ export function JiraIssueTimeEntriesTable({
               <TableCell className="p-1.5 text-muted-foreground">
                 {isActive ? '—' : formatTime(endDate)}
               </TableCell>
-              <TableCell className="p-1.5 text-right font-medium text-foreground">
+              <TableCell className="min-w-[11ch] p-1.5 text-right font-medium text-foreground">
                 {isActive ? 'In progress' : formatDuration(duration)}
               </TableCell>
             </Fragment>
@@ -109,7 +106,7 @@ export function JiraIssueTimeEntriesTable({
           <TableCell colSpan={3} className="p-1.5 text-muted-foreground">
             Total
           </TableCell>
-          <TableCell className="p-1.5 text-right font-medium text-foreground">
+          <TableCell className="min-w-[11ch] p-1.5 text-right font-medium text-foreground">
             <AnimatedDurationTotal totalSeconds={totalSeconds} />
           </TableCell>
         </TableRow>

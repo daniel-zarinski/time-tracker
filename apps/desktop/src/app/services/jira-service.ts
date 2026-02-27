@@ -237,7 +237,7 @@ export class JiraService {
     const synced = await this.fetchMyIssues();
     let totalMissing = 0;
 
-    for (let round = 0; round < 10; round++) {
+    for (let round = 0; round < 20; round++) {
       const unsynced = await getJiraIssuesUnsynced(this.prisma);
       if (unsynced.length === 0) break;
       totalMissing += unsynced.length;
