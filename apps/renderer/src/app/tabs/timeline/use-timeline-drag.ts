@@ -34,6 +34,7 @@ export function useTimelineDrag(
 ) {
   const [selection, setSelection] = React.useState<Selection | null>(null);
   const [isDragging, setIsDragging] = React.useState(false);
+  const [hoveredRow, setHoveredRow] = React.useState<number | null>(null);
   const draggingRef = React.useRef(false);
 
   const clearSelection = React.useCallback(() => setSelection(null), []);
@@ -58,6 +59,7 @@ export function useTimelineDrag(
       const pointerId = e.pointerId;
       const row = clientYToRow(clientY);
       setSelection({ startRow: row, endRow: row });
+      setHoveredRow(null);
       draggingRef.current = true;
       setIsDragging(true);
       olRef.current?.setPointerCapture(pointerId);
@@ -73,9 +75,12 @@ export function useTimelineDrag(
 
   const handlePointerMove = React.useCallback(
     (e: React.PointerEvent<HTMLOListElement>) => {
-      if (!draggingRef.current) return;
       const clientY = e.clientY;
       const row = clientYToRow(clientY);
+      if (!draggingRef.current) {
+        setHoveredRow(row);
+        return;
+      }
       onEvent?.('pointerMove', { clientY, row, type: 'pointerMove' });
       setSelection((prev) => (prev ? { ...prev, endRow: row } : null));
     },
@@ -98,6 +103,10 @@ export function useTimelineDrag(
     [olRef, selection]
   );
 
+  const handlePointerLeave = React.useCallback(() => {
+    setHoveredRow(null);
+  }, []);
+
   // Clear selection on Escape
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -110,9 +119,11 @@ export function useTimelineDrag(
   return {
     selection,
     isDragging,
+    hoveredRow,
     clearSelection,
     handlePointerDown,
     handlePointerMove,
     handlePointerUp,
+    handlePointerLeave,
   };
 }

@@ -32,10 +32,12 @@ export function TimelineTab() {
   const {
     selection,
     isDragging,
+    hoveredRow,
     clearSelection,
     handlePointerDown,
     handlePointerMove,
     handlePointerUp,
+    handlePointerLeave,
   } = useTimelineDrag(olRef);
 
   const { data: entries = [] } = useTimeEntries();
@@ -145,12 +147,14 @@ export function TimelineTab() {
           entriesWithLayout={entriesWithLayout}
           selection={selection}
           isDragging={isDragging}
+          hoveredRow={hoveredRow}
           isToday={isToday}
           date={date}
           issues={issueItems}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
+          onPointerLeave={handlePointerLeave}
           onSaveEntry={async (entryId, updates) => {
             await updateTimeEntry.mutateAsync({
               entryId,

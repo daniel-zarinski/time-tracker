@@ -5,6 +5,7 @@ import {
   QUARTER_HOUR_ROWS,
   type EntryWithLayout,
   formatSelection,
+  type FormattedSelection,
 } from './timeline-utils';
 import { CurrentTimeIndicator } from './CurrentTimeIndicator';
 import { TimelineEntryDialog } from './TimelineEntryDialog';
@@ -18,12 +19,14 @@ interface TimelineGridProps {
   entriesWithLayout: EntryWithLayout[];
   selection: Selection | null;
   isDragging: boolean;
+  hoveredRow: number | null;
   isToday: boolean;
   date: Date;
   issues: ComboboxSelectItem[];
   onPointerDown: (e: React.PointerEvent<HTMLOListElement>) => void;
   onPointerMove: (e: React.PointerEvent<HTMLOListElement>) => void;
   onPointerUp: (e: React.PointerEvent<HTMLOListElement>) => void;
+  onPointerLeave: () => void;
   onSaveEntry: (entryId: string, updates: TimeEntryUpdates) => Promise<void>;
   onDeleteEntry: (entryId: string) => Promise<void>;
   onResumeTimer?: (issueKey: string) => Promise<void>;
@@ -38,11 +41,13 @@ export function TimelineGrid({
   entriesWithLayout,
   selection,
   isDragging,
+  hoveredRow,
   isToday,
   date,
   onPointerDown,
   onPointerMove,
   onPointerUp,
+  onPointerLeave,
   onSaveEntry,
   onDeleteEntry,
   onCreateEntry,
@@ -54,6 +59,11 @@ export function TimelineGrid({
 
     return formatSelection(selection, date);
   }, [selection, date]);
+
+  const formattedHover: FormattedSelection | null = React.useMemo(() => {
+    if (hoveredRow == null || selection) return null;
+    return formatSelection({ startRow: hoveredRow, endRow: hoveredRow }, date);
+  }, [hoveredRow, selection, date]);
 
   return (
     <div ref={containerRef}>
@@ -78,7 +88,16 @@ export function TimelineGrid({
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
+            onPointerLeave={onPointerLeave}
           >
+            {/* Hover highlight (renders behind entries) */}
+            {formattedHover && (
+              <TimelineSelectionHighlight
+                variant="hover"
+                formattedSelection={formattedHover}
+              />
+            )}
+
             {entriesWithLayout.map(
               ({ entry, gridRowStart, gridRowSpan, column, totalColumns }) => {
                 const isActive = entry.timeSpentSeconds == null;
