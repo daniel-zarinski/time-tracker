@@ -1,4 +1,4 @@
-import { app, ipcMain } from 'electron';
+import { app, dialog, ipcMain } from 'electron';
 import { existsSync, closeSync, openSync, unlinkSync } from 'fs';
 import { join, dirname, resolve } from 'path';
 import { spawn } from 'child_process';
@@ -44,9 +44,13 @@ async function runMigrations(dbUrl: string): Promise<void> {
     );
   }
 
+  // In packaged app, use Electron's Node runtime; in dev, use system node
+  const nodeExec = app.isPackaged ? process.execPath : 'node';
+  const extraEnv = app.isPackaged ? { ELECTRON_RUN_AS_NODE: '1' } : {};
+
   return new Promise((resolvePromise, reject) => {
     const child = spawn(
-      process.execPath,
+      nodeExec,
       [
         prismaPath,
         'migrate',
@@ -59,7 +63,7 @@ async function runMigrations(dbUrl: string): Promise<void> {
       {
         env: {
           ...process.env,
-          ELECTRON_RUN_AS_NODE: '1',
+          ...extraEnv,
           DATABASE_URL: dbUrl,
         },
         stdio: ['ignore', 'pipe', 'pipe'],
@@ -98,7 +102,9 @@ export async function bootstrapDatabase(): Promise<void> {
   try {
     await runMigrations(dbUrl);
   } catch (err) {
-    console.error('Migration failed:', err);
+    const message = err instanceof Error ? err.message : String(err);
+    console.error('Migration failed:', message);
+    dialog.showErrorBox('Migration failed', message);
   }
 
   getClient();
