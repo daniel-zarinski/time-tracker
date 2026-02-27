@@ -34,7 +34,8 @@ async function runMigrations(dbUrl: string): Promise<void> {
   }
 
   const prismaPkg = require.resolve('prisma/package.json') as string;
-  const prismaPath = resolve(dirname(prismaPkg), 'build', 'index.js');
+  const prismaPath = resolve(dirname(prismaPkg), 'build', 'index.js')
+    .replace('app.asar', 'app.asar.unpacked');
   const configPath = join(basePath, 'prisma.config.ts');
 
   if (!existsSync(configPath)) {
@@ -45,7 +46,7 @@ async function runMigrations(dbUrl: string): Promise<void> {
 
   return new Promise((resolvePromise, reject) => {
     const child = spawn(
-      'node',
+      process.execPath,
       [
         prismaPath,
         'migrate',
@@ -56,7 +57,11 @@ async function runMigrations(dbUrl: string): Promise<void> {
         configPath,
       ],
       {
-        env: { ...process.env, DATABASE_URL: dbUrl },
+        env: {
+          ...process.env,
+          ELECTRON_RUN_AS_NODE: '1',
+          DATABASE_URL: dbUrl,
+        },
         stdio: ['ignore', 'pipe', 'pipe'],
       }
     );

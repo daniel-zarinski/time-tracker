@@ -7,6 +7,16 @@
       "from": "../../node_modules/.prisma",
       "to": "node_modules/.prisma",
       "filter": ["**/*"]
+    },
+    {
+      "from": "desktop/prisma",
+      "to": "prisma",
+      "filter": ["**/*"]
+    },
+    {
+      "from": "desktop",
+      "to": "",
+      "filter": ["prisma.config.ts"]
     }
   ],
   "mac": {
