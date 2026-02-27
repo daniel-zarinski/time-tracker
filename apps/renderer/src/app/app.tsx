@@ -9,8 +9,9 @@ import {
   DialogContent,
   TransitionPanel,
 } from '@time-tracker/ui';
-import { useJiraIssue, useTimeEntryMutations } from '@time-tracker/hooks';
+import { useActiveTimeEntry, useJiraIssue, useTimeEntryMutations } from '@time-tracker/hooks';
 
+import { ActiveTimeEntryHeaderTimer } from './components/active-time-entry-header-timer';
 import { SettingsTab, JiraIssuesTab, MainTabList } from './tabs';
 import { useAppStore } from './store';
 import { useAppCommands } from './use-app-commands';
@@ -26,6 +27,7 @@ export function App() {
   const { commands } = useAppCommands();
 
   const issueQuery = useJiraIssue(selectedIssueKey);
+  const { data: activeEntry } = useActiveTimeEntry();
   const { startTracking } = useTimeEntryMutations();
 
   const tabIndexMap = { home: 0, 'jira-issues': 1, settings: 2 } as const;
@@ -40,7 +42,8 @@ export function App() {
         >
           <div className="flex-1" aria-hidden />
           <MainTabList />
-          <div className="flex min-w-0 flex-1 justify-end pr-2">
+          <div className="flex min-w-0 flex-1 items-center justify-end gap-2 pr-2">
+            <ActiveTimeEntryHeaderTimer />
             <CommandPalette
               open={commandOpen}
               onOpenChange={setCommandOpen}
@@ -48,9 +51,11 @@ export function App() {
               placeholder="Type a command..."
               emptyMessage="No results found."
               trigger={
-                <Button variant="ghost" size="icon">
-                  <Search />
-                </Button>
+                activeEntry ? undefined : (
+                  <Button variant="ghost" size="icon">
+                    <Search />
+                  </Button>
+                )
               }
               commands={commands}
             />
