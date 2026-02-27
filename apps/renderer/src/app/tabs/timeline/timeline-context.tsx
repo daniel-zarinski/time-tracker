@@ -82,8 +82,17 @@ export function TimelineProvider({
 
   const formattedHover: FormattedSelection | null = React.useMemo(() => {
     if (hoveredRow == null || selection) return null;
+
+    const isOverActiveEntry = entriesWithLayout.some(
+      ({ entry, gridRowStart, gridRowSpan }) =>
+        entry.timeSpentSeconds == null &&
+        hoveredRow >= gridRowStart &&
+        hoveredRow < gridRowStart + gridRowSpan
+    );
+    if (isOverActiveEntry) return null;
+
     return formatSelection({ startRow: hoveredRow, endRow: hoveredRow }, date);
-  }, [hoveredRow, selection, date]);
+  }, [hoveredRow, selection, date, entriesWithLayout]);
 
   const value = React.useMemo<TimelineContextValue>(
     () => ({
