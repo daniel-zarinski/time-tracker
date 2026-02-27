@@ -64,9 +64,9 @@ export function App() {
             activeIndex={activeTabIndex}
             transition={{ duration: 0.2, ease: 'easeInOut' }}
             variants={{
-              enter: { opacity: 0, y: -50, filter: 'blur(4px)' },
-              center: { opacity: 1, y: 0, filter: 'blur(0px)' },
-              exit: { opacity: 0, y: 50, filter: 'blur(4px)' },
+              enter: { opacity: 0 },
+              center: { opacity: 1 },
+              exit: { opacity: 0, filter: 'blur(4px)' },
             }}
             className="flex-1 overflow-y-auto"
           >
