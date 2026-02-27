@@ -2,6 +2,7 @@ import { app, dialog, ipcMain } from 'electron';
 import { existsSync, closeSync, openSync, unlinkSync } from 'fs';
 import { join, dirname, resolve } from 'path';
 import { spawn } from 'child_process';
+import { createRequire } from 'module';
 import {
   setDatabaseUrl,
   getDatabaseUrl,
@@ -33,7 +34,8 @@ async function runMigrations(dbUrl: string): Promise<void> {
     );
   }
 
-  const prismaPkg = require.resolve('prisma/package.json') as string;
+  const req = createRequire(join(basePath, 'package.json'));
+  const prismaPkg = req.resolve('prisma/package.json');
   const prismaPath = resolve(dirname(prismaPkg), 'build', 'index.js')
     .replace('app.asar', 'app.asar.unpacked');
   const configPath = join(basePath, 'prisma.config.ts');
