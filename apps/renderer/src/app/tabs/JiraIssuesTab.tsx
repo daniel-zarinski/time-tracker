@@ -176,12 +176,12 @@ export function JiraIssuesTab() {
           }}
         >
           {statuses.map((status) => (
-            <div key={status} className="px-4">
+            <div key={status} className="px-4 pt-2">
               <AnimatedGroup
                 as="ul"
                 asChild="li"
                 preset="slide"
-                className="flex flex-col gap-2 w-full max-w-2xl mx-auto mt-2"
+                className="flex flex-col gap-2 w-full max-w-2xl mx-auto"
               >
                 {groupedByStatus[status].map((issue) => (
                   <JiraIssueCard
