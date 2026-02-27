@@ -1,25 +1,24 @@
-import * as React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { ComboboxSelectItem } from '@time-tracker/ui';
 import {
-  useTimeEntries,
-  useJiraMyIssues,
-  useTimeEntryMutations,
   queryKeys,
+  useJiraMyIssues,
+  useTimeEntries,
+  useTimeEntryMutations,
 } from '@time-tracker/hooks';
+import type { ComboboxSelectItem } from '@time-tracker/ui';
+import * as React from 'react';
 import { useAppStore } from '../../store';
-import {
-  getEntriesWithGrid,
-  computeEntryLayout,
-  getWeekDays,
-  isSameDay,
-  formatSelection,
-} from './timeline-utils';
-import { useTimelineDrag } from './use-timeline-drag';
-import { TimelineHeader } from './TimelineHeader';
 import { TimelineGrid } from './TimelineGrid';
+import { TimelineHeader } from './TimelineHeader';
 import { TimelineListView } from './TimelineListView';
 import { TimelineView } from './timeline-types';
+import {
+  computeEntryLayout,
+  formatSelection,
+  getEntriesWithGrid,
+  isSameDay,
+} from './timeline-utils';
+import { useTimelineDrag } from './use-timeline-drag';
 
 export function TimelineTab() {
   const setSelectedTimeEntry = useAppStore.use.setSelectedTimeEntry();
@@ -88,7 +87,6 @@ export function TimelineTab() {
     () => computeEntryLayout(entriesWithGrid),
     [entriesWithGrid]
   );
-  const weekDays = React.useMemo(() => getWeekDays(date), [date]);
   const today = React.useMemo(() => new Date(), []);
   const isToday = isSameDay(date, today);
 
@@ -136,8 +134,6 @@ export function TimelineTab() {
     <div className="flex flex-col">
       <TimelineHeader
         date={date}
-        today={today}
-        weekDays={weekDays}
         view={view}
         onViewChange={setView}
         onPreviousWeek={previousWeek}
@@ -157,7 +153,9 @@ export function TimelineTab() {
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
-          onEntryClick={(entry) => setSelectedTimeEntry(entry, { view: 'edit' })}
+          onEntryClick={(entry) =>
+            setSelectedTimeEntry(entry, { view: 'edit' })
+          }
           onCreateEntry={(issueKey) => createEntryMutation.mutate(issueKey)}
           onClearSelection={clearSelection}
         />
@@ -178,7 +176,9 @@ export function TimelineTab() {
             })
           }
           onDeleteEntry={(id) => deleteTimeEntry.mutateAsync(id)}
-          onOpenInJira={(issueKey) => window.electron.openJiraExternal(issueKey)}
+          onOpenInJira={(issueKey) =>
+            window.electron.openJiraExternal(issueKey)
+          }
         />
       )}
     </div>

@@ -1,19 +1,14 @@
-import { cn, format } from '@time-tracker/utils';
+import { cn, format, isSameDay } from '@time-tracker/utils';
 import { useDayProgress } from '@time-tracker/hooks';
 
 interface DayButtonProps {
   date: Date;
   isSelected: boolean;
-  isToday: boolean;
   onSelect: () => void;
 }
 
-export function DayButton({
-  date,
-  isSelected,
-  isToday,
-  onSelect,
-}: DayButtonProps) {
+export function DayButton({ date, isSelected, onSelect }: DayButtonProps) {
+  const isToday = isSameDay(date, new Date());
   const progress = useDayProgress(date);
 
   return (
@@ -35,8 +30,8 @@ export function DayButton({
                 ? 'bg-primary-foreground/20'
                 : 'bg-primary-foreground/10'
               : progress >= 1
-                ? 'bg-primary/15'
-                : 'bg-primary/8'
+              ? 'bg-primary/15'
+              : 'bg-primary/8'
           )}
           style={{ height: `${Math.min(100, progress * 100)}%` }}
         />

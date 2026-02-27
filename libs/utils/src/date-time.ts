@@ -1,4 +1,4 @@
-export { startOfDay, endOfDay } from 'date-fns';
+export { startOfDay, endOfDay, isSameDay, format } from 'date-fns';
 import {
   format,
   parse,

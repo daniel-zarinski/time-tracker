@@ -10,14 +10,14 @@ import {
   TabsTrigger,
   WeekDaySelector,
 } from '@time-tracker/ui';
-import { useWeekDayProgress } from '@time-tracker/hooks';
+import { isSameDay } from '@time-tracker/utils';
 import { LayoutGrid, List } from 'lucide-react';
 import { TimelineView } from './timeline-types';
+import { getWeekDays } from './timeline-utils';
+import { DayButton } from './DayButton';
 
 interface TimelineHeaderProps {
   date: Date;
-  today: Date;
-  weekDays: Date[];
   view: TimelineView;
   onViewChange: (view: TimelineView) => void;
   onPreviousWeek: () => void;
@@ -27,8 +27,6 @@ interface TimelineHeaderProps {
 
 export function TimelineHeader({
   date,
-  today,
-  weekDays,
   view,
   onViewChange,
   onPreviousWeek,
@@ -36,7 +34,7 @@ export function TimelineHeader({
   onSelectDay,
 }: TimelineHeaderProps) {
   const [calendarOpen, setCalendarOpen] = React.useState(false);
-  const dayProgress = useWeekDayProgress(weekDays);
+  const weekDays = React.useMemo(() => getWeekDays(date), [date]);
 
   return (
     <div className="sticky top-0 z-30 border-b border-border bg-background">
@@ -83,14 +81,18 @@ export function TimelineHeader({
       </div>
 
       <WeekDaySelector
-        weekDays={weekDays}
-        selectedDate={date}
-        today={today}
-        dayProgress={dayProgress}
-        onSelectDay={onSelectDay}
         onPreviousWeek={onPreviousWeek}
         onNextWeek={onNextWeek}
-      />
+      >
+        {weekDays.map((d, i) => (
+          <DayButton
+            key={i}
+            date={d}
+            isSelected={isSameDay(d, date)}
+            onSelect={() => onSelectDay(d)}
+          />
+        ))}
+      </WeekDaySelector>
     </div>
   );
 }
