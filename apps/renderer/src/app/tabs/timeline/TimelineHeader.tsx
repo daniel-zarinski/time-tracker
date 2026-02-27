@@ -80,10 +80,7 @@ export function TimelineHeader({
         </Tabs>
       </div>
 
-      <WeekDaySelector
-        onPreviousWeek={onPreviousWeek}
-        onNextWeek={onNextWeek}
-      >
+      <WeekDaySelector onPreviousWeek={onPreviousWeek} onNextWeek={onNextWeek}>
         {weekDays.map((d, i) => (
           <DayButton
             key={i}
