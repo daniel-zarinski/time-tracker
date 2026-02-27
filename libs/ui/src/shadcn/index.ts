@@ -22,6 +22,7 @@ export * from './label';
 export * from './morphing-dialog';
 export * from './popover';
 export * from './progress';
+export * from './radio-group';
 export * from './resizable';
 export * from './scroll-area';
 export * from './separator';
