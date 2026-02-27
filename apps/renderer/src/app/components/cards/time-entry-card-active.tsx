@@ -1,5 +1,5 @@
 import type { TimeEntryWithIssue } from '@time-tracker/database';
-import { cn, formatDurationTimer, SECONDS_PER_WORKDAY } from '@time-tracker/utils';
+import { cn, SECONDS_PER_WORKDAY } from '@time-tracker/utils';
 import { SquareIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import {
@@ -8,6 +8,7 @@ import {
   Card,
   CardHeader,
   Progress,
+  SlidingNumber,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
@@ -80,8 +81,12 @@ export function TimeEntryCardActive({
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="shrink-0 tabular-nums font-bold text-primary text-sm font-mono">
-              {formatDurationTimer(elapsedSeconds)}
+            <span className="shrink-0 font-bold text-primary text-sm font-mono flex items-center">
+              <SlidingNumber value={Math.floor(elapsedSeconds / 3600)} padStart />
+              <span>:</span>
+              <SlidingNumber value={Math.floor((elapsedSeconds % 3600) / 60)} padStart />
+              <span>:</span>
+              <SlidingNumber value={elapsedSeconds % 60} padStart />
             </span>
           </TooltipTrigger>
           <TooltipContent side="bottom">
