@@ -27,7 +27,6 @@
         ],
         "externalDependencies": [
           "electron",
-          "prisma",
           "@prisma/client",
           ".prisma/client",
           "@prisma/adapter-better-sqlite3",

@@ -1,7 +1,7 @@
 import { app, dialog, ipcMain } from 'electron';
 import { existsSync, closeSync, openSync, unlinkSync } from 'fs';
-import { join, dirname, resolve } from 'path';
-import { spawn } from 'child_process';
+import { join, dirname } from 'path';
+import { fork } from 'child_process';
 import { createRequire } from 'module';
 import {
   setDatabaseUrl,
@@ -24,51 +24,47 @@ import { resolveConfig } from '../services/jira-service';
 import { destroyTray } from '../tray';
 
 async function runMigrations(dbUrl: string): Promise<void> {
-  const appPath = app.getAppPath();
-  const basePath = appPath.replace('app.asar', 'app.asar.unpacked');
+  // Schema, config, engine: extraResources in packaged, app path in dev
+  const basePath = app.isPackaged ? process.resourcesPath : app.getAppPath();
   const schemaPath = join(basePath, 'prisma', 'schema.prisma');
+  const configPath = join(basePath, 'prisma.config.ts');
 
   if (!existsSync(schemaPath)) {
     throw new Error(
-      `Prisma schema not found at ${schemaPath} (appPath: ${appPath})`
+      `Prisma schema not found at ${schemaPath} (basePath: ${basePath})`
     );
   }
 
-  const req = createRequire(join(basePath, 'package.json'));
-  const prismaPkg = req.resolve('prisma/package.json');
-  const prismaPath = resolve(dirname(prismaPkg), 'build', 'index.js')
-    .replace('app.asar', 'app.asar.unpacked');
-  const configPath = join(basePath, 'prisma.config.ts');
+  // Prisma CLI: inside ASAR — fork() handles this transparently
+  const appPath = app.getAppPath();
+  const req = createRequire(join(appPath, 'package.json'));
+  const prismaCliPath = join(
+    dirname(req.resolve('prisma/package.json')),
+    'build',
+    'index.js'
+  );
 
-  if (!existsSync(configPath)) {
-    throw new Error(
-      `Prisma config not found at ${configPath} (appPath: ${appPath})`
+  // Schema engine: extraResources in packaged, auto-resolved in dev
+  const env: Record<string, string | undefined> = {
+    ...process.env,
+    DATABASE_URL: dbUrl,
+  };
+  if (app.isPackaged) {
+    const platform = process.arch === 'arm64' ? 'darwin-arm64' : 'darwin';
+    env.PRISMA_SCHEMA_ENGINE_BINARY = join(
+      process.resourcesPath,
+      `schema-engine-${platform}`
     );
   }
-
-  // In packaged app, use Electron's Node runtime; in dev, use system node
-  const nodeExec = app.isPackaged ? process.execPath : 'node';
-  const extraEnv = app.isPackaged ? { ELECTRON_RUN_AS_NODE: '1' } : {};
 
   return new Promise((resolvePromise, reject) => {
-    const child = spawn(
-      nodeExec,
-      [
-        prismaPath,
-        'migrate',
-        'deploy',
-        '--schema',
-        schemaPath,
-        '--config',
-        configPath,
-      ],
+    const child = fork(
+      prismaCliPath,
+      ['migrate', 'deploy', '--schema', schemaPath, '--config', configPath],
       {
-        env: {
-          ...process.env,
-          ...extraEnv,
-          DATABASE_URL: dbUrl,
-        },
-        stdio: ['ignore', 'pipe', 'pipe'],
+        env,
+        cwd: app.isPackaged ? process.resourcesPath : undefined,
+        stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
       }
     );
 

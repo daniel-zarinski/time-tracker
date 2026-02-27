@@ -1,22 +1,26 @@
 {
   "$schema": "../../../../../node_modules/nx-electron/src/validation/maker.schema.json",
   "asar": true,
-  "asarUnpack": ["**/prisma/**", "**/node_modules/prisma/**", "**/.prisma/**", "**/prisma.config.ts"],
+  "extraResources": [
+    {
+      "from": "dist/apps/desktop/prisma",
+      "to": "prisma",
+      "filter": ["!dev.db"]
+    },
+    {
+      "from": "dist/apps/desktop/prisma.config.ts",
+      "to": "prisma.config.ts"
+    },
+    {
+      "from": "node_modules/@prisma/engines/schema-engine-darwin-arm64",
+      "to": "schema-engine-darwin-arm64"
+    }
+  ],
   "files": [
     {
       "from": "../../node_modules/.prisma",
       "to": "node_modules/.prisma",
       "filter": ["**/*"]
-    },
-    {
-      "from": "desktop/prisma",
-      "to": "prisma",
-      "filter": ["**/*"]
-    },
-    {
-      "from": "desktop",
-      "to": "",
-      "filter": ["prisma.config.ts"]
     }
   ],
   "mac": {
@@ -24,5 +28,5 @@
     "icon": "apps/desktop/src/assets/stopwatch.png",
     "identity": null
   },
-  "productName": "Time Tracker"
+  "productName": "TimeTracker"
 }

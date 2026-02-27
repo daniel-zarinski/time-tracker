@@ -69,8 +69,8 @@ Output lands in `dist/executables/`. For macOS, this produces a `.zip` containin
 Since the app isn't code-signed, macOS Gatekeeper will block it on first launch. Recipients need to:
 
 1. Unzip the file
-2. Right-click `Time Tracker.app` → **Open** → click **Open** in the dialog (one-time only)
-3. If that doesn't work: **System Settings → Privacy & Security** → find "Time Tracker was blocked" → **Open Anyway**
+2. Right-click `TimeTracker.app` → **Open** → click **Open** in the dialog (one-time only)
+3. If that doesn't work: **System Settings → Privacy & Security** → find "TimeTracker was blocked" → **Open Anyway**
 
 #### Build configuration
 
