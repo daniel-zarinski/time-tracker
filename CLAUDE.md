@@ -77,6 +77,7 @@ Research documentation lives in `docs/research/<package-name>/`. All research do
 - Project names, file names, and directories use kebab-case
 - Nx generators should be used to scaffold new libraries and apps (`nx g @nx/react:lib`, etc.)
 - Shared code goes in Nx libraries under `libs/`
+- **Never run `nx serve renderer` or `nx serve desktop`** — the developer runs those manually. Claude should only make code changes and run tests/lint/typecheck.
 
 <!-- nx configuration start-->
 <!-- Leave the start & end comments to automatically receive updates. -->
