@@ -6,6 +6,7 @@ import {
   getLastTimeEntryFromIssue as _getLastTimeEntryFromIssue,
   getTimeEntryById,
   getTotalTimeSpentSecondsForDay as _getTotalTimeSpentSecondsForDay,
+  getTimeEntriesByIssueKey,
 } from '@time-tracker/database';
 import { startOfDay, endOfDay } from '@time-tracker/utils';
 import type { SyncStatus } from '@prisma/client';
@@ -50,5 +51,12 @@ export class TimeTrackingService {
     );
 
     return stopTimeEntry(prisma, entryId, timeSpentSeconds);
+  }
+
+  async getTimeEntriesFromIssue(
+    issueKey: string,
+    syncStatus?: SyncStatus
+  ): Promise<TimeEntryWithIssue[]> {
+    return getTimeEntriesByIssueKey(getClient(), issueKey, syncStatus);
   }
 }

@@ -107,6 +107,7 @@ export async function getTimeEntriesByIssueKey(
   return prisma.timeEntry.findMany({
     where: { issueKey, syncStatus },
     orderBy: { startedAt: 'desc' },
+    include: timeEntryInclude,
   });
 }
 
