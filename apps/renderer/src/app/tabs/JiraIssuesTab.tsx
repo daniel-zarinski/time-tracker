@@ -76,8 +76,7 @@ export function JiraIssuesTab() {
           </EmptyMedia>
           <EmptyTitle>Failed to fetch Jira issues</EmptyTitle>
           <EmptyDescription>
-            {(error as { message?: string })?.message ??
-              'Something went wrong'}
+            {(error as { message?: string })?.message ?? 'Something went wrong'}
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
@@ -141,7 +140,7 @@ export function JiraIssuesTab() {
     >
       <div className="sticky top-0 z-30 bg-background">
         {activeEntry && (
-          <div className="border-b border-border px-4 py-2 max-w-2xl mx-auto w-full">
+          <div className="px-4 py-2 max-w-2xl mx-auto w-full">
             <TimeEntryCardActive
               entry={activeEntry}
               onStopTimer={stopTracking.mutateAsync}

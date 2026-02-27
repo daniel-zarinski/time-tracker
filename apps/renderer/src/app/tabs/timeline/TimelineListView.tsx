@@ -44,9 +44,7 @@ export function TimelineListView({
             <Clock />
           </EmptyMedia>
           <EmptyTitle>No time entries</EmptyTitle>
-          <EmptyDescription>
-            No entries for the selected day.
-          </EmptyDescription>
+          <EmptyDescription>No entries for the selected day.</EmptyDescription>
         </EmptyHeader>
       </Empty>
     );
@@ -55,7 +53,7 @@ export function TimelineListView({
   return (
     <div className="w-full max-w-2xl mx-auto flex flex-col">
       {activeEntry && (
-        <div className="sticky top-0 z-30 border-b border-border bg-background px-4 py-2">
+        <div className="sticky top-0 z-30 bg-background px-4 py-2">
           <TimeEntryCardActive
             entry={activeEntry}
             onStopTimer={(id) => stopTracking.mutate(id)}
@@ -64,13 +62,22 @@ export function TimelineListView({
       )}
 
       <div className="p-4 flex flex-col gap-3">
-        <AnimatedGroup key={dateKey} as="ul" asChild="li" preset="slide" variants={staggerVariants} className="flex flex-col gap-2">
+        <AnimatedGroup
+          key={dateKey}
+          as="ul"
+          asChild="li"
+          preset="slide"
+          variants={staggerVariants}
+          className="flex flex-col gap-2"
+        >
           {completedEntries.map((entry) => (
             <TimeEntryCardDefault
               key={entry.id}
               entry={entry}
               issues={issues}
-              onOpenInJira={() => window.electron.openJiraExternal(entry.issueKey)}
+              onOpenInJira={() =>
+                window.electron.openJiraExternal(entry.issueKey)
+              }
               onResumeTimer={() => startTracking.mutate(entry.issueKey)}
               onSave={(entryId, updates) =>
                 updateTimeEntry.mutate({ entryId, updates })

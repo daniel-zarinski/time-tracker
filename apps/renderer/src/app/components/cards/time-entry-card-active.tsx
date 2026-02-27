@@ -43,7 +43,10 @@ export function TimeEntryCardActive({
       (new Date().getTime() - new Date(entry.startedAt).getTime()) / 1000
     );
 
-  const progressValue = Math.min(100, (elapsedSeconds / SECONDS_PER_WORKDAY) * 100);
+  const progressValue = Math.min(
+    100,
+    (elapsedSeconds / SECONDS_PER_WORKDAY) * 100
+  );
 
   const issueKey = entry.issue.key ?? entry.issueKey;
 
@@ -70,7 +73,10 @@ export function TimeEntryCardActive({
           <div className="flex flex-wrap items-center gap-1.5">
             <JiraIssueKeyBadge issueKey={issueKey} />
             <JiraIssueTypeBadge issueType={entry.issue.issueType} />
-            <Badge variant="outline" className="shrink-0 w-fit text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70">
+            <Badge
+              variant="outline"
+              className="shrink-0 w-fit text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70"
+            >
               {entry.issue.status ?? 'Unknown'}
             </Badge>
           </div>
@@ -82,9 +88,15 @@ export function TimeEntryCardActive({
         <Tooltip>
           <TooltipTrigger asChild>
             <span className="shrink-0 font-bold text-primary text-sm font-mono flex items-center">
-              <SlidingNumber value={Math.floor(elapsedSeconds / 3600)} padStart />
+              <SlidingNumber
+                value={Math.floor(elapsedSeconds / 3600)}
+                padStart
+              />
               <span>:</span>
-              <SlidingNumber value={Math.floor((elapsedSeconds % 3600) / 60)} padStart />
+              <SlidingNumber
+                value={Math.floor((elapsedSeconds % 3600) / 60)}
+                padStart
+              />
               <span>:</span>
               <SlidingNumber value={elapsedSeconds % 60} padStart />
             </span>
