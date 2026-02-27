@@ -15,7 +15,7 @@ import { isSameDay } from '@time-tracker/utils';
 import { LayoutGrid, List } from 'lucide-react';
 import { TimelineView } from './timeline-types';
 import { getWeekDays } from './timeline-utils';
-import { DayButtonContent } from './DayButton';
+import { DayButton } from './DayButton';
 
 interface TimelineHeaderProps {
   date: Date;
@@ -99,14 +99,7 @@ export function TimelineHeader({
           transition={{ type: 'spring', bounce: 0.2, duration: 0.3 }}
         >
           {weekDays.map((d, i) => (
-            <button
-              key={i}
-              data-id={String(i)}
-              type="button"
-              className="group flex flex-col items-center gap-0.5 rounded-lg px-2 py-1 text-xs transition-colors hover:bg-muted data-[checked=true]:text-primary-foreground data-[checked=true]:hover:bg-transparent"
-            >
-              <DayButtonContent date={d} />
-            </button>
+            <DayButton key={i} data-id={String(i)} date={d} />
           ))}
         </AnimatedBackground>
       </WeekDaySelector>

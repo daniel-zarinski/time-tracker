@@ -48,6 +48,7 @@ export function AnimatedBackground({
 
   return Children.map(children, (child: any, index) => {
     const id = child.props['data-id'];
+    const isActive = activeId === id;
 
     const interactionProps = enableHover
       ? {
@@ -58,17 +59,15 @@ export function AnimatedBackground({
           onClick: () => handleSetActiveId(id),
         };
 
-    return cloneElement(
-      child,
-      {
-        key: index,
-        className: cn('relative inline-flex', child.props.className),
-        'data-checked': activeId === id ? 'true' : 'false',
-        ...interactionProps,
-      },
-      <>
+    return (
+      <div
+        key={id ?? index}
+        className="relative inline-flex"
+        data-checked={isActive ? 'true' : 'false'}
+        {...interactionProps}
+      >
         <AnimatePresence initial={false}>
-          {activeId === id && (
+          {isActive && (
             <motion.div
               layoutId={`background-${uniqueId}`}
               className={cn('absolute inset-0', className)}
@@ -83,8 +82,12 @@ export function AnimatedBackground({
             />
           )}
         </AnimatePresence>
-        <div className="z-10">{child.props.children}</div>
-      </>
+        <div className="z-10">
+          {cloneElement(child, {
+            'data-checked': isActive ? 'true' : 'false',
+          })}
+        </div>
+      </div>
     );
   });
 }

@@ -12,6 +12,7 @@ export * from './dialog';
 export * from './dropdown-menu';
 export * from './empty';
 export * from './field';
+export * from './in-view';
 export * from './input';
 export * from './input-group';
 export * from './item';

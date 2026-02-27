@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '@time-tracker/utils';
 import type { TimeEntryWithIssue } from '@time-tracker/database';
-import type { ComboboxSelectItem } from '@time-tracker/ui';
+import { InView, type ComboboxSelectItem } from '@time-tracker/ui';
 import {
   HALF_HOUR_ROWS,
   QUARTER_HOUR_ROWS,
@@ -106,8 +106,14 @@ export function TimelineGrid({
                 const issueKey = entry.issue.key ?? entry.issueKey;
 
                 return (
-                  <li
+                  <InView
                     key={entry.id}
+                    as="li"
+                    variants={{
+                      hidden: { opacity: 0, scale: 0.8 },
+                      visible: { opacity: 1, scale: 1 },
+                    }}
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
                     className="pointer-events-none relative"
                     style={{
                       gridRow: `${gridRowStart} / span ${gridRowSpan}`,
@@ -158,7 +164,7 @@ export function TimelineGrid({
                         </p>
                       )}
                     </button>
-                  </li>
+                  </InView>
                 );
               }
             )}
