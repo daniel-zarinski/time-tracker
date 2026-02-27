@@ -6,6 +6,7 @@ import {
   Button,
   Card,
   CardContent,
+  EASE_CUBIC,
   EditTimeEntryForm,
   Progress,
   TransitionPanel,
@@ -41,8 +42,8 @@ function syncStatusStyles(status: string) {
 }
 
 const panelTransition = {
-  x: { type: 'spring' as const, stiffness: 300, damping: 30 },
-  opacity: { duration: 0.2 },
+  x: { duration: 0.3, ease: EASE_CUBIC },
+  opacity: { duration: 0.2, ease: EASE_CUBIC },
 };
 
 export function TimeEntryCardDefault({
@@ -133,7 +134,7 @@ export function TimeEntryCardDefault({
       <motion.div
         initial={false}
         animate={{ height: bounds.height > 0 ? bounds.height : 'auto' }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        transition={{ duration: 0.3, ease: EASE_CUBIC }}
         className="relative overflow-hidden"
       >
         <TransitionPanel

@@ -2,6 +2,7 @@
 import { ReactNode } from 'react';
 import { motion, Variants } from 'motion/react';
 import React from 'react';
+import { EASE_CUBIC } from '../constants';
 
 export type PresetType =
   | 'fade'
@@ -64,35 +65,35 @@ const presetVariants: Record<PresetType, Variants> = {
     hidden: { scale: 0.5 },
     visible: {
       scale: 1,
-      transition: { type: 'spring', stiffness: 300, damping: 20 },
+      transition: { duration: 0.35, ease: EASE_CUBIC },
     },
   },
   flip: {
     hidden: { rotateX: -90 },
     visible: {
       rotateX: 0,
-      transition: { type: 'spring', stiffness: 300, damping: 20 },
+      transition: { duration: 0.35, ease: EASE_CUBIC },
     },
   },
   bounce: {
     hidden: { y: -50 },
     visible: {
       y: 0,
-      transition: { type: 'spring', stiffness: 400, damping: 10 },
+      transition: { duration: 0.35, ease: EASE_CUBIC },
     },
   },
   rotate: {
     hidden: { rotate: -180 },
     visible: {
       rotate: 0,
-      transition: { type: 'spring', stiffness: 200, damping: 15 },
+      transition: { duration: 0.35, ease: EASE_CUBIC },
     },
   },
   swing: {
     hidden: { rotate: -10 },
     visible: {
       rotate: 0,
-      transition: { type: 'spring', stiffness: 300, damping: 8 },
+      transition: { duration: 0.35, ease: EASE_CUBIC },
     },
   },
 };

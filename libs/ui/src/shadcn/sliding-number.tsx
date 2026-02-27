@@ -2,27 +2,22 @@
 import { useEffect, useId } from 'react';
 import {
   MotionValue,
+  animate,
   motion,
-  useSpring,
   useTransform,
   motionValue,
 } from 'motion/react';
 import useMeasure from 'react-use-measure';
+import { EASE_CUBIC } from '../constants';
 
-const TRANSITION = {
-  type: 'spring',
-  stiffness: 280,
-  damping: 18,
-  mass: 0.3,
-} as const;
+const TRANSITION = { duration: 0.35, ease: EASE_CUBIC };
 
 function Digit({ value, place }: { value: number; place: number }) {
   const valueRoundedToPlace = Math.floor(value / place) % 10;
-  const initial = motionValue(valueRoundedToPlace);
-  const animatedValue = useSpring(initial, TRANSITION);
+  const animatedValue = motionValue(valueRoundedToPlace);
 
   useEffect(() => {
-    animatedValue.set(valueRoundedToPlace);
+    animate(animatedValue, valueRoundedToPlace, TRANSITION);
   }, [animatedValue, valueRoundedToPlace]);
 
   return (
@@ -66,7 +61,6 @@ function Number({ mv, number }: { mv: MotionValue<number>; number: number }) {
       style={{ y }}
       layoutId={`${uniqueId}-${number}`}
       className="absolute inset-0 flex items-center justify-center"
-      transition={TRANSITION}
       ref={ref}
     >
       {number}

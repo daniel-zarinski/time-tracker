@@ -5,6 +5,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  EASE_CUBIC,
   EditTimeEntryForm,
   MorphingDialog,
   MorphingDialogContainer,
@@ -75,11 +76,7 @@ export function TimelineEntryDialog({
 
   return (
     <MorphingDialog
-      transition={{
-        type: 'spring',
-        bounce: 0.05,
-        duration: 0.5,
-      }}
+      transition={{ duration: 0.5, ease: EASE_CUBIC }}
       onOpenChange={(open) => {
         if (open) clearSelection();
       }}

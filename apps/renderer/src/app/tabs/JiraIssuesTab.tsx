@@ -4,6 +4,7 @@ import {
   AnimatedBackground,
   AnimatedGroup,
   Button,
+  DEFAULT_TRANSITION,
   Empty,
   EmptyHeader,
   EmptyTitle,
@@ -153,7 +154,7 @@ export function JiraIssuesTab() {
                 }
               }}
               className="rounded-md bg-background shadow-sm"
-              transition={{ type: 'spring', bounce: 0.2, duration: 0.3 }}
+              transition={DEFAULT_TRANSITION}
             >
               {statuses.map((status) => (
                 <button
@@ -172,7 +173,7 @@ export function JiraIssuesTab() {
       <TransitionPanel
         activeIndex={activeIndex}
         className="overflow-hidden"
-        transition={{ duration: 0.2, ease: 'easeInOut' }}
+        transition={{ duration: 0.2, ease: DEFAULT_TRANSITION.ease }}
         variants={{
           enter: { opacity: 0, x: direction * 80, filter: 'blur(4px)' },
           center: { opacity: 1, x: 0, filter: 'blur(0px)' },

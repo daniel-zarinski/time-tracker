@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { useJiraConfig, useTempoConfig } from '@time-tracker/hooks';
-import { AnimatedBackground, TransitionPanel } from '@time-tracker/ui';
+import {
+  AnimatedBackground,
+  DEFAULT_TRANSITION,
+  TransitionPanel,
+} from '@time-tracker/ui';
 import { SubHeader } from '../../components/sub-header';
 import { JiraIntegrationCard } from './jira-integration-card';
 import { TempoIntegrationCard } from './tempo-integration-card';
@@ -48,7 +52,7 @@ export function SettingsTab() {
                 }
               }}
               className="rounded-md bg-background shadow-sm"
-              transition={{ type: 'spring', bounce: 0.2, duration: 0.3 }}
+              transition={DEFAULT_TRANSITION}
             >
               {subtabs.map((tab) => (
                 <button
@@ -68,7 +72,7 @@ export function SettingsTab() {
       <TransitionPanel
         activeIndex={activeIndex}
         className="overflow-hidden"
-        transition={{ duration: 0.2, ease: 'easeInOut' }}
+        transition={{ duration: 0.2, ease: DEFAULT_TRANSITION.ease }}
         variants={{
           enter: { opacity: 0, x: direction * 80, filter: 'blur(4px)' },
           center: { opacity: 1, x: 0, filter: 'blur(0px)' },

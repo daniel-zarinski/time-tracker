@@ -1,4 +1,4 @@
-import { AnimatedBackground } from '@time-tracker/ui';
+import { AnimatedBackground, DEFAULT_TRANSITION } from '@time-tracker/ui';
 import { useAppStore, TabValue } from '../store';
 
 const tabs: { id: TabValue; label: string }[] = [
@@ -22,7 +22,7 @@ export function MainTabList() {
           if (id) setActiveTab(id as TabValue);
         }}
         className="rounded-md bg-background shadow-sm"
-        transition={{ type: 'spring', bounce: 0.2, duration: 0.3 }}
+        transition={DEFAULT_TRANSITION}
       >
         {tabs.map((tab) => (
           <button

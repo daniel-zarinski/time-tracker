@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import {
   Button,
   CommandPalette,
+  DEFAULT_TRANSITION,
   Dialog,
   DialogContent,
   TransitionPanel,
@@ -72,7 +73,7 @@ export function App() {
             />
             <TransitionPanel
               activeIndex={activeTabIndex}
-              transition={{ duration: 0.2, ease: 'easeInOut' }}
+              transition={{ duration: 0.2, ease: DEFAULT_TRANSITION.ease }}
               variants={{
                 enter: { opacity: 0 },
                 center: { opacity: 1 },

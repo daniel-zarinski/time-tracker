@@ -7,6 +7,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  --tw-ease: cubic-bezier(.83, .01, .2, 1);
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -117,6 +118,10 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --color-sidebar: var(--sidebar);
+  --ease-default: cubic-bezier(.83, .01, .2, 1);
+  --ease-in: cubic-bezier(.83, .01, .2, 1);
+  --ease-out: cubic-bezier(.83, .01, .2, 1);
+  --ease-in-out: cubic-bezier(.83, .01, .2, 1);
 }
 
 @layer base {
