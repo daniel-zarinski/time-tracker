@@ -100,9 +100,9 @@ export function JiraIssueTimeEntriesTable({
                 entry={entry}
                 trigger={trigger}
                 triggerClassName={cn(
-                  `grid w-full ${GRID_COLS} gap-0 cursor-pointer text-left border-b border-border/50 transition-colors [&>span]:py-1`,
+                  `grid w-full ${GRID_COLS} gap-0 cursor-pointer text-left border-b border-border/50 transition-colors [&>span]:py-1 rounded-none`,
                   isActive
-                    ? 'bg-red-500/10 border-l-2 border-l-red-500 hover:bg-red-500/15'
+                    ? 'bg-red-500/10 !border-l-2 !border-l-red-500 !rounded-none hover:bg-red-500/15'
                     : 'hover:bg-muted/50'
                 )}
               />
