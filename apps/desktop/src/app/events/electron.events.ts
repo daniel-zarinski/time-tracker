@@ -12,6 +12,8 @@ import {
   setJiraConfig,
   getTempoConfig,
   setTempoConfig,
+  getAppTheme,
+  setAppTheme,
 } from '../store/config-store';
 
 export default class ElectronEvents {
@@ -56,3 +58,5 @@ ipcMain.handle('store:get-jira-config', () => getJiraConfig());
 ipcMain.handle('store:set-jira-config', (_, config) => setJiraConfig(config));
 ipcMain.handle('store:get-tempo-config', () => getTempoConfig());
 ipcMain.handle('store:set-tempo-config', (_, config) => setTempoConfig(config));
+ipcMain.handle('store:get-app-theme', () => getAppTheme());
+ipcMain.handle('store:set-app-theme', (_, theme) => setAppTheme(theme));

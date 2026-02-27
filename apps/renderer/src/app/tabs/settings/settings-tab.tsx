@@ -11,8 +11,10 @@ import { JiraIntegrationCard } from './jira-integration-card';
 import { TempoIntegrationCard } from './tempo-integration-card';
 import { ManualActionsCard } from './manual-actions-card';
 import { LocalDataCard } from './local-data-card';
+import { AppConfigurationCard } from './app-configuration-card';
 
 const subtabs = [
+  { id: 'app', label: 'App' },
   { id: 'jira', label: 'Jira' },
   { id: 'tempo', label: 'Tempo' },
   { id: 'sync', label: 'Sync' },
@@ -22,7 +24,7 @@ const subtabs = [
 type SubtabId = (typeof subtabs)[number]['id'];
 
 export function SettingsTab() {
-  const [activeSubtab, setActiveSubtab] = useState<SubtabId>('jira');
+  const [activeSubtab, setActiveSubtab] = useState<SubtabId>('app');
   const [direction, setDirection] = useState(1);
   const configQuery = useJiraConfig();
   const tempoConfigQuery = useTempoConfig();
@@ -41,7 +43,10 @@ export function SettingsTab() {
     <div className="flex flex-col">
       <SubHeader>
         <div className="w-full max-w-md mx-auto px-4 pb-2 flex justify-center">
-          <motion.div layoutId="sub-header-pill" className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-2 text-muted-foreground">
+          <motion.div
+            layoutId="sub-header-pill"
+            className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-2 text-muted-foreground"
+          >
             <AnimatedBackground
               defaultValue={activeSubtab}
               onValueChange={(id) => {
@@ -79,6 +84,9 @@ export function SettingsTab() {
           exit: { opacity: 0, x: direction * -80, filter: 'blur(4px)' },
         }}
       >
+        <div className="w-full max-w-md mx-auto p-4">
+          <AppConfigurationCard />
+        </div>
         <div className="w-full max-w-md mx-auto p-4">
           <JiraIntegrationCard />
         </div>

@@ -61,6 +61,9 @@ const storeApi: StoreApi = {
   getTempoConfig: () => ipcRenderer.invoke('store:get-tempo-config'),
   setTempoConfig: (config: { token: string }) =>
     ipcRenderer.invoke('store:set-tempo-config', config),
+  getAppTheme: () => ipcRenderer.invoke('store:get-app-theme'),
+  setAppTheme: (theme: 'light' | 'dark') =>
+    ipcRenderer.invoke('store:set-app-theme', theme),
 };
 
 const jiraApi: JiraApi = {

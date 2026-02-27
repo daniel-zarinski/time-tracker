@@ -52,6 +52,8 @@ export interface StoreApi {
   setJiraConfig: (config: JiraConfigInput) => Promise<void>;
   getTempoConfig: () => Promise<TempoConfig | undefined>;
   setTempoConfig: (config: TempoConfig) => Promise<void>;
+  getAppTheme: () => Promise<'light' | 'dark' | undefined>;
+  setAppTheme: (theme: 'light' | 'dark') => Promise<void>;
 }
 
 /** Jira IPC API exposed to the renderer */

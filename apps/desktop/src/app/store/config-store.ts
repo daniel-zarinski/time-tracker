@@ -10,6 +10,9 @@ import type { JiraConfigInput, TempoConfig } from '@time-tracker/schema';
 
 const JIRA_CONFIG_KEY = 'jira.config' as const;
 const TEMPO_CONFIG_KEY = 'tempo.config' as const;
+const APP_THEME_KEY = 'app.theme' as const;
+
+export type AppTheme = 'light' | 'dark';
 
 const schema = {
   [JIRA_CONFIG_KEY]: {
@@ -28,6 +31,11 @@ const schema = {
     properties: {
       token: { type: 'string' },
     },
+    default: undefined,
+  },
+  [APP_THEME_KEY]: {
+    type: 'string',
+    enum: ['light', 'dark'],
     default: undefined,
   },
 } as const;
@@ -67,4 +75,14 @@ export function getTempoConfig(): TempoConfig | undefined {
 
 export function setTempoConfig(config: TempoConfig): void {
   configStore.set(TEMPO_CONFIG_KEY, config);
+}
+
+export function getAppTheme(): AppTheme | undefined {
+  const raw = configStore.get(APP_THEME_KEY);
+  if (raw === 'light' || raw === 'dark') return raw;
+  return undefined;
+}
+
+export function setAppTheme(theme: AppTheme): void {
+  configStore.set(APP_THEME_KEY, theme);
 }
