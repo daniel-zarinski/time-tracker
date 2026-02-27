@@ -51,7 +51,9 @@ export function JiraIssuesTab() {
   const effectiveTab =
     activeStatus && validValues.has(activeStatus)
       ? activeStatus
-      : toTabValue(statuses[0]);
+      : statuses.length > 0
+        ? toTabValue(statuses[0])
+        : '';
   const activeIndex = Math.max(
     0,
     statuses.findIndex((s) => toTabValue(s) === effectiveTab)

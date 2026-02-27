@@ -17,7 +17,8 @@ const STATUS_ORDER = [
   'Other',
 ] as const;
 
-export function toTabValue(status: string) {
+export function toTabValue(status: string | undefined | null): string {
+  if (status == null || typeof status !== 'string') return '';
   return status
     .toLowerCase()
     .replace(/\s+/g, '-')

@@ -70,7 +70,7 @@ export function App() {
               layout
               transition={DEFAULT_TRANSITION}
               ref={setSubHeaderSlot}
-              className="grid [&>*]:col-start-1 [&>*]:row-start-1 bg-background"
+              className="relative grid [&>*]:col-start-1 [&>*]:row-start-1 bg-background overflow-hidden"
             />
             <TransitionPanel
               activeIndex={activeTabIndex}

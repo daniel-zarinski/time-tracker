@@ -46,7 +46,7 @@ export function TimelineHeader({
 
   return (
     <SubHeader>
-      <div className="flex items-center justify-between px-4 py-2">
+      <div className="flex items-center justify-between px-4">
         <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
           <PopoverTrigger asChild>
             <Button variant="ghost" size="sm" className="font-semibold">
@@ -71,7 +71,10 @@ export function TimelineHeader({
             />
           </PopoverContent>
         </Popover>
-        <motion.div layoutId="sub-header-pill" className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-2 text-muted-foreground">
+        <motion.div
+          layoutId="sub-header-pill"
+          className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-2 text-muted-foreground"
+        >
           <AnimatedBackground
             defaultValue={view}
             onValueChange={(id) => {
