@@ -175,7 +175,19 @@ export function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
-export function formatSelection(selection: Selection, date: Date) {
+export interface FormattedSelection {
+  startTime: Date;
+  endTime: Date;
+  duration: string;
+  span: number;
+  minRow: number;
+  maxRow: number;
+}
+
+export function formatSelection(
+  selection: Selection,
+  date: Date
+): FormattedSelection {
   const minRow = Math.min(selection.startRow, selection.endRow);
   const maxRow = Math.max(selection.startRow, selection.endRow);
   const span = maxRow - minRow + 1;
