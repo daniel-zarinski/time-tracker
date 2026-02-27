@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import {
+  BorderTrail,
   Card,
   Collapsible,
   CollapsibleContent,
@@ -14,6 +15,7 @@ export interface JiraIssueCardProps {
   issue: JiraIssueWithParent;
   onOpenInJira?: (issueKey: string) => void | Promise<void>;
   onTrackTime?: (issueKey: string) => void | Promise<unknown>;
+  showTrail?: boolean;
   defaultExpanded?: boolean;
   collapsible?: boolean;
   headerAction?: React.ReactNode;
@@ -24,6 +26,7 @@ export function JiraIssueCard({
   defaultExpanded,
   onOpenInJira,
   onTrackTime,
+  showTrail,
   collapsible = true,
   headerAction,
 }: JiraIssueCardProps) {
@@ -54,12 +57,13 @@ export function JiraIssueCard({
   return (
     <Card
       className={cn(
-        'transition-all duration-200 border rounded-(--radius) shadow-none overflow-hidden',
+        'relative transition-all duration-200 border rounded-(--radius) shadow-none overflow-hidden',
         'border-border bg-card/30 hover:bg-card/40 hover:border-primary/20',
         'py-0',
         (collapsible ? showDetails : true) && 'border-primary/25 bg-card/45'
       )}
     >
+      {showTrail && <BorderTrail size={80} />}
       {collapsible ? (
         <Collapsible open={showDetails} onOpenChange={setShowDetails}>
           <JiraIssueCardHeader
