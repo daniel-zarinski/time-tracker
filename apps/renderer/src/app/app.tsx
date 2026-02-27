@@ -6,8 +6,7 @@ import {
   CommandPalette,
   Dialog,
   DialogContent,
-  Tabs,
-  TabsContent,
+  TransitionPanel,
 } from '@time-tracker/ui';
 import {
   useJiraIssue,
@@ -19,14 +18,13 @@ import {
   JiraIssuesTab,
   MainTabList,
 } from './tabs';
-import { useAppStore, TabValue } from './store';
+import { useAppStore } from './store';
 import { useAppCommands } from './use-app-commands';
 import { TimelineTab } from './tabs/timeline';
 import { JiraIssueCard } from './components/cards/jira-issue-card';
 
 export function App() {
   const activeTab = useAppStore.use.activeTab();
-  const setActiveTab = useAppStore.use.setActiveTab();
   const selectedIssueKey = useAppStore.use.selectedIssueKey();
   const setSelectedIssueKey = useAppStore.use.setSelectedIssueKey();
   const setSelectedTimeEntry = useAppStore.use.setSelectedTimeEntry();
@@ -36,13 +34,12 @@ export function App() {
   const issueQuery = useJiraIssue(selectedIssueKey);
   const { startTracking } = useTimeEntryMutations();
 
+  const tabIndexMap = { home: 0, 'jira-issues': 1, settings: 2 } as const;
+  const activeTabIndex = tabIndexMap[activeTab];
+
   return (
     <div className="flex h-screen flex-col text-foreground">
-      <Tabs
-        value={activeTab}
-        onValueChange={(v) => setActiveTab(v as TabValue)}
-        className="flex h-full flex-col gap-0"
-      >
+      <div className="flex h-full flex-col gap-0">
         <header
           className="sticky top-0 z-40 flex items-center justify-between bg-background pt-2"
           style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
@@ -70,19 +67,22 @@ export function App() {
           className="flex min-h-0 flex-1 flex-col bg-muted"
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
         >
-          <TabsContent value="home" className="overflow-y-auto">
+          <TransitionPanel
+            activeIndex={activeTabIndex}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            variants={{
+              enter: { opacity: 0, y: -50, filter: 'blur(4px)' },
+              center: { opacity: 1, y: 0, filter: 'blur(0px)' },
+              exit: { opacity: 0, y: 50, filter: 'blur(4px)' },
+            }}
+            className="flex-1 overflow-y-auto"
+          >
             <TimelineTab />
-          </TabsContent>
-
-          <TabsContent value="jira-issues" className="overflow-y-auto">
             <JiraIssuesTab />
-          </TabsContent>
-
-          <TabsContent value="settings" className="overflow-y-auto">
             <SettingsTab />
-          </TabsContent>
+          </TransitionPanel>
         </main>
-      </Tabs>
+      </div>
 
       <Dialog
         open={!!selectedIssueKey}

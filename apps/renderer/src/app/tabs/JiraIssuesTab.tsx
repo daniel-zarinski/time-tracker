@@ -21,18 +21,15 @@ import {
 import { Settings, AlertCircle, Inbox } from 'lucide-react';
 import { useAppStore } from '../store';
 import { JiraIssueCard } from '../components/cards/jira-issue-card';
-import { TimeEntryCardActive } from '../components/cards/time-entry-card-active';
 import { toTabValue } from './jira-issues-utils';
 import { useJiraIssuesData } from './use-jira-issues-data';
 
 export function JiraIssuesTab() {
   const [activeStatus, setActiveStatus] = useState('');
   const setActiveTab = useAppStore.use.setActiveTab();
-  const activeEntryQuery = useActiveTimeEntry();
   const { syncMyIssues } = useJiraSyncMutations();
-  const { startTracking, stopTracking } = useTimeEntryMutations();
-
-  const activeEntry = activeEntryQuery.data ?? null;
+  const { startTracking } = useTimeEntryMutations();
+  const activeEntry = useActiveTimeEntry();
 
   const {
     issues,
@@ -102,6 +99,8 @@ export function JiraIssuesTab() {
     );
   }
 
+  const activeIssueKey = activeEntry.data?.issueKey;
+
   const validValues = new Set(statuses.map(toTabValue));
   const effectiveTab =
     activeStatus && validValues.has(activeStatus)
@@ -139,14 +138,6 @@ export function JiraIssuesTab() {
       className="flex flex-col"
     >
       <div className="sticky top-0 z-30 bg-background">
-        {activeEntry && (
-          <div className="px-4 py-2 max-w-2xl mx-auto w-full">
-            <TimeEntryCardActive
-              entry={activeEntry}
-              onStopTimer={stopTracking.mutateAsync}
-            />
-          </div>
-        )}
         <ScrollArea
           className="w-full max-w-2xl mx-auto px-4 pb-2"
           orientation="horizontal"
@@ -188,6 +179,7 @@ export function JiraIssuesTab() {
               <JiraIssueCard
                 key={issue.id}
                 issue={issue}
+                showTrail={issue.key === activeIssueKey}
                 onOpenInJira={(key) => window.electron.openJiraExternal(key)}
                 onTrackTime={async (key) => {
                   await startTracking.mutateAsync(key);
