@@ -1,6 +1,9 @@
 import type { TimeEntryWithIssue } from '@time-tracker/database';
 import {
   BorderTrail,
+  CardDescription,
+  CardHeader,
+  CardTitle,
   EditTimeEntryForm,
   MorphingDialog,
   MorphingDialogContainer,
@@ -14,7 +17,7 @@ import {
 } from '@time-tracker/ui';
 import type { TimeEntryUpdates } from '@time-tracker/utils';
 import { cn } from '@time-tracker/utils';
-import { TimeEntryCardHeader } from '../../components/cards/time-entry-card-default/time-entry-card-header';
+import { JiraIssueKeyBadge } from '../../components/jira-issue-key-badge';
 import { formatEntryTime } from './timeline-utils';
 
 interface TimelineEntryDialogProps {
@@ -135,12 +138,18 @@ export function TimelineEntryDialog({
           style={{ borderRadius: 'var(--radius)' }}
         >
           <ScrollArea className="max-h-[85vh]" type="scroll">
-            <TimeEntryCardHeader
-              issueKey={issueKey}
-              summary={entry.issue.summary ?? ''}
-              truncate
-              className="cursor-default"
-            />
+            <CardHeader className="px-3 py-2.5 gap-0.5 cursor-default">
+              <MorphingDialogTitle>
+                <CardTitle>
+                  <JiraIssueKeyBadge issueKey={issueKey} />
+                </CardTitle>
+              </MorphingDialogTitle>
+              <MorphingDialogSubtitle>
+                <CardDescription className="text-xs truncate">
+                  {entry.issue.summary ?? ''}
+                </CardDescription>
+              </MorphingDialogSubtitle>
+            </CardHeader>
             <TimelineEntryDialogForm
               entry={entry}
               issues={issues}
