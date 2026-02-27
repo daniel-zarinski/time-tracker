@@ -40,7 +40,12 @@ export function JiraIssueCardFooter({
         Open in Jira
       </Button>
 
-      <Button size="sm" onClick={handleTrackTime} className="flex-1">
+      <Button
+        variant={isActive ? 'destructive' : 'default'}
+        size="sm"
+        onClick={handleTrackTime}
+        className="flex-1"
+      >
         {isActive ? (
           <>
             <SquareIcon className="h-4 w-4" />
