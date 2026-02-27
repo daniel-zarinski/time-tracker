@@ -1,4 +1,5 @@
 import type { TimeEntryWithIssue } from '@time-tracker/database';
+import { useTimeEntryMutations } from '@time-tracker/hooks';
 import {
   BorderTrail,
   CardDescription,
@@ -15,7 +16,6 @@ import {
   useMorphingDialog,
   type ComboboxSelectItem,
 } from '@time-tracker/ui';
-import type { TimeEntryUpdates } from '@time-tracker/utils';
 import { cn } from '@time-tracker/utils';
 import { JiraIssueKeyBadge } from '../../components/jira-issue-key-badge';
 import { formatEntryTime } from './timeline-utils';
@@ -32,28 +32,25 @@ interface TimelineEntryDialogProps {
 function TimelineEntryDialogForm({
   entry,
   issues,
-  onSave,
-  onDelete,
 }: {
   entry: TimeEntryWithIssue;
   issues: ComboboxSelectItem[];
-  onSave: (entryId: string, updates: TimeEntryUpdates) => Promise<void>;
-  onDelete: (entryId: string) => Promise<void>;
 }) {
   const { setIsOpen } = useMorphingDialog();
+  const { updateTimeEntry, deleteTimeEntry } = useTimeEntryMutations();
   const close = () => setIsOpen(false);
 
   return (
     <EditTimeEntryForm
       entry={entry}
       issues={issues}
-      onSave={async (id, u) => {
-        await onSave(id, u);
+      onSave={async (entryId, updates) => {
+        await updateTimeEntry.mutateAsync({ entryId, updates });
         close();
       }}
       onCancel={close}
       onDelete={async (id) => {
-        await onDelete(id);
+        await deleteTimeEntry.mutateAsync(id);
         close();
       }}
     />
@@ -67,8 +64,7 @@ export function TimelineEntryDialog({
   totalColumns,
   isActive,
 }: TimelineEntryDialogProps) {
-  const { issues, onSaveEntry, onDeleteEntry, clearSelection } =
-    useTimelineEntryActions();
+  const { issues, clearSelection } = useTimelineEntryActions();
 
   const issueKey = entry.issue.key ?? entry.issueKey;
   const entryEnd = entry.timeSpentSeconds
@@ -146,12 +142,7 @@ export function TimelineEntryDialog({
                 </CardDescription>
               </MorphingDialogSubtitle>
             </CardHeader>
-            <TimelineEntryDialogForm
-              entry={entry}
-              issues={issues}
-              onSave={onSaveEntry}
-              onDelete={onDeleteEntry}
-            />
+            <TimelineEntryDialogForm entry={entry} issues={issues} />
           </ScrollArea>
         </MorphingDialogContent>
       </MorphingDialogContainer>

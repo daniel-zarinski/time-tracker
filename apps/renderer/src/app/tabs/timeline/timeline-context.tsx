@@ -1,7 +1,6 @@
 import type { TimeEntryWithIssue } from '@time-tracker/database';
 import { useTimeEntryMutations } from '@time-tracker/hooks';
 import type { ComboboxSelectItem } from '@time-tracker/ui';
-import type { TimeEntryUpdates } from '@time-tracker/utils';
 import * as React from 'react';
 import {
   type EntryWithLayout,
@@ -32,8 +31,6 @@ interface TimelineContextValue {
   issues: ComboboxSelectItem[];
   date: Date;
   // Entry action callbacks
-  onSaveEntry: (entryId: string, updates: TimeEntryUpdates) => Promise<void>;
-  onDeleteEntry: (entryId: string) => Promise<void>;
   onCreateEntry: (issueKey: string) => void;
 }
 
@@ -66,8 +63,7 @@ export function TimelineProvider({
     handlePointerLeave,
   } = useTimelineDrag(olRef);
 
-  const { updateTimeEntry, deleteTimeEntry, createTimeEntry } =
-    useTimeEntryMutations();
+  const { createTimeEntry } = useTimeEntryMutations();
 
   // Compute layout
   const entriesWithGrid = React.useMemo(
@@ -97,21 +93,6 @@ export function TimelineProvider({
 
     return formatSelection({ startRow: hoveredRow, endRow: hoveredRow }, date);
   }, [hoveredRow, selection, date, entriesWithLayout]);
-
-  // Entry action callbacks
-  const onSaveEntry = React.useCallback(
-    async (entryId: string, updates: TimeEntryUpdates) => {
-      await updateTimeEntry.mutateAsync({ entryId, updates });
-    },
-    [updateTimeEntry]
-  );
-
-  const onDeleteEntry = React.useCallback(
-    async (id: string) => {
-      await deleteTimeEntry.mutateAsync(id);
-    },
-    [deleteTimeEntry]
-  );
 
   const onCreateEntry = React.useCallback(
     (issueKey: string) => {
@@ -170,8 +151,6 @@ export function TimelineProvider({
         handlePointerUp,
         handlePointerLeave,
         clearSelection,
-        onSaveEntry,
-        onDeleteEntry,
         onCreateEntry,
       }}
     >
@@ -220,8 +199,6 @@ export function useTimelineEntryActions() {
   const ctx = useTimelineContext();
   return {
     issues: ctx.issues,
-    onSaveEntry: ctx.onSaveEntry,
-    onDeleteEntry: ctx.onDeleteEntry,
     clearSelection: ctx.clearSelection,
   };
 }
