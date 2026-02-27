@@ -6,6 +6,7 @@
     "postinstall": "electron-builder install-app-deps",
     "add:component": "npx shadcn@latest add",
     "build": "nx run-many --target=build --all",
+    "build:production": "nx run-many --target=build --all --configuration=production",
     "build:renderer": "nx build renderer --configuration=production",
     "build:desktop": "nx build desktop --configuration=production",
     "build:ui": "nx typecheck ui",
