@@ -1,30 +1,19 @@
-import type { ComboboxSelectItem } from '@time-tracker/ui';
 import { type FormattedSelection, formatEntryTime } from './timeline-utils';
 import { TimelineCreatePopover } from './TimelineCreatePopover';
+import { useTimelineSelection } from './timeline-context';
 
-type SelectionVariantProps = {
-  variant?: 'selection';
+interface TimelineSelectionHighlightProps {
   formattedSelection: FormattedSelection;
-  isDragging: boolean;
-  issues: ComboboxSelectItem[];
-  onCreateEntry: (issueKey: string) => void | Promise<void>;
-  onClearSelection: () => void;
-};
+  variant?: 'hover' | 'selection';
+}
 
-type HoverVariantProps = {
-  variant: 'hover';
-  formattedSelection: FormattedSelection;
-};
-
-type TimelineSelectionHighlightProps =
-  | SelectionVariantProps
-  | HoverVariantProps;
-
-export function TimelineSelectionHighlight(
-  props: TimelineSelectionHighlightProps
-) {
-  const { formattedSelection } = props;
-  const isHover = props.variant === 'hover';
+export function TimelineSelectionHighlight({
+  formattedSelection,
+  variant = 'selection',
+}: TimelineSelectionHighlightProps) {
+  const isHover = variant === 'hover';
+  const { isDragging, issues, onCreateEntry, clearSelection } =
+    useTimelineSelection();
 
   return (
     <li
@@ -56,11 +45,11 @@ export function TimelineSelectionHighlight(
           {formatEntryTime(formattedSelection.endTime)} (
           {formattedSelection.duration})
         </span>
-        {!isHover && !props.isDragging && (
+        {!isHover && !isDragging && (
           <TimelineCreatePopover
-            issues={props.issues}
-            onSubmit={props.onCreateEntry}
-            onCancel={props.onClearSelection}
+            issues={issues}
+            onSubmit={onCreateEntry}
+            onCancel={clearSelection}
           />
         )}
       </div>

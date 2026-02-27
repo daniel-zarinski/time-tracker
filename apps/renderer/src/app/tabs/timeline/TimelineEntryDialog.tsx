@@ -19,17 +19,14 @@ import type { TimeEntryUpdates } from '@time-tracker/utils';
 import { cn } from '@time-tracker/utils';
 import { JiraIssueKeyBadge } from '../../components/jira-issue-key-badge';
 import { formatEntryTime } from './timeline-utils';
+import { useTimelineEntryActions } from './timeline-context';
 
 interface TimelineEntryDialogProps {
   entry: TimeEntryWithIssue;
-  issues: ComboboxSelectItem[];
   gridRowSpan: number;
   column: number;
   totalColumns: number;
   isActive: boolean;
-  onSave: (entryId: string, updates: TimeEntryUpdates) => Promise<void>;
-  onDelete: (entryId: string) => Promise<void>;
-  onOpen?: () => void;
 }
 
 function TimelineEntryDialogForm({
@@ -65,15 +62,14 @@ function TimelineEntryDialogForm({
 
 export function TimelineEntryDialog({
   entry,
-  issues,
   gridRowSpan,
   column,
   totalColumns,
   isActive,
-  onSave,
-  onDelete,
-  onOpen,
 }: TimelineEntryDialogProps) {
+  const { issues, onSaveEntry, onDeleteEntry, clearSelection } =
+    useTimelineEntryActions();
+
   const issueKey = entry.issue.key ?? entry.issueKey;
   const entryEnd = entry.timeSpentSeconds
     ? new Date(
@@ -89,7 +85,7 @@ export function TimelineEntryDialog({
         duration: 0.5,
       }}
       onOpenChange={(open) => {
-        if (open) onOpen?.();
+        if (open) clearSelection();
       }}
     >
       <MorphingDialogTrigger
@@ -153,8 +149,8 @@ export function TimelineEntryDialog({
             <TimelineEntryDialogForm
               entry={entry}
               issues={issues}
-              onSave={onSave}
-              onDelete={onDelete}
+              onSave={onSaveEntry}
+              onDelete={onDeleteEntry}
             />
           </ScrollArea>
         </MorphingDialogContent>

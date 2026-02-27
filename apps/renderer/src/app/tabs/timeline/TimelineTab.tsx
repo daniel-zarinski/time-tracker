@@ -18,6 +18,7 @@ import {
   isSameDay,
 } from './timeline-utils';
 import { useTimelineDrag } from './use-timeline-drag';
+import { TimelineProvider } from './timeline-context';
 
 export function TimelineTab() {
   const [date, setDate] = React.useState(() => new Date());
@@ -90,6 +91,34 @@ export function TimelineTab() {
   const today = React.useMemo(() => new Date(), []);
   const isToday = isSameDay(date, today);
 
+  const onSaveEntry = React.useCallback(
+    async (entryId: string, updates: { startedAt?: Date; timeSpentSeconds?: number; description?: string }) => {
+      await updateTimeEntry.mutateAsync({
+        entryId,
+        updates: {
+          startedAt: updates.startedAt,
+          timeSpentSeconds: updates.timeSpentSeconds,
+          description: updates.description,
+        },
+      });
+    },
+    [updateTimeEntry]
+  );
+
+  const onDeleteEntry = React.useCallback(
+    async (id: string) => {
+      await deleteTimeEntry.mutateAsync(id);
+    },
+    [deleteTimeEntry]
+  );
+
+  const onCreateEntry = React.useCallback(
+    (issueKey: string) => {
+      createEntryMutation.mutate(issueKey);
+    },
+    [createEntryMutation]
+  );
+
   const previousWeek = React.useCallback(() => {
     const next = new Date(date);
     next.setDate(next.getDate() - 7);
@@ -141,40 +170,27 @@ export function TimelineTab() {
         onSelectDay={setDate}
       />
       {view === TimelineView.Timeline ? (
-        <TimelineGrid
+        <TimelineProvider
           olRef={olRef}
           containerRef={containerRef}
-          entriesWithLayout={entriesWithLayout}
           selection={selection}
-          isDragging={isDragging}
           hoveredRow={hoveredRow}
-          isToday={isToday}
+          isDragging={isDragging}
           date={date}
+          handlePointerDown={handlePointerDown}
+          handlePointerMove={handlePointerMove}
+          handlePointerUp={handlePointerUp}
+          handlePointerLeave={handlePointerLeave}
+          clearSelection={clearSelection}
+          entriesWithLayout={entriesWithLayout}
+          isToday={isToday}
           issues={issueItems}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerLeave={handlePointerLeave}
-          onSaveEntry={async (entryId, updates) => {
-            await updateTimeEntry.mutateAsync({
-              entryId,
-              updates: {
-                startedAt: updates.startedAt,
-                timeSpentSeconds: updates.timeSpentSeconds,
-                description: updates.description,
-              },
-            });
-          }}
-          onDeleteEntry={async (id) => {
-            await deleteTimeEntry.mutateAsync(id);
-          }}
-          onResumeTimer={async (key) => {
-            await startTracking.mutateAsync(key);
-          }}
-          onOpenInJira={(key) => window.electron.openJiraExternal(key)}
-          onCreateEntry={(issueKey) => createEntryMutation.mutate(issueKey)}
-          onClearSelection={clearSelection}
-        />
+          onSaveEntry={onSaveEntry}
+          onDeleteEntry={onDeleteEntry}
+          onCreateEntry={onCreateEntry}
+        >
+          <TimelineGrid />
+        </TimelineProvider>
       ) : (
         <TimelineListView
           entries={filteredEntries}
