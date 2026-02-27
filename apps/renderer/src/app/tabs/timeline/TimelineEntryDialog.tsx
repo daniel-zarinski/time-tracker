@@ -88,8 +88,8 @@ export function TimelineEntryDialog({
         className={cn(
           'pointer-events-auto absolute inset-y-0.5 inset-x-[22px] px-2 pt-0 pb-2 text-left transition-colors',
           isActive
-            ? 'border border-primary/30 bg-accent/15 hover:bg-primary/10'
-            : 'border border-primary/20 bg-primary/5 hover:bg-primary/10',
+            ? 'border border-primary/30 bg-card/10 hover:bg-card/70'
+            : 'border border-primary/20 bg-card/50 hover:bg-card/70',
           totalColumns > 1 && 'inset-y-0.5'
         )}
         style={{

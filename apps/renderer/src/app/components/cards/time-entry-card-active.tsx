@@ -54,9 +54,9 @@ export function TimeEntryCardActive({
     <Card
       className={cn(
         'transition-all duration-200 border rounded-(--radius) shadow-none overflow-hidden',
-        'border-l-2 border-accent bg-accent',
+        'border-l-2 border-primary/20 bg-card/70',
         'py-0 gap-0',
-        onCardClick && 'hover:bg-card/60 cursor-pointer',
+        onCardClick && 'hover:bg-card/70 cursor-pointer',
         className
       )}
       onClick={onCardClick}

@@ -32,11 +32,11 @@ interface TimeEntryCardDefaultProps {
 function syncStatusStyles(status: string) {
   switch (status) {
     case 'SYNCED':
-      return 'border-green-500/20 bg-green-500/5';
+      return 'border-green-500/20 bg-green-500/10';
     case 'ERROR':
-      return 'border-destructive/20 bg-destructive/5';
+      return 'border-destructive/20 bg-destructive/10';
     default:
-      return 'border-border bg-card/30';
+      return 'border-border bg-card/20';
   }
 }
 
@@ -106,9 +106,9 @@ export function TimeEntryCardDefault({
       className={cn(
         'transition-colors duration-200 border rounded-(--radius) shadow-none',
         syncStatusStyles(entry.syncStatus),
-        'hover:bg-card/40 hover:border-primary/20',
+        'hover:bg-card/70 hover:border-primary/20',
         'py-0 gap-0',
-        state === 'edit' && 'border-primary/25 bg-card/45',
+        state === 'edit' && 'border-primary/25 bg-card/70 hover:bg-card/70',
         className
       )}
     >
