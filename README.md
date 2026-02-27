@@ -54,10 +54,27 @@ Schema lives at `libs/database/prisma/schema.prisma`. After editing models, run 
 
 ### Package / Distribute
 
+Build both apps for production, then create the distributable:
+
 ```bash
-nx run desktop:package   # Package without installer
-nx run desktop:make      # Create platform installer
+nx build renderer --configuration=production
+nx build desktop --configuration=production
+nx run desktop:make
 ```
+
+Output lands in `dist/executables/`. For macOS, this produces a `.zip` containing the `.app` bundle.
+
+#### Sending to others (unsigned app)
+
+Since the app isn't code-signed, macOS Gatekeeper will block it on first launch. Recipients need to:
+
+1. Unzip the file
+2. Right-click `Time Tracker.app` → **Open** → click **Open** in the dialog (one-time only)
+3. If that doesn't work: **System Settings → Privacy & Security** → find "Time Tracker was blocked" → **Open Anyway**
+
+#### Build configuration
+
+Packaging options are in `apps/desktop/src/app/options/maker.options.json`. This controls electron-builder settings like target format, code signing, and ASAR packaging.
 
 ## Project Structure
 
