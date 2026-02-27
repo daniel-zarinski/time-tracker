@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion } from 'motion/react';
 import { useJiraConfig, useTempoConfig } from '@time-tracker/hooks';
 import { AnimatedBackground, TransitionPanel } from '@time-tracker/ui';
 import { SubHeader } from '../../components/sub-header';
@@ -36,7 +37,7 @@ export function SettingsTab() {
     <div className="flex flex-col">
       <SubHeader>
         <div className="w-full max-w-md mx-auto px-4 pb-2 flex justify-center">
-          <div className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-2 text-muted-foreground">
+          <motion.div layoutId="sub-header-pill" className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-2 text-muted-foreground">
             <AnimatedBackground
               defaultValue={activeSubtab}
               onValueChange={(id) => {
@@ -60,7 +61,7 @@ export function SettingsTab() {
                 </button>
               ))}
             </AnimatedBackground>
-          </div>
+          </motion.div>
         </div>
       </SubHeader>
 

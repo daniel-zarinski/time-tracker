@@ -17,7 +17,7 @@ export function SubHeader({ children, className }: SubHeaderProps) {
       layoutId="tab-sub-header"
       className={cn('z-30 bg-background', className)}
     >
-      <motion.div layoutId="tab-sub-header-content" layout>{children}</motion.div>
+      <motion.div layout>{children}</motion.div>
     </motion.div>
   );
 

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { motion } from 'motion/react';
 import {
   AnimatedBackground,
   Button,
@@ -70,7 +71,7 @@ export function TimelineHeader({
             />
           </PopoverContent>
         </Popover>
-        <div className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-2 text-muted-foreground">
+        <motion.div layoutId="sub-header-pill" className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-2 text-muted-foreground">
           <AnimatedBackground
             defaultValue={view}
             onValueChange={(id) => {
@@ -96,7 +97,7 @@ export function TimelineHeader({
               List
             </button>
           </AnimatedBackground>
-        </div>
+        </motion.div>
       </div>
 
       <WeekDaySelector onPreviousWeek={onPreviousWeek} onNextWeek={onNextWeek}>

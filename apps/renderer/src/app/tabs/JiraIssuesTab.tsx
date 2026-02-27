@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion } from 'motion/react';
 import {
   AnimatedBackground,
   AnimatedGroup,
@@ -139,7 +140,7 @@ export function JiraIssuesTab() {
     <div className="flex flex-col">
       <SubHeader>
         <div className="w-full max-w-md mx-auto px-4 pb-2 flex justify-center">
-          <div className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-2 text-muted-foreground">
+          <motion.div layoutId="sub-header-pill" className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-2 text-muted-foreground">
             <AnimatedBackground
               defaultValue={effectiveTab}
               onValueChange={(id) => {
@@ -165,7 +166,7 @@ export function JiraIssuesTab() {
                 </button>
               ))}
             </AnimatedBackground>
-          </div>
+          </motion.div>
         </div>
       </SubHeader>
       <TransitionPanel
