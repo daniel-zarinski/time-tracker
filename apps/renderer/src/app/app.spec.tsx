@@ -34,6 +34,6 @@ describe('App', () => {
         <App />
       </TestWrapper>
     );
-    expect(getByText('Tasks')).toBeTruthy();
+    expect(getByText('Home')).toBeTruthy();
   });
 });
