@@ -31,7 +31,7 @@ export type MorphingDialogContextType = {
 const MorphingDialogContext =
   React.createContext<MorphingDialogContextType | null>(null);
 
-function useMorphingDialog() {
+export function useMorphingDialog() {
   const context = useContext(MorphingDialogContext);
   if (!context) {
     throw new Error(
@@ -44,24 +44,37 @@ function useMorphingDialog() {
 export type MorphingDialogProviderProps = {
   children: React.ReactNode;
   transition?: Transition;
+  onOpenChange?: (open: boolean) => void;
 };
 
 function MorphingDialogProvider({
   children,
   transition,
+  onOpenChange,
 }: MorphingDialogProviderProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpenRaw, setIsOpenRaw] = useState(false);
   const uniqueId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null!);
 
+  const setIsOpen: React.Dispatch<React.SetStateAction<boolean>> = useCallback(
+    (action) => {
+      setIsOpenRaw((prev) => {
+        const next = typeof action === 'function' ? action(prev) : action;
+        if (next !== prev) onOpenChange?.(next);
+        return next;
+      });
+    },
+    [onOpenChange]
+  );
+
   const contextValue = useMemo(
     () => ({
-      isOpen,
+      isOpen: isOpenRaw,
       setIsOpen,
       uniqueId,
       triggerRef,
     }),
-    [isOpen, uniqueId]
+    [isOpenRaw, setIsOpen, uniqueId]
   );
 
   return (
@@ -74,11 +87,16 @@ function MorphingDialogProvider({
 export type MorphingDialogProps = {
   children: React.ReactNode;
   transition?: Transition;
+  onOpenChange?: (open: boolean) => void;
 };
 
-function MorphingDialog({ children, transition }: MorphingDialogProps) {
+function MorphingDialog({
+  children,
+  transition,
+  onOpenChange,
+}: MorphingDialogProps) {
   return (
-    <MorphingDialogProvider>
+    <MorphingDialogProvider onOpenChange={onOpenChange}>
       <MotionConfig transition={transition}>{children}</MotionConfig>
     </MorphingDialogProvider>
   );
@@ -226,13 +244,22 @@ export type MorphingDialogContainerProps = {
 };
 
 function MorphingDialogContainer({ children }: MorphingDialogContainerProps) {
-  const { isOpen, uniqueId } = useMorphingDialog();
+  const { isOpen, setIsOpen, uniqueId } = useMorphingDialog();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     return () => setMounted(false);
   }, []);
+
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (e.target === e.currentTarget) {
+        setIsOpen(false);
+      }
+    },
+    [setIsOpen]
+  );
 
   if (!mounted) return null;
 
@@ -242,12 +269,15 @@ function MorphingDialogContainer({ children }: MorphingDialogContainerProps) {
         <>
           <motion.div
             key={`backdrop-${uniqueId}`}
-            className="fixed inset-0 h-full w-full bg-white/40 backdrop-blur-xs dark:bg-black/40"
+            className="fixed inset-0 z-50 h-full w-full bg-white/40 backdrop-blur-xs dark:bg-black/40"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           />
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            onPointerDown={handlePointerDown}
+          >
             {children}
           </div>
         </>

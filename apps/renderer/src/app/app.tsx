@@ -8,10 +8,8 @@ import {
   DialogContent,
   Tabs,
   TabsContent,
-  type ComboboxSelectItem,
 } from '@time-tracker/ui';
 import {
-  useJiraMyIssues,
   useJiraIssue,
   useTimeEntryMutations,
 } from '@time-tracker/hooks';
@@ -25,35 +23,18 @@ import { useAppStore, TabValue } from './store';
 import { useAppCommands } from './use-app-commands';
 import { TimelineTab } from './tabs/timeline';
 import { JiraIssueCard } from './components/cards/jira-issue-card';
-import { TimeEntryCardDefault } from './components/cards/time-entry-card-default';
 
 export function App() {
   const activeTab = useAppStore.use.activeTab();
   const setActiveTab = useAppStore.use.setActiveTab();
   const selectedIssueKey = useAppStore.use.selectedIssueKey();
   const setSelectedIssueKey = useAppStore.use.setSelectedIssueKey();
-  const selectedTimeEntry = useAppStore.use.selectedTimeEntry();
-  const selectedTimeEntryView = useAppStore.use.selectedTimeEntryView();
   const setSelectedTimeEntry = useAppStore.use.setSelectedTimeEntry();
   const [commandOpen, setCommandOpen] = React.useState(false);
   const { commands } = useAppCommands();
 
-  const { data: jiraIssues = [] } = useJiraMyIssues();
   const issueQuery = useJiraIssue(selectedIssueKey);
-  const { startTracking, deleteTimeEntry, updateTimeEntry } =
-    useTimeEntryMutations();
-
-  const issueItems: ComboboxSelectItem[] = React.useMemo(
-    () =>
-      jiraIssues
-        .filter((i) => i.key != null)
-        .map((i) => ({
-          value: i.key!,
-          label: i.key!,
-          description: i.summary ?? undefined,
-        })),
-    [jiraIssues]
-  );
+  const { startTracking } = useTimeEntryMutations();
 
   return (
     <div className="flex h-screen flex-col text-foreground">
@@ -127,45 +108,6 @@ export function App() {
         </DialogContent>
       </Dialog>
 
-      <Dialog
-        open={!!selectedTimeEntry}
-        onOpenChange={(open) => !open && setSelectedTimeEntry(null)}
-      >
-        <DialogContent
-          className="p-0 border-0 shadow-none gap-0 mx-auto max-w-md"
-          showCloseButton
-        >
-          {selectedTimeEntry && (
-            <TimeEntryCardDefault
-              entry={selectedTimeEntry}
-              issues={issueItems}
-              defaultExpanded
-              defaultView={selectedTimeEntryView}
-              onResumeTimer={async (key) => {
-                await startTracking.mutateAsync(key);
-                setSelectedIssueKey(null);
-                setSelectedTimeEntry(null);
-              }}
-              onOpenInJira={(key) => window.electron.openJiraExternal(key)}
-              onSave={async (entryId, updates) => {
-                await updateTimeEntry.mutateAsync({
-                  entryId,
-                  updates: {
-                    startedAt: updates.startedAt,
-                    timeSpentSeconds: updates.timeSpentSeconds,
-                    description: updates.description,
-                  },
-                });
-                setSelectedTimeEntry(null);
-              }}
-              onDelete={async (id) => {
-                await deleteTimeEntry.mutateAsync(id);
-                setSelectedTimeEntry(null);
-              }}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

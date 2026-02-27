@@ -15,6 +15,7 @@ export * from './empty';
 export * from './field';
 export * from './in-view';
 export * from './input';
+export * from './morphing-dialog';
 export * from './input-group';
 export * from './item';
 export * from './label';

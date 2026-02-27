@@ -1,7 +1,22 @@
 import * as React from 'react';
 import { cn } from '@time-tracker/utils';
+import type { TimeEntryUpdates } from '@time-tracker/utils';
 import type { TimeEntryWithIssue } from '@time-tracker/database';
-import { BorderTrail, InView, type ComboboxSelectItem } from '@time-tracker/ui';
+import {
+  BorderTrail,
+  InView,
+  MorphingDialog,
+  MorphingDialogTrigger,
+  MorphingDialogContainer,
+  MorphingDialogContent,
+  MorphingDialogClose,
+  MorphingDialogTitle,
+  MorphingDialogSubtitle,
+  ScrollArea,
+  useMorphingDialog,
+  type ComboboxSelectItem,
+} from '@time-tracker/ui';
+import { TimeEntryCardDefault } from '../../components/cards/time-entry-card-default';
 import {
   HALF_HOUR_ROWS,
   QUARTER_HOUR_ROWS,
@@ -26,9 +41,55 @@ interface TimelineGridProps {
   onPointerDown: (e: React.PointerEvent<HTMLOListElement>) => void;
   onPointerMove: (e: React.PointerEvent<HTMLOListElement>) => void;
   onPointerUp: (e: React.PointerEvent<HTMLOListElement>) => void;
-  onEntryClick: (entry: TimeEntryWithIssue) => void;
+  onSaveEntry: (entryId: string, updates: TimeEntryUpdates) => Promise<void>;
+  onDeleteEntry: (entryId: string) => Promise<void>;
+  onResumeTimer?: (issueKey: string) => Promise<void>;
+  onOpenInJira?: (issueKey: string) => void;
   onCreateEntry: (issueKey: string) => void | Promise<void>;
   onClearSelection: () => void;
+}
+
+function TimelineEntryDialogContent({
+  entry,
+  issues,
+  onSave,
+  onDelete,
+  onResume,
+  onOpenInJira,
+}: {
+  entry: TimeEntryWithIssue;
+  issues: ComboboxSelectItem[];
+  onSave: (entryId: string, updates: TimeEntryUpdates) => Promise<void>;
+  onDelete: (entryId: string) => Promise<void>;
+  onResume?: (issueKey: string) => Promise<void>;
+  onOpenInJira?: (issueKey: string) => void;
+}) {
+  const { setIsOpen } = useMorphingDialog();
+  return (
+    <TimeEntryCardDefault
+      entry={entry}
+      issues={issues}
+      defaultExpanded
+      defaultView="edit"
+      onSave={async (id, u) => {
+        await onSave(id, u);
+        setIsOpen(false);
+      }}
+      onDelete={async (id) => {
+        await onDelete(id);
+        setIsOpen(false);
+      }}
+      onResumeTimer={
+        onResume
+          ? async (k) => {
+              await onResume(k);
+              setIsOpen(false);
+            }
+          : undefined
+      }
+      onOpenInJira={onOpenInJira}
+    />
+  );
 }
 
 export function TimelineGrid({
@@ -42,7 +103,10 @@ export function TimelineGrid({
   onPointerDown,
   onPointerMove,
   onPointerUp,
-  onEntryClick,
+  onSaveEntry,
+  onDeleteEntry,
+  onResumeTimer,
+  onOpenInJira,
   onCreateEntry,
   onClearSelection,
   issues,
@@ -113,7 +177,7 @@ export function TimelineGrid({
                       hidden: { opacity: 0, scale: 0.8 },
                       visible: { opacity: 1, scale: 1 },
                     }}
-                    viewOptions={{ margin: '-190px 0px -24px 0px' }} // TODO: this depends on the header height. we want to add 20 px padding to the bottom.
+                    viewOptions={{ margin: '-120px 0px -24px 0px' }}
                     transition={{ duration: 0.3, ease: 'easeOut' }}
                     className="pointer-events-none relative"
                     style={{
@@ -121,51 +185,81 @@ export function TimelineGrid({
                       gridColumn: '1',
                     }}
                   >
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onClearSelection();
-                        onEntryClick(entry);
+                    <MorphingDialog
+                      transition={{
+                        type: 'spring',
+                        bounce: 0.05,
+                        duration: 0.5,
                       }}
-                      className={cn(
-                        'pointer-events-auto absolute inset-y-0.5 inset-x-[22px] rounded-lg px-2 pt-0 pb-2 text-left transition-colors',
-                        isActive
-                          ? 'bg-accent/15'
-                          : 'border border-primary/20 bg-primary/5 hover:bg-primary/10',
-                        totalColumns > 1 && 'inset-y-0.5'
-                      )}
-                      style={
-                        totalColumns > 1
-                          ? {
-                              left: `calc(${(column / totalColumns) * 100}% + ${
-                                column === 0 ? '22px' : '0.25rem'
-                              })`,
-                              right: `calc(${
-                                ((totalColumns - column - 1) / totalColumns) *
-                                100
-                              }% + ${
-                                column === totalColumns - 1 ? '22px' : '0.25rem'
-                              })`,
-                            }
-                          : undefined
-                      }
+                      onOpenChange={(open) => {
+                        if (open) onClearSelection();
+                      }}
                     >
-                      {isActive && <BorderTrail size={100} />}
-                      <p className="truncate text-xs text-primary flex items-center">
-                        <span className="font-semibold">{issueKey}</span>
-                        {entry.issue.summary && (
-                          <span className="ml-1.5 text-primary/60">
-                            {entry.issue.summary}
-                          </span>
+                      <MorphingDialogTrigger
+                        className={cn(
+                          'pointer-events-auto absolute inset-y-0.5 inset-x-[22px] px-2 pt-0 pb-2 text-left transition-colors',
+                          isActive
+                            ? 'border border-primary/30 bg-accent/15 hover:bg-primary/10'
+                            : 'border border-primary/20 bg-primary/5 hover:bg-primary/10',
+                          totalColumns > 1 && 'inset-y-0.5'
                         )}
-                      </p>
-                      {gridRowSpan >= 2 && (
-                        <p className="mt-0.5 text-[10px] text-primary/60">
-                          {formatEntryTime(new Date(entry.startedAt))}
-                          {entryEnd ? ` - ${formatEntryTime(entryEnd)}` : ''}
-                        </p>
-                      )}
-                    </button>
+                        style={{
+                          borderRadius: 'var(--radius)',
+                          ...(totalColumns > 1
+                            ? {
+                                left: `calc(${
+                                  (column / totalColumns) * 100
+                                }% + ${column === 0 ? '22px' : '0.25rem'})`,
+                                right: `calc(${
+                                  ((totalColumns - column - 1) /
+                                    totalColumns) *
+                                  100
+                                }% + ${
+                                  column === totalColumns - 1
+                                    ? '22px'
+                                    : '0.25rem'
+                                })`,
+                              }
+                            : undefined),
+                        }}
+                      >
+                        {isActive && <BorderTrail size={100} />}
+                        <div className="truncate text-xs text-primary flex items-center">
+                          <MorphingDialogTitle className="font-semibold">
+                            {issueKey}
+                          </MorphingDialogTitle>
+                          {entry.issue.summary && (
+                            <MorphingDialogSubtitle className="ml-1.5 text-primary/60">
+                              {entry.issue.summary}
+                            </MorphingDialogSubtitle>
+                          )}
+                        </div>
+                        {gridRowSpan >= 2 && (
+                          <p className="mt-0.5 text-[10px] text-primary/60">
+                            {formatEntryTime(new Date(entry.startedAt))}
+                            {entryEnd ? ` - ${formatEntryTime(entryEnd)}` : ''}
+                          </p>
+                        )}
+                      </MorphingDialogTrigger>
+                      <MorphingDialogContainer>
+                        <MorphingDialogContent
+                          className="relative h-auto w-full max-w-md border border-border bg-background"
+                          style={{ borderRadius: 'var(--radius)' }}
+                        >
+                          <ScrollArea className="max-h-[85vh]" type="scroll">
+                            <TimelineEntryDialogContent
+                              entry={entry}
+                              issues={issues}
+                              onSave={onSaveEntry}
+                              onDelete={onDeleteEntry}
+                              onResume={onResumeTimer}
+                              onOpenInJira={onOpenInJira}
+                            />
+                          </ScrollArea>
+                          <MorphingDialogClose className="text-muted-foreground" />
+                        </MorphingDialogContent>
+                      </MorphingDialogContainer>
+                    </MorphingDialog>
                   </InView>
                 );
               }

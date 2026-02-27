@@ -7,7 +7,6 @@ import {
 } from '@time-tracker/hooks';
 import type { ComboboxSelectItem } from '@time-tracker/ui';
 import * as React from 'react';
-import { useAppStore } from '../../store';
 import { TimelineGrid } from './TimelineGrid';
 import { TimelineHeader } from './TimelineHeader';
 import { TimelineListView } from './TimelineListView';
@@ -21,7 +20,6 @@ import {
 import { useTimelineDrag } from './use-timeline-drag';
 
 export function TimelineTab() {
-  const setSelectedTimeEntry = useAppStore.use.setSelectedTimeEntry();
   const [date, setDate] = React.useState(() => new Date());
   const [view, setView] = React.useState(TimelineView.Timeline);
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -153,9 +151,23 @@ export function TimelineTab() {
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
-          onEntryClick={(entry) =>
-            setSelectedTimeEntry(entry, { view: 'edit' })
-          }
+          onSaveEntry={async (entryId, updates) => {
+            await updateTimeEntry.mutateAsync({
+              entryId,
+              updates: {
+                startedAt: updates.startedAt,
+                timeSpentSeconds: updates.timeSpentSeconds,
+                description: updates.description,
+              },
+            });
+          }}
+          onDeleteEntry={async (id) => {
+            await deleteTimeEntry.mutateAsync(id);
+          }}
+          onResumeTimer={async (key) => {
+            await startTracking.mutateAsync(key);
+          }}
+          onOpenInJira={(key) => window.electron.openJiraExternal(key)}
           onCreateEntry={(issueKey) => createEntryMutation.mutate(issueKey)}
           onClearSelection={clearSelection}
         />
