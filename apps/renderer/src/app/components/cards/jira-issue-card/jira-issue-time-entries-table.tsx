@@ -4,12 +4,6 @@ import { Fragment, useEffect, useState } from 'react';
 import {
   AnimatedGroup,
   AnimatedNumber,
-  Table,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
 } from '@time-tracker/ui';
 import {
   formatDuration,
@@ -18,6 +12,8 @@ import {
 } from '@time-tracker/utils';
 import type { TimeEntryWithIssue } from '@time-tracker/database';
 import { TimeEntryEditDialog } from '../../time-entry-edit-dialog/time-entry-edit-dialog';
+
+const GRID_COLS = 'grid-cols-[1fr_1fr_1fr_minmax(11ch,auto)]';
 
 function AnimatedDurationTotal({ totalSeconds }: { totalSeconds: number }) {
   const [displaySeconds, setDisplaySeconds] = useState(0);
@@ -32,7 +28,7 @@ function AnimatedDurationTotal({ totalSeconds }: { totalSeconds: number }) {
   };
 
   return (
-    <span className="inline-flex min-w-[11ch] items-baseline justify-end tabular-nums">
+    <span className="tabular-nums">
       <AnimatedNumber
         value={displaySeconds}
         springOptions={springOptions}
@@ -55,28 +51,24 @@ export function JiraIssueTimeEntriesTable({
   );
 
   return (
-    <Table className="text-xs">
-      <TableHeader>
-        <TableRow>
-          <TableHead className="h-7 px-1.5 text-muted-foreground font-medium">
-            Date
-          </TableHead>
-          <TableHead className="h-7 px-1.5 text-muted-foreground font-medium">
-            Start time
-          </TableHead>
-          <TableHead className="h-7 px-1.5 text-muted-foreground font-medium">
-            End time
-          </TableHead>
-          <TableHead className="h-7 min-w-[11ch] px-1.5 text-muted-foreground font-medium text-right">
-            Duration
-          </TableHead>
-        </TableRow>
-      </TableHeader>
+    <div className="text-xs">
+      <div
+        className={`grid w-full ${GRID_COLS} gap-0 border-b border-border/50 [&>div]:h-7 [&>div]:px-1.5 [&>div]:py-1`}
+      >
+        <div className="text-muted-foreground font-medium">Date</div>
+        <div className="text-muted-foreground font-medium tabular-nums">
+          Start time
+        </div>
+        <div className="text-muted-foreground font-medium tabular-nums">
+          End time
+        </div>
+        <div className="text-muted-foreground font-medium">Duration</div>
+      </div>
       <AnimatedGroup
-        as="tbody"
-        asChild="tr"
+        as="div"
+        asChild="div"
         preset="slide"
-        className="[&_tr:last-child]:border-0 [&_tr]:border-b [&_tr]:border-border/50 [&_tr]:transition-colors [&_tr:hover]:bg-muted/50"
+        className="[&>div:last-child]:border-b-0"
       >
         {entries.map((entry) => {
           const startDate = new Date(entry.startedAt);
@@ -89,13 +81,13 @@ export function JiraIssueTimeEntriesTable({
               <span className="p-1.5 text-muted-foreground">
                 {formatRelativeDate(startDate)}
               </span>
-              <span className="p-1.5 text-muted-foreground">
+              <span className="p-1.5 tabular-nums text-muted-foreground">
                 {formatTime(startDate)}
               </span>
-              <span className="p-1.5 text-muted-foreground">
+              <span className="p-1.5 tabular-nums text-muted-foreground">
                 {isActive ? '—' : formatTime(endDate)}
               </span>
-              <span className="min-w-[11ch] p-1.5 text-right font-medium text-foreground">
+              <span className="min-w-[11ch] p-1.5 font-medium text-foreground tabular-nums">
                 {isActive ? 'In progress' : formatDuration(duration)}
               </span>
             </>
@@ -103,27 +95,25 @@ export function JiraIssueTimeEntriesTable({
 
           return (
             <Fragment key={entry.id}>
-              <TableCell colSpan={4} className="p-0 align-top">
-                <TimeEntryEditDialog
-                  entry={entry}
-                  trigger={trigger}
-                  triggerClassName="grid w-full grid-cols-[1fr_1fr_1fr_minmax(11ch,auto)] gap-0 cursor-pointer hover:bg-muted/50 text-left border-b border-border/50 last:border-0 transition-colors"
-                />
-              </TableCell>
+              <TimeEntryEditDialog
+                entry={entry}
+                trigger={trigger}
+                triggerClassName={`grid w-full ${GRID_COLS} gap-0 cursor-pointer hover:bg-muted/50 text-left border-b border-border/50 transition-colors [&>span]:py-1`}
+              />
             </Fragment>
           );
         })}
       </AnimatedGroup>
-      <TableFooter>
-        <TableRow className="border-border/50 hover:bg-transparent">
-          <TableCell colSpan={3} className="p-1.5 text-muted-foreground">
-            Total
-          </TableCell>
-          <TableCell className="min-w-[11ch] p-1.5 text-right font-medium text-foreground">
-            <AnimatedDurationTotal totalSeconds={totalSeconds} />
-          </TableCell>
-        </TableRow>
-      </TableFooter>
-    </Table>
+      <div
+        className={`grid w-full ${GRID_COLS} gap-0 border-t border-border/50 bg-muted/50 font-medium [&>div]:h-7 [&>div]:px-1.5 [&>div]:py-1`}
+      >
+        <div className="text-muted-foreground">Total</div>
+        <div />
+        <div />
+        <div className="text-foreground tabular-nums">
+          <AnimatedDurationTotal totalSeconds={totalSeconds} />
+        </div>
+      </div>
+    </div>
   );
 }
