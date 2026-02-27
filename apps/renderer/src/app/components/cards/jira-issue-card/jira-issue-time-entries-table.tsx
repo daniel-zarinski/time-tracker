@@ -1,6 +1,10 @@
-import { Fragment } from 'react';
+'use client';
+
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import { useInView } from 'motion/react';
 import {
   AnimatedGroup,
+  AnimatedNumber,
   Table,
   TableCell,
   TableFooter,
@@ -15,6 +19,38 @@ import {
 } from '@time-tracker/utils';
 import type { TimeEntryWithIssue } from '@time-tracker/database';
 
+function AnimatedDurationTotal({ totalSeconds }: { totalSeconds: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref);
+  const [displaySeconds, setDisplaySeconds] = useState(0);
+
+  useEffect(() => {
+    if (isInView) setDisplaySeconds(totalSeconds);
+  }, [isInView, totalSeconds]);
+
+  const springOptions = {
+    bounce: 0,
+    duration: 2000,
+  };
+
+  const formatter = useCallback((seconds: number) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  }, []);
+
+  return (
+    <span ref={ref} className="inline-flex items-baseline tabular-nums">
+      <AnimatedNumber
+        value={displaySeconds}
+        springOptions={springOptions}
+        formatter={formatter}
+      />
+    </span>
+  );
+}
+
 interface JiraIssueTimeEntriesTableProps {
   entries: TimeEntryWithIssue[];
 }
@@ -25,7 +61,7 @@ export function JiraIssueTimeEntriesTable({
   const totalSeconds = entries.reduce(
     (sum, entry) => sum + (entry.timeSpentSeconds ?? 0),
     0
-  )
+  );
 
   return (
     <Table className="text-xs">
@@ -81,7 +117,7 @@ export function JiraIssueTimeEntriesTable({
             Total
           </TableCell>
           <TableCell className="p-1.5 text-right font-medium text-foreground">
-            {formatDuration(totalSeconds)}
+            <AnimatedDurationTotal totalSeconds={totalSeconds} />
           </TableCell>
         </TableRow>
       </TableFooter>
