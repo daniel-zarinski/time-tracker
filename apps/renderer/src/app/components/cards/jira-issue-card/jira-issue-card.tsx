@@ -19,6 +19,9 @@ export interface JiraIssueCardProps {
   issue: JiraIssueWithParent;
   onOpenInJira?: (issueKey: string) => void | Promise<void>;
   onTrackTime?: (issueKey: string) => void | Promise<unknown>;
+  isActive?: boolean;
+  activeEntryId?: string;
+  onStopTime?: (entryId: string) => void | Promise<void>;
   showTrail?: boolean;
   defaultExpanded?: boolean;
   collapsible?: boolean;
@@ -53,6 +56,9 @@ export function JiraIssueCard({
   defaultExpanded,
   onOpenInJira,
   onTrackTime,
+  isActive,
+  activeEntryId,
+  onStopTime,
   showTrail,
   collapsible = true,
   headerAction,
@@ -126,6 +132,9 @@ export function JiraIssueCard({
         issueKey={issueKey}
         onOpenInJira={onOpenInJira}
         onTrackTime={onTrackTime}
+        isActive={isActive}
+        activeEntryId={activeEntryId}
+        onStopTime={onStopTime}
       />
     </div>
   );

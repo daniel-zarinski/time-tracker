@@ -1,23 +1,33 @@
 import { Button, CardFooter } from '@time-tracker/ui';
-import { ExternalLinkIcon, TimerIcon } from 'lucide-react';
+import { ExternalLinkIcon, PlayIcon, SquareIcon } from 'lucide-react';
 
 interface JiraIssueCardFooterProps {
   issueKey: string;
   onOpenInJira?: (issueKey: string) => void | Promise<void>;
   onTrackTime?: (issueKey: string) => void | Promise<unknown>;
+  isActive?: boolean;
+  activeEntryId?: string;
+  onStopTime?: (entryId: string) => void | Promise<void>;
 }
 
 export function JiraIssueCardFooter({
   issueKey,
   onOpenInJira,
   onTrackTime,
+  isActive,
+  activeEntryId,
+  onStopTime,
 }: JiraIssueCardFooterProps) {
   async function handleOpenInJira() {
     await onOpenInJira?.(issueKey);
   }
 
   async function handleTrackTime() {
-    await onTrackTime?.(issueKey);
+    if (isActive && activeEntryId) {
+      await onStopTime?.(activeEntryId);
+    } else {
+      await onTrackTime?.(issueKey);
+    }
   }
 
   return (
@@ -31,8 +41,17 @@ export function JiraIssueCardFooter({
       </Button>
 
       <Button size="sm" onClick={handleTrackTime} className="flex-1">
-        <TimerIcon className="h-4 w-4" />
-        Track Time
+        {isActive ? (
+          <>
+            <SquareIcon className="h-4 w-4" />
+            Stop
+          </>
+        ) : (
+          <>
+            <PlayIcon className="h-4 w-4" />
+            Start
+          </>
+        )}
       </Button>
     </CardFooter>
   );

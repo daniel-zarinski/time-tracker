@@ -6,6 +6,7 @@ import {
   AnimatedNumber,
 } from '@time-tracker/ui';
 import {
+  cn,
   formatDuration,
   formatRelativeDate,
   formatTime,
@@ -98,7 +99,12 @@ export function JiraIssueTimeEntriesTable({
               <TimeEntryEditDialog
                 entry={entry}
                 trigger={trigger}
-                triggerClassName={`grid w-full ${GRID_COLS} gap-0 cursor-pointer hover:bg-muted/50 text-left border-b border-border/50 transition-colors [&>span]:py-1`}
+                triggerClassName={cn(
+                  `grid w-full ${GRID_COLS} gap-0 cursor-pointer text-left border-b border-border/50 transition-colors [&>span]:py-1`,
+                  isActive
+                    ? 'bg-red-500/10 border-l-2 border-l-red-500 hover:bg-red-500/15'
+                    : 'hover:bg-muted/50'
+                )}
               />
             </Fragment>
           );

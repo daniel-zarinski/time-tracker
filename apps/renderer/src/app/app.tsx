@@ -28,7 +28,7 @@ export function App() {
 
   const issueQuery = useJiraIssue(selectedIssueKey);
   const { data: activeEntry } = useActiveTimeEntry();
-  const { startTracking } = useTimeEntryMutations();
+  const { startTracking, stopTracking } = useTimeEntryMutations();
 
   const tabIndexMap = { home: 0, 'jira-issues': 1, settings: 2 } as const;
   const activeTabIndex = tabIndexMap[activeTab];
@@ -101,6 +101,13 @@ export function App() {
               onOpenInJira={(key) => window.electron.openJiraExternal(key)}
               onTrackTime={async (key) => {
                 await startTracking.mutateAsync(key);
+                setSelectedIssueKey(null);
+                setSelectedTimeEntry(null);
+              }}
+              isActive={activeEntry?.issueKey === issueQuery.data?.key}
+              activeEntryId={activeEntry?.id}
+              onStopTime={(id) => {
+                stopTracking.mutate(id);
                 setSelectedIssueKey(null);
                 setSelectedTimeEntry(null);
               }}

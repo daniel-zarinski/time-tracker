@@ -30,7 +30,7 @@ export function JiraIssuesTab() {
   const [direction, setDirection] = useState(1);
   const setActiveTab = useAppStore.use.setActiveTab();
   const { syncMyIssues } = useJiraSyncMutations();
-  const { startTracking } = useTimeEntryMutations();
+  const { startTracking, stopTracking } = useTimeEntryMutations();
   const activeEntry = useActiveTimeEntry();
 
   const {
@@ -195,6 +195,9 @@ export function JiraIssuesTab() {
                       await startTracking.mutateAsync(key);
                       setActiveTab('home');
                     }}
+                    isActive={issue.key === activeIssueKey}
+                    activeEntryId={activeEntry.data?.id}
+                    onStopTime={(id) => stopTracking.mutate(id)}
                   />
                 ))}
               </AnimatedGroup>
