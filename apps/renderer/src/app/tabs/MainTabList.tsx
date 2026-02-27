@@ -13,7 +13,7 @@ export function MainTabList() {
 
   return (
     <div
-      className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground"
+      className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-2 text-muted-foreground"
       style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
     >
       <AnimatedBackground
