@@ -1,17 +1,16 @@
-import { useState } from 'react';
-import { motion } from 'motion/react';
-import { useJiraConfig, useTempoConfig } from '@time-tracker/hooks';
 import {
   AnimatedBackground,
   DEFAULT_TRANSITION,
   TransitionPanel,
 } from '@time-tracker/ui';
+import { motion } from 'motion/react';
+import { useState } from 'react';
 import { SubHeader } from '../../components/sub-header';
-import { JiraIntegrationCard } from './jira-integration-card';
-import { TempoIntegrationCard } from './tempo-integration-card';
-import { ManualActionsCard } from './manual-actions-card';
-import { LocalDataCard } from './local-data-card';
 import { AppConfigurationCard } from './app-configuration-card';
+import { JiraIntegrationCard } from './jira-integration-card';
+import { LocalDataCard } from './local-data-card';
+import { ManualActionsCard } from './manual-actions-card';
+import { TempoIntegrationCard } from './tempo-integration-card';
 
 const subtabs = [
   { id: 'app', label: 'App' },
@@ -26,16 +25,6 @@ type SubtabId = (typeof subtabs)[number]['id'];
 export function SettingsTab() {
   const [activeSubtab, setActiveSubtab] = useState<SubtabId>('app');
   const [direction, setDirection] = useState(1);
-  const configQuery = useJiraConfig();
-  const tempoConfigQuery = useTempoConfig();
-
-  if (configQuery.isLoading || tempoConfigQuery.isLoading) {
-    return (
-      <div className="w-full max-w-md mx-auto p-4 text-muted-foreground text-sm">
-        Loading settings…
-      </div>
-    );
-  }
 
   const activeIndex = subtabs.findIndex((t) => t.id === activeSubtab);
 
