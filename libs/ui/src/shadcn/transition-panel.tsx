@@ -28,11 +28,7 @@ export function TransitionPanel({
 }: TransitionPanelProps) {
   return (
     <div className={cn('relative', className)}>
-      <AnimatePresence
-        initial={false}
-        mode={mode}
-        custom={motionProps.custom}
-      >
+      <AnimatePresence initial={false} mode={mode} custom={motionProps.custom}>
         <motion.div
           key={activeIndex}
           variants={variants}
