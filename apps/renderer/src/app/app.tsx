@@ -8,16 +8,9 @@ import {
   DialogContent,
   TransitionPanel,
 } from '@time-tracker/ui';
-import {
-  useJiraIssue,
-  useTimeEntryMutations,
-} from '@time-tracker/hooks';
+import { useJiraIssue, useTimeEntryMutations } from '@time-tracker/hooks';
 
-import {
-  SettingsTab,
-  JiraIssuesTab,
-  MainTabList,
-} from './tabs';
+import { SettingsTab, JiraIssuesTab, MainTabList } from './tabs';
 import { useAppStore } from './store';
 import { useAppCommands } from './use-app-commands';
 import { TimelineTab } from './tabs/timeline';
@@ -107,7 +100,6 @@ export function App() {
           )}
         </DialogContent>
       </Dialog>
-
     </div>
   );
 }
