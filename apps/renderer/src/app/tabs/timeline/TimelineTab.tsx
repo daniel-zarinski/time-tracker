@@ -1,4 +1,4 @@
-import { useJiraMyIssues, useTimeEntries } from '@time-tracker/hooks';
+import { useJiraMyIssues, useTimeEntries, useTimeEntryMutations } from '@time-tracker/hooks';
 import type { ComboboxSelectItem } from '@time-tracker/ui';
 import * as React from 'react';
 import { TimelineGrid } from './TimelineGrid';
@@ -15,6 +15,7 @@ export function TimelineTab() {
 
   const { data: entries = [] } = useTimeEntries();
   const { data: jiraIssues = [] } = useJiraMyIssues();
+  const { stopTracking } = useTimeEntryMutations();
 
   const issueItems: ComboboxSelectItem[] = React.useMemo(
     () =>
@@ -31,6 +32,16 @@ export function TimelineTab() {
   const filteredEntries = React.useMemo(
     () => entries.filter((e) => isSameDay(new Date(e.startedAt), date)),
     [entries, date]
+  );
+
+  const activeEntry = React.useMemo(
+    () => filteredEntries.find((e) => e.timeSpentSeconds === null),
+    [filteredEntries]
+  );
+
+  const completedEntries = React.useMemo(
+    () => filteredEntries.filter((e) => e.timeSpentSeconds !== null),
+    [filteredEntries]
   );
 
   const handleSelectDay = React.useCallback((day: Date) => {
@@ -59,6 +70,8 @@ export function TimelineTab() {
         onPreviousWeek={previousWeek}
         onNextWeek={nextWeek}
         onSelectDay={handleSelectDay}
+        activeEntry={view === TimelineView.List ? activeEntry : undefined}
+        onStopTimer={(id) => stopTracking.mutate(id)}
       />
       {view === TimelineView.Timeline ? (
         <TimelineProvider date={date} scrollKey={scrollKey} entries={entries} issues={issueItems}>
@@ -66,7 +79,7 @@ export function TimelineTab() {
         </TimelineProvider>
       ) : (
         <TimelineListView
-          entries={filteredEntries}
+          entries={completedEntries}
           issues={issueItems}
           dateKey={date.toDateString()}
         />

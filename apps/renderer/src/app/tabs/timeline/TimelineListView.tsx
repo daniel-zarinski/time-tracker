@@ -10,7 +10,6 @@ import {
   EmptyDescription,
 } from '@time-tracker/ui';
 import { Clock } from 'lucide-react';
-import { TimeEntryCardActive } from '../../components/cards/time-entry-card-active';
 import { TimeEntryCardDefault } from '../../components/cards/time-entry-card-default';
 
 const staggerVariants = {
@@ -30,11 +29,8 @@ export function TimelineListView({
   issues,
   dateKey,
 }: TimelineListViewProps) {
-  const { startTracking, stopTracking, updateTimeEntry, deleteTimeEntry } =
+  const { startTracking, updateTimeEntry, deleteTimeEntry } =
     useTimeEntryMutations();
-
-  const activeEntry = entries.find((e) => e.timeSpentSeconds === null);
-  const completedEntries = entries.filter((e) => e.timeSpentSeconds !== null);
 
   if (entries.length === 0) {
     return (
@@ -52,15 +48,6 @@ export function TimelineListView({
 
   return (
     <div className="w-full max-w-2xl mx-auto flex flex-col">
-      {activeEntry && (
-        <div className="sticky top-0 z-30 bg-background px-4 py-2">
-          <TimeEntryCardActive
-            entry={activeEntry}
-            onStopTimer={(id) => stopTracking.mutate(id)}
-          />
-        </div>
-      )}
-
       <div className="p-4 flex flex-col gap-3">
         <AnimatedGroup
           key={dateKey}
@@ -70,7 +57,7 @@ export function TimelineListView({
           variants={staggerVariants}
           className="flex flex-col gap-2"
         >
-          {completedEntries.map((entry) => (
+          {entries.map((entry) => (
             <TimeEntryCardDefault
               key={entry.id}
               entry={entry}

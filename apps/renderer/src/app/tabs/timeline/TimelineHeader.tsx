@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { motion } from 'motion/react';
+import type { TimeEntryWithIssue } from '@time-tracker/database';
 import {
   AnimatedBackground,
   Button,
@@ -15,6 +16,7 @@ import { TimelineView } from './timeline-types';
 import { getWeekDays } from './timeline-utils';
 import { DayButton } from './DayButton';
 import { SubHeader } from '../../components/sub-header';
+import { TimeEntryCardActive } from '../../components/cards/time-entry-card-active';
 
 interface TimelineHeaderProps {
   date: Date;
@@ -23,6 +25,8 @@ interface TimelineHeaderProps {
   onPreviousWeek: () => void;
   onNextWeek: () => void;
   onSelectDay: (date: Date) => void;
+  activeEntry?: TimeEntryWithIssue;
+  onStopTimer?: (id: string) => void;
 }
 
 export function TimelineHeader({
@@ -32,6 +36,8 @@ export function TimelineHeader({
   onPreviousWeek,
   onNextWeek,
   onSelectDay,
+  activeEntry,
+  onStopTimer,
 }: TimelineHeaderProps) {
   const [calendarOpen, setCalendarOpen] = React.useState(false);
 
@@ -117,6 +123,15 @@ export function TimelineHeader({
           ))}
         </AnimatedBackground>
       </WeekDaySelector>
+
+      {activeEntry && onStopTimer && (
+        <div className="px-4 py-2">
+          <TimeEntryCardActive
+            entry={activeEntry}
+            onStopTimer={onStopTimer}
+          />
+        </div>
+      )}
     </SubHeader>
   );
 }

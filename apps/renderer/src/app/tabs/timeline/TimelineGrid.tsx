@@ -64,6 +64,7 @@ export function TimelineGrid() {
                   <InView
                     key={entry.id}
                     as="li"
+                    // once
                     variants={{
                       hidden: { opacity: 0, scale: 0.8 },
                       visible: { opacity: 1, scale: 1 },

@@ -52,8 +52,8 @@ export function JiraIssuesTab() {
     activeStatus && validValues.has(activeStatus)
       ? activeStatus
       : statuses.length > 0
-        ? toTabValue(statuses[0])
-        : '';
+      ? toTabValue(statuses[0])
+      : '';
   const activeIndex = Math.max(
     0,
     statuses.findIndex((s) => toTabValue(s) === effectiveTab)
@@ -64,12 +64,17 @@ export function JiraIssuesTab() {
       {statuses.length > 0 && (
         <SubHeader>
           <div className="w-full max-w-md mx-auto px-4 pb-2 flex justify-center">
-            <motion.div layoutId="sub-header-pill" className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-2 text-muted-foreground">
+            <motion.div
+              layoutId="sub-header-pill"
+              className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-2 text-muted-foreground"
+            >
               <AnimatedBackground
                 defaultValue={effectiveTab}
                 onValueChange={(id) => {
                   if (id) {
-                    const newIndex = statuses.findIndex((s) => toTabValue(s) === id);
+                    const newIndex = statuses.findIndex(
+                      (s) => toTabValue(s) === id
+                    );
                     if (newIndex >= 0) {
                       setDirection(newIndex > activeIndex ? -1 : 1);
                       setActiveStatus(id);
@@ -120,7 +125,8 @@ export function JiraIssuesTab() {
             </EmptyMedia>
             <EmptyTitle>Failed to fetch Jira issues</EmptyTitle>
             <EmptyDescription>
-              {(error as { message?: string })?.message ?? 'Something went wrong'}
+              {(error as { message?: string })?.message ??
+                'Something went wrong'}
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
@@ -182,7 +188,9 @@ export function JiraIssuesTab() {
                     key={issue.id}
                     issue={issue}
                     showTrail={issue.key === activeIssueKey}
-                    onOpenInJira={(key) => window.electron.openJiraExternal(key)}
+                    onOpenInJira={(key) =>
+                      window.electron.openJiraExternal(key)
+                    }
                     onTrackTime={async (key) => {
                       await startTracking.mutateAsync(key);
                       setActiveTab('home');
