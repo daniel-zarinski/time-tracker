@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { Search } from 'lucide-react';
-import { motion } from 'motion/react';
 
 import {
   Button,
@@ -17,7 +16,6 @@ import { useAppStore } from './store';
 import { useAppCommands } from './use-app-commands';
 import { TimelineTab } from './tabs/timeline';
 import { JiraIssueCard } from './components/cards/jira-issue-card';
-import { SubHeaderSlotProvider } from './contexts/sub-header-slot-context';
 
 export function App() {
   const activeTab = useAppStore.use.activeTab();
@@ -25,8 +23,6 @@ export function App() {
   const setSelectedIssueKey = useAppStore.use.setSelectedIssueKey();
   const setSelectedTimeEntry = useAppStore.use.setSelectedTimeEntry();
   const [commandOpen, setCommandOpen] = React.useState(false);
-  const [subHeaderSlot, setSubHeaderSlot] =
-    React.useState<HTMLDivElement | null>(null);
   const { commands } = useAppCommands();
 
   const issueQuery = useJiraIssue(selectedIssueKey);
@@ -65,28 +61,20 @@ export function App() {
           className="flex min-h-0 flex-1 flex-col bg-muted"
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
         >
-          <SubHeaderSlotProvider value={subHeaderSlot}>
-            <motion.div
-              layout
-              transition={DEFAULT_TRANSITION}
-              ref={setSubHeaderSlot}
-              className="relative grid [&>*]:col-start-1 [&>*]:row-start-1 bg-background overflow-hidden"
-            />
-            <TransitionPanel
-              activeIndex={activeTabIndex}
-              transition={{ duration: 0.2, ease: DEFAULT_TRANSITION.ease }}
-              variants={{
-                enter: { opacity: 0 },
-                center: { opacity: 1 },
-                exit: { opacity: 0, filter: 'blur(4px)' },
-              }}
-              className="flex-1 overflow-y-auto"
-            >
-              <TimelineTab />
-              <JiraIssuesTab />
-              <SettingsTab />
-            </TransitionPanel>
-          </SubHeaderSlotProvider>
+          <TransitionPanel
+            activeIndex={activeTabIndex}
+            transition={{ duration: 0.2, ease: DEFAULT_TRANSITION.ease }}
+            variants={{
+              enter: { opacity: 0 },
+              center: { opacity: 1 },
+              exit: { opacity: 0, filter: 'blur(4px)' },
+            }}
+            className="flex-1 overflow-y-auto"
+          >
+            <TimelineTab />
+            <JiraIssuesTab />
+            <SettingsTab />
+          </TransitionPanel>
         </main>
       </div>
 
