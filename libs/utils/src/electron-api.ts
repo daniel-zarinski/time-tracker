@@ -35,6 +35,7 @@ export interface DatabaseApi {
   getTimeEntries: (options?: {
     limit?: number;
   }) => Promise<TimeEntryWithIssue[]>;
+  getTimeEntriesByIssueKey: (issueKey: string) => Promise<TimeEntryWithIssue[]>;
   getActiveTimeEntry: () => Promise<TimeEntryWithIssue | null>;
   deleteTimeEntry: (entryId: string) => Promise<void>;
   updateTimeEntry: (

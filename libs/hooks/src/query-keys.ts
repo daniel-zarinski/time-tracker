@@ -3,6 +3,8 @@ export const queryKeys = {
     all: ['time-entries'] as const,
     active: ['active-time-entry'] as const,
     dayTotal: (dateKey: string) => ['time-entries', 'day-total', dateKey] as const,
+    byIssue: (issueKey: string) => ['time-entries', 'by-issue', issueKey] as const,
+    byIssuePrefix: ['time-entries', 'by-issue'] as const,
   },
   jira: {
     all: ['jira'] as const,

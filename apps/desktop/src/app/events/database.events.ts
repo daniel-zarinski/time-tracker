@@ -13,6 +13,7 @@ import {
   getJiraIssues,
   getRelevantJiraIssues,
   getTimeEntries,
+  getTimeEntriesByIssueKey,
   getActiveTimeEntry,
   deleteTimeEntry,
   updateTimeEntry,
@@ -156,6 +157,12 @@ ipcMain.handle(
   async (_event, options?: { limit?: number }) => {
     return getTimeEntries(getClient(), options);
   }
+);
+
+ipcMain.handle(
+  'database:get-time-entries-by-issue-key',
+  async (_event, issueKey: string) =>
+    getTimeEntriesByIssueKey(getClient(), issueKey)
 );
 
 ipcMain.handle('database:get-active-time-entry', async () => {

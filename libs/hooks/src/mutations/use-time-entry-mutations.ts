@@ -8,6 +8,7 @@ export function useTimeEntryMutations() {
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.all });
     queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.active });
+    queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.byIssuePrefix });
   };
 
   const startTracking = useMutation({

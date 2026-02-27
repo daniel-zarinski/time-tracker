@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import {
+  AnimatedGroup,
   BorderTrail,
   Card,
   CardContent,
@@ -8,10 +9,12 @@ import {
 } from '@time-tracker/ui';
 import { cn } from '@time-tracker/utils';
 import type { JiraIssueWithParent } from '@time-tracker/database';
+import { useTimeEntriesByIssue } from '@time-tracker/hooks';
 import { motion } from 'motion/react';
 import useMeasure from 'react-use-measure';
 import { JiraIssueCardHeader } from './jira-issue-card-header';
 import { JiraIssueCardFooter } from './jira-issue-card-footer';
+import { JiraIssueTimeEntryRow } from './jira-issue-time-entry-row';
 
 export interface JiraIssueCardProps {
   issue: JiraIssueWithParent;
@@ -58,17 +61,20 @@ export function JiraIssueCard({
   const [expanded, setExpanded] = useState(defaultExpanded ?? false);
   const [direction, setDirection] = useState(1);
   const [measureRef, bounds] = useMeasure();
+  const issueKey = issue.key ?? '';
+  const isClickable = collapsible;
+  const isExpanded = !collapsible || expanded;
+  const { data: timeEntries } = useTimeEntriesByIssue(issueKey, {
+    enabled: isExpanded,
+  });
 
   const parentIssueType = issue.parent?.issueType ?? '';
   const parentLabel =
     parentIssueType === 'Epic'
       ? 'Epic'
       : parentIssueType === 'Story'
-        ? 'Story'
-        : 'Parent';
-
-  const isClickable = collapsible;
-  const isExpanded = !collapsible || expanded;
+      ? 'Story'
+      : 'Parent';
 
   function handleToggle() {
     if (!collapsible) return;
@@ -94,13 +100,40 @@ export function JiraIssueCard({
     </div>
   );
 
+  const timeEntriesSection =
+    timeEntries && timeEntries.length > 0 ? (
+      <div className="mb-2" onClick={(e) => e.stopPropagation()}>
+        <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium block mb-1.5">
+          Time entries
+        </span>
+        <AnimatedGroup
+          as="ul"
+          asChild="li"
+          preset="slide"
+          className="flex flex-col gap-0 list-none p-0 m-0"
+        >
+          {timeEntries.map((entry) => (
+            <JiraIssueTimeEntryRow key={entry.id} entry={entry} />
+          ))}
+        </AnimatedGroup>
+      </div>
+    ) : timeEntries && timeEntries.length === 0 ? (
+      <div
+        className="mb-2 text-xs text-muted-foreground/70"
+        onClick={(e) => e.stopPropagation()}
+      >
+        No time entries
+      </div>
+    ) : null;
+
   const expandedContent = (
     <div ref={measureRef}>
       <CardContent className="px-3 pt-0 pb-0">
         {parentInfo}
+        {timeEntriesSection}
       </CardContent>
       <JiraIssueCardFooter
-        issueKey={issue.key ?? ''}
+        issueKey={issueKey}
         onOpenInJira={onOpenInJira}
         onTrackTime={onTrackTime}
       />
