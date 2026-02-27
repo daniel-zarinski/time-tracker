@@ -6,6 +6,7 @@ import {
   type EntryWithLayout,
   type FormattedSelection,
   computeEntryLayout,
+  findScrollableAncestor,
   formatSelection,
   getEntriesWithGrid,
   isSameDay,
@@ -38,6 +39,7 @@ const TimelineContext = React.createContext<TimelineContextValue | null>(null);
 
 interface TimelineProviderProps {
   date: Date;
+  scrollKey: number;
   entries: TimeEntryWithIssue[];
   issues: ComboboxSelectItem[];
   children: React.ReactNode;
@@ -45,6 +47,7 @@ interface TimelineProviderProps {
 
 export function TimelineProvider({
   date,
+  scrollKey,
   entries,
   issues,
   children,
@@ -119,7 +122,7 @@ export function TimelineProvider({
     const container = containerRef.current;
     if (!container) return;
 
-    const scrollParent = container.closest('[data-slot="tabs-content"]');
+    const scrollParent = findScrollableAncestor(container);
     if (!scrollParent) return;
 
     const now = new Date();
@@ -133,7 +136,7 @@ export function TimelineProvider({
     requestAnimationFrame(() => {
       scrollParent.scrollTop = scrollTarget;
     });
-  }, [date]);
+  }, [date, scrollKey]);
 
   return (
     <TimelineContext.Provider

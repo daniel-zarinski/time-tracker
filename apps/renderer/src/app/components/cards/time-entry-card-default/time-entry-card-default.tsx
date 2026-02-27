@@ -12,7 +12,7 @@ import {
   TransitionPanel,
   type ComboboxSelectItem,
 } from '@time-tracker/ui';
-import { Trash2Icon } from 'lucide-react';
+import { PlayIcon, Trash2Icon } from 'lucide-react';
 import { motion } from 'motion/react';
 import useMeasure from 'react-use-measure';
 import { TimeEntryCardActionsDropdown } from './time-entry-card-actions';
@@ -154,7 +154,6 @@ export function TimeEntryCardDefault({
             </CardContent>
 
             <TimeEntryCardActionsFooter
-              onResume={onResumeTimer ? () => onResumeTimer(issueKey) : undefined}
               onView={() => onOpenInJira?.(issueKey)}
               onEdit={handleEdit}
             />
@@ -170,15 +169,26 @@ export function TimeEntryCardDefault({
             />
           </div>
         </TransitionPanel>
-        {onDelete && (
+        {state === 'edit' && (
           <Button
             variant="destructive"
             size="xs"
             className="absolute bottom-2.5 right-3"
-            onClick={() => onDelete(entry.id)}
+            onClick={() => onDelete?.(entry.id)}
           >
             <Trash2Icon className="size-3" />
             Delete
+          </Button>
+        )}
+        {state === 'default' && onResumeTimer && (
+          <Button
+            variant="outline"
+            size="xs"
+            className="absolute bottom-2.5 right-3"
+            onClick={() => onResumeTimer(issueKey)}
+          >
+            <PlayIcon className="size-3" />
+            Resume
           </Button>
         )}
       </motion.div>

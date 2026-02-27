@@ -10,6 +10,7 @@ import { TimelineProvider } from './timeline-context';
 
 export function TimelineTab() {
   const [date, setDate] = React.useState(() => new Date());
+  const [scrollKey, setScrollKey] = React.useState(0);
   const [view, setView] = React.useState(TimelineView.Timeline);
 
   const { data: entries = [] } = useTimeEntries();
@@ -32,6 +33,11 @@ export function TimelineTab() {
     [entries, date]
   );
 
+  const handleSelectDay = React.useCallback((day: Date) => {
+    setDate(day);
+    setScrollKey((k) => k + 1);
+  }, []);
+
   const previousWeek = React.useCallback(() => {
     const next = new Date(date);
     next.setDate(next.getDate() - 7);
@@ -52,10 +58,10 @@ export function TimelineTab() {
         onViewChange={setView}
         onPreviousWeek={previousWeek}
         onNextWeek={nextWeek}
-        onSelectDay={setDate}
+        onSelectDay={handleSelectDay}
       />
       {view === TimelineView.Timeline ? (
-        <TimelineProvider date={date} entries={entries} issues={issueItems}>
+        <TimelineProvider date={date} scrollKey={scrollKey} entries={entries} issues={issueItems}>
           <TimelineGrid />
         </TimelineProvider>
       ) : (

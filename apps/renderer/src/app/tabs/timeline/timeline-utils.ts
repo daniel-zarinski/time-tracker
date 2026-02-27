@@ -151,6 +151,18 @@ export function formatEntryTime(date: Date): string {
   });
 }
 
+export function findScrollableAncestor(
+  element: HTMLElement
+): HTMLElement | null {
+  let current = element.parentElement;
+  while (current) {
+    const { overflowY } = getComputedStyle(current);
+    if (overflowY === 'auto' || overflowY === 'scroll') return current;
+    current = current.parentElement;
+  }
+  return null;
+}
+
 export function isSameDay(a: Date, b: Date) {
   return (
     a.getFullYear() === b.getFullYear() &&

@@ -2,9 +2,8 @@ import {
   EyeIcon,
   MoreHorizontalIcon,
   PencilIcon,
-  PlayIcon,
   Trash2Icon,
-} from 'lucide-react'
+} from 'lucide-react';
 import {
   Button,
   CardFooter,
@@ -13,12 +12,12 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@time-tracker/ui'
+} from '@time-tracker/ui';
 
 interface TimeEntryCardActionsDropdownProps {
-  onView: () => void
-  onEdit: () => void
-  onDelete: () => void
+  onView: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
 }
 
 export function TimeEntryCardActionsDropdown({
@@ -38,54 +37,59 @@ export function TimeEntryCardActionsDropdown({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onView() }}>
+        <DropdownMenuItem
+          onClick={(e) => {
+            e.stopPropagation();
+            onView();
+          }}
+        >
           <EyeIcon className="size-4" />
           View
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit() }}>
+        <DropdownMenuItem
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit();
+          }}
+        >
           <PencilIcon className="size-4" />
           Edit
         </DropdownMenuItem>
         <DropdownMenuItem
           variant="destructive"
-          onClick={(e) => { e.stopPropagation(); onDelete() }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
         >
           <Trash2Icon className="size-4" />
           Delete
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }
 
 interface TimeEntryCardActionsFooterProps {
-  onResume?: () => void
-  onView: () => void
-  onEdit: () => void
+  onView: () => void;
+  onEdit: () => void;
 }
 
 export function TimeEntryCardActionsFooter({
-  onResume,
   onView,
   onEdit,
 }: TimeEntryCardActionsFooterProps) {
   return (
     <CardFooter className="px-3 pb-2.5 gap-2">
-      {onResume && (
-        <Button variant="outline" size="xs" onClick={onResume}>
-          <PlayIcon className="size-3" />
-          Resume
-        </Button>
-      )}
-      <Button variant="outline" size="xs" onClick={onView}>
+      <Button variant="ghost" size="xs" onClick={onView}>
         <EyeIcon className="size-3" />
         View
       </Button>
-      <Button variant="outline" size="xs" onClick={onEdit}>
+      <Button variant="ghost" size="xs" onClick={onEdit}>
         <PencilIcon className="size-3" />
         Edit
       </Button>
     </CardFooter>
-  )
+  );
 }
