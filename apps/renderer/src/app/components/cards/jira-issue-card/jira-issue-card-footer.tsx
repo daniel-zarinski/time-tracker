@@ -1,7 +1,4 @@
-import {
-  Button,
-  CardFooter,
-} from '@time-tracker/ui';
+import { Button, CardFooter } from '@time-tracker/ui';
 import { ExternalLinkIcon, TimerIcon } from 'lucide-react';
 
 interface JiraIssueCardFooterProps {
@@ -28,14 +25,14 @@ export function JiraIssueCardFooter({
       className="flex justify-center px-3 pb-2 gap-6 mt-4"
       onClick={(e) => e.stopPropagation()}
     >
-      <Button size="sm" onClick={handleTrackTime} className="flex-1">
-        <TimerIcon className="h-4 w-4" />
-        Track Time
-      </Button>
-
       <Button variant="outline" size="sm" onClick={handleOpenInJira}>
         <ExternalLinkIcon className="h-4 w-4" />
         Open in Jira
+      </Button>
+
+      <Button size="sm" onClick={handleTrackTime} className="flex-1">
+        <TimerIcon className="h-4 w-4" />
+        Track Time
       </Button>
     </CardFooter>
   );

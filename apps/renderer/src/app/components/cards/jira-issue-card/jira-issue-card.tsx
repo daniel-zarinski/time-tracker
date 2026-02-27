@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import {
-  AnimatedGroup,
   BorderTrail,
   Card,
   CardContent,
@@ -14,7 +13,7 @@ import { motion } from 'motion/react';
 import useMeasure from 'react-use-measure';
 import { JiraIssueCardHeader } from './jira-issue-card-header';
 import { JiraIssueCardFooter } from './jira-issue-card-footer';
-import { JiraIssueTimeEntryRow } from './jira-issue-time-entry-row';
+import { JiraIssueTimeEntriesTable } from './jira-issue-time-entries-table';
 
 export interface JiraIssueCardProps {
   issue: JiraIssueWithParent;
@@ -83,7 +82,7 @@ export function JiraIssueCard({
   }
 
   const parentInfo = (
-    <div className="flex flex-col gap-1 items-start mb-2 min-w-0 w-full overflow-hidden">
+    <div className="flex flex-col gap-1 items-start mb-4 min-w-0 w-full overflow-hidden">
       <div className="flex items-center gap-1.5 min-w-0 w-full">
         <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium shrink-0">
           Parent {parentLabel}
@@ -106,16 +105,7 @@ export function JiraIssueCard({
         <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium block mb-1.5">
           Time entries
         </span>
-        <AnimatedGroup
-          as="ul"
-          asChild="li"
-          preset="slide"
-          className="flex flex-col gap-0 list-none p-0 m-0"
-        >
-          {timeEntries.map((entry) => (
-            <JiraIssueTimeEntryRow key={entry.id} entry={entry} />
-          ))}
-        </AnimatedGroup>
+        <JiraIssueTimeEntriesTable entries={timeEntries} />
       </div>
     ) : timeEntries && timeEntries.length === 0 ? (
       <div

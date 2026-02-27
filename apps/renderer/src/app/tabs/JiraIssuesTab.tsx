@@ -60,7 +60,7 @@ export function JiraIssuesTab() {
   );
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col pb-4">
       {statuses.length > 0 && (
         <SubHeader>
           <div className="w-full max-w-md mx-auto px-4 pb-2 flex justify-center">
