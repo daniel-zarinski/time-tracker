@@ -1,3 +1,4 @@
+export * from './animated-background';
 export * from './badge';
 export * from './breadcrumb';
 export * from './button';
