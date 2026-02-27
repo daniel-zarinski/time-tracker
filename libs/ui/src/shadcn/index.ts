@@ -1,6 +1,7 @@
 export * from './animated-background';
 export * from './animated-group';
 export * from './badge';
+export * from './border-trail';
 export * from './breadcrumb';
 export * from './button';
 export * from './calendar';
