@@ -15,7 +15,12 @@ export function SubHeader({ children, className }: SubHeaderProps) {
       className={cn('sticky top-0 z-30 bg-background', className)}
       transition={DEFAULT_TRANSITION}
     >
-      <motion.div layout transition={DEFAULT_TRANSITION} className="mt-2">
+      <motion.div
+        layout
+        layoutId="sub-header-content"
+        transition={DEFAULT_TRANSITION}
+        className="mt-2"
+      >
         {children}
       </motion.div>
     </motion.div>
