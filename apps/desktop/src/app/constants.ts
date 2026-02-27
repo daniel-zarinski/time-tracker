@@ -10,6 +10,6 @@ export const WINDOW = {
 export const MENU_MAX_LENGTH = 50;
 
 export const rendererAppPort = 4200;
-export const rendererAppName = 'Time Tracker'; // options.name.split('-')[0] + '-web'
+export const rendererAppName = 'renderer';
 export const electronAppName = 'Time Tracker';
 export const updateServerUrl = 'https://deployment-server-url.com'; // TODO: insert your update server url here
