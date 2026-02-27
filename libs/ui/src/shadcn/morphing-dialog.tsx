@@ -254,6 +254,7 @@ function MorphingDialogContainer({ children }: MorphingDialogContainerProps) {
 
   const handlePointerDown = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
+      e.stopPropagation();
       if (e.target === e.currentTarget) {
         setIsOpen(false);
       }
