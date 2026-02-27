@@ -24,11 +24,9 @@ interface TimeEntryCardDefaultProps {
   entry: TimeEntryWithIssue;
   issues?: ComboboxSelectItem[];
   defaultExpanded?: boolean;
-  defaultView?: 'expanded' | 'edit';
   onResumeTimer?: (issueKey: string) => unknown | Promise<unknown>;
   onSave?: (entryId: string, updates: TimeEntryUpdates) => void | Promise<void>;
   onDelete?: (entryId: string) => void | Promise<void>;
-  onCancel?: () => void;
   onOpenInJira?: (issueKey: string) => void | Promise<void>;
   className?: string;
 }
@@ -68,20 +66,14 @@ export function TimeEntryCardDefault({
   entry,
   issues,
   defaultExpanded = false,
-  defaultView,
   onResumeTimer,
   onSave,
   onDelete,
-  onCancel,
   onOpenInJira,
   className,
 }: TimeEntryCardDefaultProps) {
   const [state, setState] = useState<'default' | 'expanded' | 'edit'>(
-    defaultView === 'edit'
-      ? 'edit'
-      : defaultExpanded
-        ? 'expanded'
-        : 'default'
+    defaultExpanded ? 'expanded' : 'default'
   );
   const [direction, setDirection] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -109,11 +101,7 @@ export function TimeEntryCardDefault({
   }
 
   function handleCancelEdit() {
-    if (onCancel) {
-      onCancel();
-    } else {
-      handleSetState('expanded');
-    }
+    handleSetState('expanded');
   }
 
   return (
@@ -149,9 +137,7 @@ export function TimeEntryCardDefault({
             {/* Panel 0: View mode */}
             <Collapsible
               open={state === 'expanded'}
-              onOpenChange={(open) =>
-                setState(open ? 'expanded' : 'default')
-              }
+              onOpenChange={(open) => setState(open ? 'expanded' : 'default')}
             >
               <CollapsibleTrigger asChild>
                 <div className="cursor-pointer select-none">

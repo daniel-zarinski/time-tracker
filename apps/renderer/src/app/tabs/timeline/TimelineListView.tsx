@@ -2,6 +2,7 @@ import type { TimeEntryWithIssue } from '@time-tracker/database';
 import type { TimeEntryUpdates } from '@time-tracker/utils';
 import type { ComboboxSelectItem } from '@time-tracker/ui';
 import {
+  AnimatedGroup,
   Empty,
   EmptyHeader,
   EmptyMedia,
@@ -12,9 +13,16 @@ import { Clock } from 'lucide-react';
 import { TimeEntryCardActive } from '../../components/cards/time-entry-card-active';
 import { TimeEntryCardDefault } from '../../components/cards/time-entry-card-default';
 
+const staggerVariants = {
+  container: {
+    visible: { transition: { staggerChildren: 0.05 } },
+  },
+};
+
 interface TimelineListViewProps {
   entries: TimeEntryWithIssue[];
   issues: ComboboxSelectItem[];
+  dateKey: string;
   onStopTracking: (id: string) => void;
   onStartTracking: (issueKey: string) => void;
   onUpdateEntry: (entryId: string, updates: TimeEntryUpdates) => void;
@@ -25,6 +33,7 @@ interface TimelineListViewProps {
 export function TimelineListView({
   entries,
   issues,
+  dateKey,
   onStopTracking,
   onStartTracking,
   onUpdateEntry,
@@ -62,20 +71,19 @@ export function TimelineListView({
       )}
 
       <div className="p-4 flex flex-col gap-3">
-        <ul className="flex flex-col gap-2">
+        <AnimatedGroup key={dateKey} as="ul" asChild="li" preset="slide" variants={staggerVariants} className="flex flex-col gap-2">
           {completedEntries.map((entry) => (
-            <li key={entry.id}>
-              <TimeEntryCardDefault
-                entry={entry}
-                issues={issues}
-                onOpenInJira={() => onOpenInJira(entry.issueKey)}
-                onResumeTimer={() => onStartTracking(entry.issueKey)}
-                onSave={(entryId, updates) => onUpdateEntry(entryId, updates)}
-                onDelete={(id) => onDeleteEntry(id)}
-              />
-            </li>
+            <TimeEntryCardDefault
+              key={entry.id}
+              entry={entry}
+              issues={issues}
+              onOpenInJira={() => onOpenInJira(entry.issueKey)}
+              onResumeTimer={() => onStartTracking(entry.issueKey)}
+              onSave={(entryId, updates) => onUpdateEntry(entryId, updates)}
+              onDelete={(id) => onDeleteEntry(id)}
+            />
           ))}
-        </ul>
+        </AnimatedGroup>
       </div>
     </div>
   );

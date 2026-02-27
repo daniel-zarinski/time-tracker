@@ -51,6 +51,7 @@ export function useTimelineDrag(
 
   const handlePointerDown = React.useCallback(
     (e: React.PointerEvent<HTMLOListElement>) => {
+      if (!olRef.current?.contains(e.target as Node)) return;
       if ((e.target as HTMLElement).closest('button')) return;
       e.preventDefault();
       const clientY = e.clientY;

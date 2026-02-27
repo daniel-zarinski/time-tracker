@@ -175,6 +175,7 @@ export function TimelineTab() {
         <TimelineListView
           entries={filteredEntries}
           issues={issueItems}
+          dateKey={date.toDateString()}
           onStopTracking={(id) => stopTracking.mutateAsync(id)}
           onStartTracking={(issueKey) => startTracking.mutateAsync(issueKey)}
           onUpdateEntry={(entryId, updates) =>
