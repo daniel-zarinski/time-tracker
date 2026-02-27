@@ -27,7 +27,10 @@ interface TimeEntryEditDialogFormProps {
   issues: ComboboxSelectItem[];
 }
 
-function TimeEntryEditDialogForm({ entry, issues }: TimeEntryEditDialogFormProps) {
+function TimeEntryEditDialogForm({
+  entry,
+  issues,
+}: TimeEntryEditDialogFormProps) {
   const { setIsOpen } = useMorphingDialog();
   const { updateTimeEntry, deleteTimeEntry } = useTimeEntryMutations();
   const close = () => setIsOpen(false);

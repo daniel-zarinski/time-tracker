@@ -166,6 +166,7 @@ export function TimeEntryCardDefault({
               issues={issues}
               onSave={handleSave}
               onCancel={handleCancelEdit}
+              onDelete={() => onDelete?.(entry.id)}
             />
           </div>
         </TransitionPanel>
@@ -173,7 +174,7 @@ export function TimeEntryCardDefault({
           <Button
             variant="destructive"
             size="xs"
-            className="absolute bottom-2.5 right-3"
+            className="absolute bottom-2.5 left-3"
             onClick={() => onDelete?.(entry.id)}
           >
             <Trash2Icon className="size-3" />

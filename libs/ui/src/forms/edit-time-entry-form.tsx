@@ -15,12 +15,7 @@ import {
   timeStringToMinutes,
   toTimeString,
 } from '@time-tracker/utils';
-import {
-  CalendarIcon,
-  Clock2Icon,
-  TimerIcon,
-  Trash2Icon,
-} from 'lucide-react';
+import { CalendarIcon, Clock2Icon, TimerIcon, Trash2Icon } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import type { ComboboxSelectItem } from '../combobox-select';
@@ -109,13 +104,12 @@ export function EditTimeEntryForm({
 
   async function onFormSubmit(data: TimeEntryFormValues) {
     const newStartedAt = combineDateAndTime(data.date, data.startTime);
-    const newTimeSpent =
-      Math.max(
-        0,
-        (timeStringToMinutes(data.endTime) -
-          timeStringToMinutes(data.startTime)) *
-          60
-      );
+    const newTimeSpent = Math.max(
+      0,
+      (timeStringToMinutes(data.endTime) -
+        timeStringToMinutes(data.startTime)) *
+        60
+    );
 
     await onSave(entry.id, {
       issueKey: data.issueKey !== entry.issueKey ? data.issueKey : undefined,
@@ -168,7 +162,10 @@ export function EditTimeEntryForm({
             render={({ field }) => (
               <Field>
                 <FieldLabel className="text-xs">Date</FieldLabel>
-                <Popover open={isOngoing ? false : calendarOpen} onOpenChange={setCalendarOpen}>
+                <Popover
+                  open={isOngoing ? false : calendarOpen}
+                  onOpenChange={setCalendarOpen}
+                >
                   <PopoverTrigger asChild>
                     <button
                       type="button"
@@ -214,7 +211,12 @@ export function EditTimeEntryForm({
             <FieldLabel htmlFor="edit-duration" className="text-xs">
               Duration
             </FieldLabel>
-            <InputGroup className={cn('h-7', isOngoing && 'opacity-50 cursor-not-allowed')}>
+            <InputGroup
+              className={cn(
+                'h-7',
+                isOngoing && 'opacity-50 cursor-not-allowed'
+              )}
+            >
               <InputGroupInput
                 id="edit-duration"
                 type="text"
@@ -268,7 +270,12 @@ export function EditTimeEntryForm({
                 <FieldLabel htmlFor="edit-endTime" className="text-xs">
                   End Time
                 </FieldLabel>
-                <InputGroup className={cn('h-7', isOngoing && 'opacity-50 cursor-not-allowed')}>
+                <InputGroup
+                  className={cn(
+                    'h-7',
+                    isOngoing && 'opacity-50 cursor-not-allowed'
+                  )}
+                >
                   <InputGroupInput
                     id="edit-endTime"
                     type="time"
@@ -310,19 +317,6 @@ export function EditTimeEntryForm({
       </CardContent>
 
       <CardFooter className="px-3 pb-2.5 gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          size="xs"
-          onClick={onCancel}
-          disabled={isSubmitting}
-        >
-          Cancel
-        </Button>
-        <Button type="submit" size="xs" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving\u2026' : 'Save'}
-        </Button>
-        <div className="flex-1" />
         {onDelete && (
           <Button
             type="button"
@@ -335,6 +329,19 @@ export function EditTimeEntryForm({
             Delete
           </Button>
         )}
+        <div className="flex-1" />
+        <Button
+          type="button"
+          variant="outline"
+          size="xs"
+          onClick={onCancel}
+          disabled={isSubmitting}
+        >
+          Cancel
+        </Button>
+        <Button type="submit" size="xs" disabled={isSubmitting}>
+          {isSubmitting ? 'Saving\u2026' : 'Save'}
+        </Button>
       </CardFooter>
     </form>
   );
