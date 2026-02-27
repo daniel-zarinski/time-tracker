@@ -1,7 +1,8 @@
 {
   "$schema": "../../../../../node_modules/nx-electron/src/validation/maker.schema.json",
   "asar": true,
-  "asarUnpack": ["**/prisma/**", "**/node_modules/prisma/**", "**/prisma.config.ts"],
+  "asarUnpack": ["**/prisma/**", "**/node_modules/prisma/**", "**/.prisma/**", "**/prisma.config.ts"],
+  "files": ["**/*", "node_modules/.prisma/**"],
   "mac": {
     "target": ["zip"],
     "icon": "apps/desktop/src/assets/stopwatch.png",
