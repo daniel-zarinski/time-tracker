@@ -9,9 +9,11 @@ import {
   FieldLegend,
   Field,
   FieldLabel,
+  FieldContent,
+  FieldTitle,
+  FieldDescription,
   RadioGroup,
   RadioGroupItem,
-  Label,
 } from '@time-tracker/ui';
 import { useThemeConfigContext } from '@time-tracker/hooks';
 import { Palette } from 'lucide-react';
@@ -38,29 +40,36 @@ export function AppConfigurationCard() {
         <FieldGroup>
           <FieldSet className="gap-3">
             <FieldLegend>Appearance</FieldLegend>
-            <Field>
-              <FieldLabel>Theme</FieldLabel>
-              <RadioGroup
-                value={theme}
-                onValueChange={(value) =>
-                  setTheme(value as 'light' | 'dark')
-                }
-                className="flex flex-row gap-4"
-              >
-                <div className="flex items-center gap-2">
+            <RadioGroup
+              value={theme}
+              onValueChange={(value) =>
+                setTheme(value as 'light' | 'dark')
+              }
+              className="flex flex-col gap-2"
+            >
+              <FieldLabel htmlFor="theme-light">
+                <Field orientation="horizontal" className="!p-2 gap-2">
+                  <FieldContent className="gap-0.5">
+                    <FieldTitle className="text-xs">Light</FieldTitle>
+                    <FieldDescription className="text-xs">
+                      Use light theme for the interface.
+                    </FieldDescription>
+                  </FieldContent>
                   <RadioGroupItem value="light" id="theme-light" />
-                  <Label htmlFor="theme-light" className="cursor-pointer">
-                    Light
-                  </Label>
-                </div>
-                <div className="flex items-center gap-2">
+                </Field>
+              </FieldLabel>
+              <FieldLabel htmlFor="theme-dark">
+                <Field orientation="horizontal" className="!p-2 gap-2">
+                  <FieldContent className="gap-0.5">
+                    <FieldTitle className="text-xs">Dark</FieldTitle>
+                    <FieldDescription className="text-xs">
+                      Use dark theme for the interface.
+                    </FieldDescription>
+                  </FieldContent>
                   <RadioGroupItem value="dark" id="theme-dark" />
-                  <Label htmlFor="theme-dark" className="cursor-pointer">
-                    Dark
-                  </Label>
-                </div>
-              </RadioGroup>
-            </Field>
+                </Field>
+              </FieldLabel>
+            </RadioGroup>
           </FieldSet>
         </FieldGroup>
       </CardContent>
