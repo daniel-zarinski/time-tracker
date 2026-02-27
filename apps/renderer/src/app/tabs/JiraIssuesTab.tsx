@@ -61,8 +61,8 @@ export function JiraIssuesTab() {
 
   return (
     <div className="flex flex-col pb-4">
-      {statuses.length > 0 && (
-        <SubHeader>
+      <SubHeader>
+        {statuses.length > 0 && (
           <div className="w-full max-w-md mx-auto px-4 pb-2 flex justify-center">
             <motion.div
               layoutId="sub-header-pill"
@@ -97,8 +97,8 @@ export function JiraIssuesTab() {
               </AnimatedBackground>
             </motion.div>
           </div>
-        </SubHeader>
-      )}
+        )}
+      </SubHeader>
 
       {isConfigError ? (
         <Empty className="w-full max-w-md mx-auto">
@@ -181,7 +181,7 @@ export function JiraIssuesTab() {
                 as="ul"
                 asChild="li"
                 preset="slide"
-                className="flex flex-col gap-2 w-full max-w-2xl mx-auto"
+                className="flex flex-col gap-2 w-full max-w-2xl mx-auto mt-2"
               >
                 {groupedByStatus[status].map((issue) => (
                   <JiraIssueCard
