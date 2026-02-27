@@ -1,4 +1,5 @@
 import {
+  AnimatedGroup,
   Button,
   ScrollArea,
   Empty,
@@ -204,20 +205,24 @@ export function JiraIssuesTab() {
       </div>
       {statuses.map((status) => (
         <TabsContent key={status} value={toTabValue(status)} className="px-4">
-          <ul className="flex flex-col gap-2 w-full max-w-2xl mx-auto">
+          <AnimatedGroup
+            as="ul"
+            asChild="li"
+            preset="slide"
+            className="flex flex-col gap-2 w-full max-w-2xl mx-auto"
+          >
             {groupedByStatus[status].map((issue) => (
-              <li key={issue.id}>
-                <JiraIssueCard
-                  issue={issue}
-                  onOpenInJira={(key) => window.electron.openJiraExternal(key)}
-                  onTrackTime={async (key) => {
-                    await startTracking.mutateAsync(key);
-                    setActiveTab('home');
-                  }}
-                />
-              </li>
+              <JiraIssueCard
+                key={issue.id}
+                issue={issue}
+                onOpenInJira={(key) => window.electron.openJiraExternal(key)}
+                onTrackTime={async (key) => {
+                  await startTracking.mutateAsync(key);
+                  setActiveTab('home');
+                }}
+              />
             ))}
-          </ul>
+          </AnimatedGroup>
         </TabsContent>
       ))}
     </Tabs>

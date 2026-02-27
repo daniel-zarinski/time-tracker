@@ -35,7 +35,15 @@ export function TimelineHeader({
   onSelectDay,
 }: TimelineHeaderProps) {
   const [calendarOpen, setCalendarOpen] = React.useState(false);
-  const weekDays = React.useMemo(() => getWeekDays(date), [date]);
+
+  // Stabilize weekDays by week-start so they don't recalculate on
+  // same-week day clicks — keeps AnimatedBackground children stable
+  // which is required for layoutId slide animation to work.
+  const weekStartKey = React.useMemo(() => {
+    const days = getWeekDays(date);
+    return days[0].toDateString();
+  }, [date]);
+  const weekDays = React.useMemo(() => getWeekDays(date), [weekStartKey]);
 
   return (
     <div className="sticky top-0 z-30 border-b border-border bg-background">
@@ -95,7 +103,7 @@ export function TimelineHeader({
               key={i}
               data-id={String(i)}
               type="button"
-              className="group flex flex-col items-center gap-0.5 rounded-lg px-2 py-1 text-xs overflow-hidden transition-colors hover:bg-muted data-[checked=true]:text-primary-foreground data-[checked=true]:hover:bg-transparent"
+              className="group flex flex-col items-center gap-0.5 rounded-lg px-2 py-1 text-xs transition-colors hover:bg-muted data-[checked=true]:text-primary-foreground data-[checked=true]:hover:bg-transparent"
             >
               <DayButtonContent date={d} />
             </button>
