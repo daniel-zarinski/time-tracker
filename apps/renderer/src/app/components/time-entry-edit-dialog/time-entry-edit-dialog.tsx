@@ -9,6 +9,7 @@ import {
   CardTitle,
   EASE_CUBIC,
   EditTimeEntryForm,
+  jiraIssuesToComboboxItems,
   MorphingDialog,
   MorphingDialogContainer,
   MorphingDialogContent,
@@ -65,15 +66,8 @@ export function TimeEntryEditDialog({
 }: TimeEntryEditDialogProps) {
   const issueKey = entry.issue.key ?? entry.issueKey;
   const { data: jiraIssues = [] } = useJiraMyIssues();
-  const issues: ComboboxSelectItem[] = useMemo(
-    () =>
-      jiraIssues
-        .filter((i) => i.key != null)
-        .map((i) => ({
-          value: i.key!,
-          label: i.key!,
-          description: i.summary ?? undefined,
-        })),
+  const issues = useMemo(
+    () => jiraIssuesToComboboxItems(jiraIssues),
     [jiraIssues]
   );
 

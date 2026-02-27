@@ -1,5 +1,5 @@
 import { useJiraMyIssues, useTimeEntries, useTimeEntryMutations } from '@time-tracker/hooks';
-import type { ComboboxSelectItem } from '@time-tracker/ui';
+import { jiraIssuesToComboboxItems } from '@time-tracker/ui';
 import * as React from 'react';
 import { TimelineGrid } from './TimelineGrid';
 import { TimelineHeader } from './TimelineHeader';
@@ -17,15 +17,8 @@ export function TimelineTab() {
   const { data: jiraIssues = [] } = useJiraMyIssues();
   const { stopTracking } = useTimeEntryMutations();
 
-  const issueItems: ComboboxSelectItem[] = React.useMemo(
-    () =>
-      jiraIssues
-        .filter((i) => i.key != null)
-        .map((i) => ({
-          value: i.key!,
-          label: i.key!,
-          description: i.summary ?? undefined,
-        })),
+  const issueItems = React.useMemo(
+    () => jiraIssuesToComboboxItems(jiraIssues),
     [jiraIssues]
   );
 
