@@ -17,6 +17,7 @@ import {
   formatTime,
 } from '@time-tracker/utils';
 import type { TimeEntryWithIssue } from '@time-tracker/database';
+import { TimeEntryEditDialog } from '../../time-entry-edit-dialog/time-entry-edit-dialog';
 
 function AnimatedDurationTotal({ totalSeconds }: { totalSeconds: number }) {
   const [displaySeconds, setDisplaySeconds] = useState(0);
@@ -83,19 +84,31 @@ export function JiraIssueTimeEntriesTable({
           const endDate = new Date(startDate.getTime() + duration * 1000);
           const isActive = entry.timeSpentSeconds == null;
 
+          const trigger = (
+            <>
+              <span className="p-1.5 text-muted-foreground">
+                {formatRelativeDate(startDate)}
+              </span>
+              <span className="p-1.5 text-muted-foreground">
+                {formatTime(startDate)}
+              </span>
+              <span className="p-1.5 text-muted-foreground">
+                {isActive ? '—' : formatTime(endDate)}
+              </span>
+              <span className="min-w-[11ch] p-1.5 text-right font-medium text-foreground">
+                {isActive ? 'In progress' : formatDuration(duration)}
+              </span>
+            </>
+          );
+
           return (
             <Fragment key={entry.id}>
-              <TableCell className="p-1.5 text-muted-foreground">
-                {formatRelativeDate(startDate)}
-              </TableCell>
-              <TableCell className="p-1.5 text-muted-foreground">
-                {formatTime(startDate)}
-              </TableCell>
-              <TableCell className="p-1.5 text-muted-foreground">
-                {isActive ? '—' : formatTime(endDate)}
-              </TableCell>
-              <TableCell className="min-w-[11ch] p-1.5 text-right font-medium text-foreground">
-                {isActive ? 'In progress' : formatDuration(duration)}
+              <TableCell colSpan={4} className="p-0 align-top">
+                <TimeEntryEditDialog
+                  entry={entry}
+                  trigger={trigger}
+                  triggerClassName="grid w-full grid-cols-[1fr_1fr_1fr_minmax(11ch,auto)] gap-0 cursor-pointer hover:bg-muted/50 text-left border-b border-border/50 last:border-0 transition-colors"
+                />
               </TableCell>
             </Fragment>
           );
