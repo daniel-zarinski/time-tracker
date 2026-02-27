@@ -3,6 +3,7 @@ import {
   AnimatedGroup,
   Table,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -21,6 +22,11 @@ interface JiraIssueTimeEntriesTableProps {
 export function JiraIssueTimeEntriesTable({
   entries,
 }: JiraIssueTimeEntriesTableProps) {
+  const totalSeconds = entries.reduce(
+    (sum, entry) => sum + (entry.timeSpentSeconds ?? 0),
+    0
+  )
+
   return (
     <Table className="text-xs">
       <TableHeader>
@@ -69,6 +75,16 @@ export function JiraIssueTimeEntriesTable({
           );
         })}
       </AnimatedGroup>
+      <TableFooter>
+        <TableRow className="border-border/50 hover:bg-transparent">
+          <TableCell colSpan={3} className="p-1.5 text-muted-foreground">
+            Total
+          </TableCell>
+          <TableCell className="p-1.5 text-right font-medium text-foreground">
+            {formatDuration(totalSeconds)}
+          </TableCell>
+        </TableRow>
+      </TableFooter>
     </Table>
   );
 }
