@@ -27,8 +27,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 | Task | Command |
 |------|---------|
-| Serve frontend | `nx serve renderer` |
-| Serve electron | `nx serve desktop` |
 | Build frontend | `nx build renderer` |
 | Build electron | `nx build desktop` |
 | Test frontend | `nx test renderer` |
@@ -43,8 +41,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | Apply migrations (prod) | `nx run database:migrate-deploy` |
 | Push schema (no migration) | `nx run database:push` |
 | Open Prisma Studio | `nx run database:studio` |
-
-**Dev workflow:** Run `nx serve renderer` and `nx serve desktop` in separate terminals simultaneously.
 
 **Before packaging:** Build both `renderer` and `desktop` first.
 
