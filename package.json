@@ -1,6 +1,7 @@
 {
   "name": "time-tracker",
   "version": "0.0.0",
+  "description": "Electron desktop time tracker application",
   "license": "MIT",
   "author": "Daniel Zarinski <daniel.zarinski@gmail.com>",
   "scripts": {
