@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '@time-tracker/utils';
 import type { TimeEntryWithIssue } from '@time-tracker/database';
-import { InView, type ComboboxSelectItem } from '@time-tracker/ui';
+import { BorderTrail, InView, type ComboboxSelectItem } from '@time-tracker/ui';
 import {
   HALF_HOUR_ROWS,
   QUARTER_HOUR_ROWS,
@@ -113,6 +113,7 @@ export function TimelineGrid({
                       hidden: { opacity: 0, scale: 0.8 },
                       visible: { opacity: 1, scale: 1 },
                     }}
+                    viewOptions={{ margin: '-190px 0px -24px 0px' }} // TODO: this depends on the header height. we want to add 20 px padding to the bottom.
                     transition={{ duration: 0.3, ease: 'easeOut' }}
                     className="pointer-events-none relative"
                     style={{
@@ -127,9 +128,9 @@ export function TimelineGrid({
                         onEntryClick(entry);
                       }}
                       className={cn(
-                        'pointer-events-auto absolute inset-y-0.5 inset-x-[22px] overflow-hidden rounded-lg border px-2 pt-0 pb-2 text-left transition-colors',
+                        'pointer-events-auto absolute inset-y-0.5 inset-x-[22px] rounded-lg px-2 pt-0 pb-2 text-left transition-colors',
                         isActive
-                          ? 'border-l-4 border-accent bg-primary/15 animate-pulse'
+                          ? 'bg-primary/15'
                           : 'border border-primary/20 bg-primary/10 hover:bg-primary/15',
                         totalColumns > 1 && 'inset-y-0.5'
                       )}
@@ -149,6 +150,15 @@ export function TimelineGrid({
                           : undefined
                       }
                     >
+                      {isActive && (
+                        <BorderTrail
+                          size={100}
+                          style={{
+                            boxShadow:
+                              '0px 0px 60px 30px rgb(255 255 255 / 50%), 0 0 100px 60px rgb(0 0 0 / 50%), 0 0 140px 90px rgb(0 0 0 / 50%)',
+                          }}
+                        />
+                      )}
                       <p className="truncate text-xs text-primary flex items-center">
                         <span className="font-semibold">{issueKey}</span>
                         {entry.issue.summary && (
