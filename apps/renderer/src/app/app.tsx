@@ -68,6 +68,7 @@ export function App() {
           <SubHeaderSlotProvider value={subHeaderSlot}>
             <motion.div
               layout
+              transition={DEFAULT_TRANSITION}
               ref={setSubHeaderSlot}
               className="grid [&>*]:col-start-1 [&>*]:row-start-1 bg-background"
             />

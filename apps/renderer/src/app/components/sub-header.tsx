@@ -2,6 +2,7 @@ import { createPortal } from 'react-dom';
 import { motion } from 'motion/react';
 import { type ReactNode } from 'react';
 import { cn } from '@time-tracker/utils';
+import { DEFAULT_TRANSITION } from '@time-tracker/ui';
 import { useSubHeaderSlot } from '../contexts/sub-header-slot-context';
 
 interface SubHeaderProps {
@@ -16,8 +17,11 @@ export function SubHeader({ children, className }: SubHeaderProps) {
     <motion.div
       layoutId="tab-sub-header"
       className={cn('z-30 bg-background', className)}
+      transition={DEFAULT_TRANSITION}
     >
-      <motion.div layout>{children}</motion.div>
+      <motion.div layout transition={DEFAULT_TRANSITION}>
+        {children}
+      </motion.div>
     </motion.div>
   );
 
