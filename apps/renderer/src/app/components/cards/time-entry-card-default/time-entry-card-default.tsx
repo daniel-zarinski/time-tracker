@@ -2,6 +2,8 @@ import type { TimeEntryWithIssue } from '@time-tracker/database';
 import type { TimeEntryUpdates } from '@time-tracker/utils';
 import { cn, SECONDS_PER_WORKDAY } from '@time-tracker/utils';
 import { useState } from 'react';
+import { motion } from 'motion/react';
+import useMeasure from 'react-use-measure';
 import {
   Card,
   CardContent,
@@ -10,6 +12,7 @@ import {
   CollapsibleTrigger,
   EditTimeEntryForm,
   Progress,
+  TransitionPanel,
   type ComboboxSelectItem,
 } from '@time-tracker/ui';
 import { TimeEntryCardActionsDropdown } from './time-entry-card-actions';
@@ -40,6 +43,26 @@ function syncStatusStyles(status: string) {
   }
 }
 
+const panelVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 64 : -64,
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction > 0 ? -64 : 64,
+    opacity: 0,
+  }),
+};
+
+const panelTransition = {
+  x: { type: 'spring' as const, stiffness: 300, damping: 30 },
+  opacity: { duration: 0.2 },
+};
+
 export function TimeEntryCardDefault({
   entry,
   issues,
@@ -58,6 +81,9 @@ export function TimeEntryCardDefault({
         ? 'expanded'
         : 'default'
   );
+  const [direction, setDirection] = useState(1);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [measureRef, bounds] = useMeasure();
   const expanded = state === 'expanded' || state === 'edit';
 
   const startDate = new Date(entry.startedAt);
@@ -68,14 +94,20 @@ export function TimeEntryCardDefault({
 
   const issueKey = entry.issue.key ?? entry.issueKey;
 
+  function handleSetState(next: 'default' | 'expanded' | 'edit') {
+    setDirection(next === 'edit' ? 1 : -1);
+    setIsTransitioning(true);
+    setState(next);
+  }
+
   async function handleSave(entryId: string, updates: TimeEntryUpdates) {
     if (!onSave) return;
     await onSave(entryId, updates);
-    setState('default');
+    handleSetState('default');
   }
 
   function handleCancelEdit() {
-    setState('expanded');
+    handleSetState('expanded');
   }
 
   return (
@@ -93,69 +125,89 @@ export function TimeEntryCardDefault({
         value={progressValue}
         className="h-1 rounded-none bg-primary/15"
       />
-      {state === 'edit' ? (
-        <>
-          <TimeEntryCardHeader
-            issueKey={issueKey}
-            summary={entry.issue.summary ?? ''}
-            truncate
-            className="cursor-default"
-          />
-          <EditTimeEntryForm
-            entry={entry}
-            issues={issues}
-            onSave={handleSave}
-            onCancel={handleCancelEdit}
-            onDelete={onDelete}
-          />
-        </>
-      ) : (
-        <Collapsible
-          open={state === 'expanded'}
-          onOpenChange={(open) => setState(open ? 'expanded' : 'default')}
-        >
-          <CollapsibleTrigger asChild>
-            <div className="cursor-pointer select-none">
+      <motion.div
+        animate={{
+          height: isTransitioning && bounds.height > 0 ? bounds.height : 'auto',
+        }}
+        transition={{ type: 'spring' as const, stiffness: 300, damping: 30 }}
+        onAnimationComplete={() => setIsTransitioning(false)}
+        style={{ overflow: isTransitioning ? 'hidden' : 'visible' }}
+      >
+        <div ref={measureRef}>
+          <TransitionPanel
+            activeIndex={state === 'edit' ? 1 : 0}
+            variants={panelVariants}
+            transition={panelTransition}
+            custom={direction}
+          >
+            {/* Panel 0: View mode */}
+            <Collapsible
+              open={state === 'expanded'}
+              onOpenChange={(open) =>
+                setState(open ? 'expanded' : 'default')
+              }
+            >
+              <CollapsibleTrigger asChild>
+                <div className="cursor-pointer select-none">
+                  <TimeEntryCardHeader
+                    issueKey={issueKey}
+                    summary={entry.issue.summary ?? ''}
+                    truncate={state !== 'expanded'}
+                    children={
+                      state === 'default' ? (
+                        <TimeEntryCardActionsDropdown
+                          onView={() => onOpenInJira?.(issueKey)}
+                          onEdit={() => handleSetState('edit')}
+                          onDelete={() => onDelete?.(entry.id)}
+                        />
+                      ) : undefined
+                    }
+                  />
+                </div>
+              </CollapsibleTrigger>
+
+              <CardContent className="px-3 pt-0 pb-2.5 max-w-sm mx-auto">
+                <TimeEntryCardSummary
+                  startDate={startDate}
+                  endDate={endDate}
+                  duration={duration}
+                />
+              </CardContent>
+
+              <CollapsibleContent>
+                <div className="px-3 py-2 text-xs text-muted-foreground/50 italic">
+                  {/* placeholder — future content TBD */}
+                </div>
+                <TimeEntryCardActionsFooter
+                  onResume={
+                    onResumeTimer ? () => onResumeTimer(issueKey) : undefined
+                  }
+                  onView={() => onOpenInJira?.(issueKey)}
+                  onEdit={() => handleSetState('edit')}
+                  onDelete={() => onDelete?.(entry.id)}
+                />
+              </CollapsibleContent>
+            </Collapsible>
+
+            {/* Panel 1: Edit mode */}
+            <div>
               <TimeEntryCardHeader
                 issueKey={issueKey}
                 summary={entry.issue.summary ?? ''}
-                truncate={state !== 'expanded'}
-                children={
-                  state === 'default' ? (
-                    <TimeEntryCardActionsDropdown
-                      onView={() => onOpenInJira?.(issueKey)}
-                      onEdit={() => setState('edit')}
-                      onDelete={() => onDelete?.(entry.id)}
-                    />
-                  ) : undefined
-                }
+                truncate
+                className="cursor-default"
+              />
+              <EditTimeEntryForm
+                entry={entry}
+                issues={issues}
+                onSave={handleSave}
+                onCancel={handleCancelEdit}
+                onDelete={onDelete}
               />
             </div>
-          </CollapsibleTrigger>
-
-          <CardContent className="px-3 pt-0 pb-2.5 max-w-sm mx-auto">
-            <TimeEntryCardSummary
-              startDate={startDate}
-              endDate={endDate}
-              duration={duration}
-            />
-          </CardContent>
-
-          <CollapsibleContent>
-            <div className="px-3 py-2 text-xs text-muted-foreground/50 italic">
-              {/* placeholder — future content TBD */}
-            </div>
-            <TimeEntryCardActionsFooter
-              onResume={
-                onResumeTimer ? () => onResumeTimer(issueKey) : undefined
-              }
-              onView={() => onOpenInJira?.(issueKey)}
-              onEdit={() => setState('edit')}
-              onDelete={() => onDelete?.(entry.id)}
-            />
-          </CollapsibleContent>
-        </Collapsible>
-      )}
+          </TransitionPanel>
+        </div>
+      </motion.div>
     </Card>
   );
 }
