@@ -4,3 +4,4 @@ export * from './query-keys';
 export * from './theme-provider';
 export * from './use-mobile';
 export * from './use-system-theme';
+export * from './useClickOutside';
