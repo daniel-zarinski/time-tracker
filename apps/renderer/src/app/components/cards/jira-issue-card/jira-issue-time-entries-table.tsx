@@ -79,7 +79,15 @@ export function JiraIssueTimeEntriesTable({
 
           const trigger = (
             <>
-              <span className="p-1.5 text-muted-foreground">
+              <span
+                className={cn(
+                  'p-1.5 text-muted-foreground',
+                  isActive && 'flex items-center gap-2'
+                )}
+              >
+                {isActive && (
+                  <span className="size-1.5 shrink-0 rounded-full bg-red-500 animate-pulse" />
+                )}
                 {formatRelativeDate(startDate)}
               </span>
               <span className="p-1.5 tabular-nums text-muted-foreground">
@@ -101,9 +109,7 @@ export function JiraIssueTimeEntriesTable({
                 trigger={trigger}
                 triggerClassName={cn(
                   `grid w-full ${GRID_COLS} gap-0 cursor-pointer text-left border-b border-border/50 transition-colors [&>span]:py-1 rounded-none`,
-                  isActive
-                    ? 'bg-red-500/10 !border-l-2 !border-l-red-500 !rounded-none hover:bg-red-500/15'
-                    : 'hover:bg-muted/50'
+                  'hover:bg-muted/50'
                 )}
               />
             </Fragment>
