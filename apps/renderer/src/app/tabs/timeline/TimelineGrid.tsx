@@ -79,6 +79,7 @@ function TimelineEntryDialogContent({
         await onDelete(id);
         setIsOpen(false);
       }}
+      onCancel={() => setIsOpen(false)}
       onResumeTimer={
         onResume
           ? async (k) => {

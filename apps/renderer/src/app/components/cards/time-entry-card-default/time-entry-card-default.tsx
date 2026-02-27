@@ -28,6 +28,7 @@ interface TimeEntryCardDefaultProps {
   onResumeTimer?: (issueKey: string) => unknown | Promise<unknown>;
   onSave?: (entryId: string, updates: TimeEntryUpdates) => void | Promise<void>;
   onDelete?: (entryId: string) => void | Promise<void>;
+  onCancel?: () => void;
   onOpenInJira?: (issueKey: string) => void | Promise<void>;
   className?: string;
 }
@@ -71,6 +72,7 @@ export function TimeEntryCardDefault({
   onResumeTimer,
   onSave,
   onDelete,
+  onCancel,
   onOpenInJira,
   className,
 }: TimeEntryCardDefaultProps) {
@@ -107,7 +109,11 @@ export function TimeEntryCardDefault({
   }
 
   function handleCancelEdit() {
-    handleSetState('expanded');
+    if (onCancel) {
+      onCancel();
+    } else {
+      handleSetState('expanded');
+    }
   }
 
   return (
