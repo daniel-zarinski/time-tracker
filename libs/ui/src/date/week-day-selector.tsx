@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '../shadcn/button';
+import { motion } from 'motion/react';
 
 interface WeekDaySelectorProps {
   children: React.ReactNode;
@@ -13,7 +14,10 @@ export function WeekDaySelector({
   onNextWeek,
 }: WeekDaySelectorProps) {
   return (
-    <div className="flex items-center px-2 py-2">
+    <motion.div
+      className="flex items-center px-2 py-2"
+      layoutId="week-day-selector"
+    >
       <Button
         variant="ghost"
         size="icon"
@@ -31,6 +35,6 @@ export function WeekDaySelector({
       >
         <ChevronRight className="size-3.5" />
       </Button>
-    </div>
+    </motion.div>
   );
 }

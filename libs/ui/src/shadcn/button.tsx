@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Slot } from 'radix-ui';
+import { motion, MotionProps } from 'motion/react';
 
 import { cn } from '@time-tracker/utils';
 
@@ -61,4 +62,21 @@ function Button({
   );
 }
 
-export { Button, buttonVariants };
+function MotionButton({
+  className,
+  variant = 'default',
+  size = 'default',
+  ...props
+}: MotionProps &
+  VariantProps<typeof buttonVariants> & {
+    className?: string;
+  }) {
+  return (
+    <motion.button
+      className={cn(buttonVariants({ variant, size, className }))}
+      {...props}
+    />
+  );
+}
+
+export { Button, buttonVariants, MotionButton };

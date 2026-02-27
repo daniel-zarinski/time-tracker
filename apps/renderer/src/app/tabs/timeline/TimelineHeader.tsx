@@ -5,6 +5,7 @@ import {
   AnimatedBackground,
   Button,
   Calendar,
+  MotionButton,
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -52,7 +53,10 @@ export function TimelineHeader({
 
   return (
     <SubHeader>
-      <div className="flex items-center justify-between px-4">
+      <motion.div
+        layoutId="timeline-header-content"
+        className="flex items-center justify-between px-4"
+      >
         <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
           <PopoverTrigger asChild>
             <Button variant="ghost" size="sm" className="font-semibold">
@@ -107,7 +111,7 @@ export function TimelineHeader({
             </button>
           </AnimatedBackground>
         </motion.div>
-      </div>
+      </motion.div>
 
       <WeekDaySelector onPreviousWeek={onPreviousWeek} onNextWeek={onNextWeek}>
         <AnimatedBackground
@@ -126,10 +130,7 @@ export function TimelineHeader({
 
       {activeEntry && onStopTimer && (
         <div className="px-4 py-2">
-          <TimeEntryCardActive
-            entry={activeEntry}
-            onStopTimer={onStopTimer}
-          />
+          <TimeEntryCardActive entry={activeEntry} onStopTimer={onStopTimer} />
         </div>
       )}
     </SubHeader>
