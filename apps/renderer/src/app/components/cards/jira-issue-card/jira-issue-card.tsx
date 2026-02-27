@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   BorderTrail,
   Card,
@@ -63,8 +63,14 @@ export function JiraIssueCard({
   collapsible = true,
   headerAction,
 }: JiraIssueCardProps) {
-  const [expanded, setExpanded] = useState(defaultExpanded ?? false);
+  const [expanded, setExpanded] = useState(
+    defaultExpanded ?? isActive ?? false
+  );
   const [direction, setDirection] = useState(1);
+
+  useEffect(() => {
+    if (isActive) setExpanded(true);
+  }, [isActive]);
   const [measureRef, bounds] = useMeasure();
   const issueKey = issue.key ?? '';
   const isClickable = collapsible;
