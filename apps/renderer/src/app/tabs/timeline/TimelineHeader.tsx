@@ -6,9 +6,6 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-  Tabs,
-  TabsList,
-  TabsTrigger,
   WeekDaySelector,
 } from '@time-tracker/ui';
 import { isSameDay } from '@time-tracker/utils';
@@ -72,21 +69,33 @@ export function TimelineHeader({
             />
           </PopoverContent>
         </Popover>
-        <Tabs
-          value={view}
-          onValueChange={(v) => onViewChange(v as TimelineView)}
-        >
-          <TabsList variant="line">
-            <TabsTrigger value={TimelineView.Timeline}>
+        <div className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-2 text-muted-foreground">
+          <AnimatedBackground
+            defaultValue={view}
+            onValueChange={(id) => {
+              if (id) onViewChange(id as TimelineView);
+            }}
+            className="rounded-md bg-background shadow-sm"
+            transition={{ type: 'spring', bounce: 0.2, duration: 0.3 }}
+          >
+            <button
+              data-id={TimelineView.Timeline}
+              type="button"
+              className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 data-[checked=true]:text-foreground"
+            >
               <LayoutGrid className="size-3.5" />
               Timeline
-            </TabsTrigger>
-            <TabsTrigger value={TimelineView.List}>
+            </button>
+            <button
+              data-id={TimelineView.List}
+              type="button"
+              className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 data-[checked=true]:text-foreground"
+            >
               <List className="size-3.5" />
               List
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+            </button>
+          </AnimatedBackground>
+        </div>
       </div>
 
       <WeekDaySelector onPreviousWeek={onPreviousWeek} onNextWeek={onNextWeek}>

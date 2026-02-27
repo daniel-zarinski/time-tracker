@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import {
+  AnimatedBackground,
   AnimatedGroup,
   Button,
   ScrollArea,
@@ -9,8 +11,6 @@ import {
   EmptyContent,
   EmptyMedia,
   Tabs,
-  TabsList,
-  TabsTrigger,
   TabsContent,
 } from '@time-tracker/ui';
 import {
@@ -65,6 +65,7 @@ function sortStatuses(statuses: string[]): string[] {
 }
 
 export function JiraIssuesTab() {
+  const [activeStatus, setActiveStatus] = useState('');
   const setActiveTab = useAppStore.use.setActiveTab();
   const getIssuesQuery = useJiraMyIssues();
   const activeEntryQuery = useActiveTimeEntry();
@@ -152,6 +153,11 @@ export function JiraIssuesTab() {
     {}
   );
   const statuses = sortStatuses(Object.keys(groupedByStatus));
+  const validValues = new Set(statuses.map(toTabValue));
+  const effectiveTab =
+    activeStatus && validValues.has(activeStatus)
+      ? activeStatus
+      : toTabValue(statuses[0]);
 
   if (issues.length === 0) {
     return (
@@ -178,7 +184,11 @@ export function JiraIssuesTab() {
   }
 
   return (
-    <Tabs defaultValue={toTabValue(statuses[0])} className="flex flex-col">
+    <Tabs
+      value={effectiveTab}
+      onValueChange={setActiveStatus}
+      className="flex flex-col"
+    >
       <div className="sticky top-0 z-30 bg-background">
         {activeEntry && (
           <div className="border-b border-border px-4 py-2 max-w-2xl mx-auto w-full">
@@ -193,13 +203,27 @@ export function JiraIssuesTab() {
           orientation="horizontal"
         >
           <div className="flex min-w-max">
-            <TabsList variant="line">
-              {statuses.map((status) => (
-                <TabsTrigger key={status} value={toTabValue(status)}>
-                  {status}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            <div className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-2 text-muted-foreground">
+              <AnimatedBackground
+                defaultValue={effectiveTab}
+                onValueChange={(id) => {
+                  if (id) setActiveStatus(id);
+                }}
+                className="rounded-md bg-background shadow-sm"
+                transition={{ type: 'spring', bounce: 0.2, duration: 0.3 }}
+              >
+                {statuses.map((status) => (
+                  <button
+                    key={status}
+                    data-id={toTabValue(status)}
+                    type="button"
+                    className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 data-[checked=true]:text-foreground"
+                  >
+                    {status}
+                  </button>
+                ))}
+              </AnimatedBackground>
+            </div>
           </div>
         </ScrollArea>
       </div>

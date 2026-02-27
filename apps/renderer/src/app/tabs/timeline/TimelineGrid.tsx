@@ -49,7 +49,8 @@ interface TimelineGridProps {
   onClearSelection: () => void;
 }
 
-function TimelineEntryDialogContent({
+/** Renders the card inside a MorphingDialog, closing the dialog on save/delete/cancel. */
+function TimelineEntryDialogCard({
   entry,
   issues,
   onSave,
@@ -65,29 +66,17 @@ function TimelineEntryDialogContent({
   onOpenInJira?: (issueKey: string) => void;
 }) {
   const { setIsOpen } = useMorphingDialog();
+  const close = () => setIsOpen(false);
   return (
     <TimeEntryCardDefault
       entry={entry}
       issues={issues}
       defaultExpanded
       defaultView="edit"
-      onSave={async (id, u) => {
-        await onSave(id, u);
-        setIsOpen(false);
-      }}
-      onDelete={async (id) => {
-        await onDelete(id);
-        setIsOpen(false);
-      }}
-      onCancel={() => setIsOpen(false)}
-      onResumeTimer={
-        onResume
-          ? async (k) => {
-              await onResume(k);
-              setIsOpen(false);
-            }
-          : undefined
-      }
+      onSave={async (id, u) => { await onSave(id, u); close(); }}
+      onDelete={async (id) => { await onDelete(id); close(); }}
+      onCancel={close}
+      onResumeTimer={onResume ? async (k) => { await onResume(k); close(); } : undefined}
       onOpenInJira={onOpenInJira}
     />
   );
@@ -248,7 +237,7 @@ export function TimelineGrid({
                           style={{ borderRadius: 'var(--radius)' }}
                         >
                           <ScrollArea className="max-h-[85vh]" type="scroll">
-                            <TimelineEntryDialogContent
+                            <TimelineEntryDialogCard
                               entry={entry}
                               issues={issues}
                               onSave={onSaveEntry}
