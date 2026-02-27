@@ -130,8 +130,8 @@ export function TimelineGrid({
                       className={cn(
                         'pointer-events-auto absolute inset-y-0.5 inset-x-[22px] rounded-lg px-2 pt-0 pb-2 text-left transition-colors',
                         isActive
-                          ? 'bg-primary/15'
-                          : 'border border-primary/20 bg-primary/10 hover:bg-primary/15',
+                          ? 'bg-accent/15'
+                          : 'border border-primary/20 bg-primary/5 hover:bg-primary/10',
                         totalColumns > 1 && 'inset-y-0.5'
                       )}
                       style={
@@ -150,15 +150,7 @@ export function TimelineGrid({
                           : undefined
                       }
                     >
-                      {isActive && (
-                        <BorderTrail
-                          size={100}
-                          style={{
-                            boxShadow:
-                              '0px 0px 60px 30px rgb(255 255 255 / 50%), 0 0 100px 60px rgb(0 0 0 / 50%), 0 0 140px 90px rgb(0 0 0 / 50%)',
-                          }}
-                        />
-                      )}
+                      {isActive && <BorderTrail size={100} />}
                       <p className="truncate text-xs text-primary flex items-center">
                         <span className="font-semibold">{issueKey}</span>
                         {entry.issue.summary && (

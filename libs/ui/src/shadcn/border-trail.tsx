@@ -30,6 +30,8 @@ export function BorderTrail({
         style={{
           width: size,
           offsetPath: `rect(0 auto auto 0 round ${size}px)`,
+          boxShadow:
+            '0px 0px 60px 30px rgb(255 255 255 / 50%), 0 0 100px 60px rgb(0 0 0 / 50%), 0 0 140px 90px rgb(0 0 0 / 50%)',
           ...style,
         }}
         animate={{
