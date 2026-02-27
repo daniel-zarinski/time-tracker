@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {
+  AnimatedBackground,
   Button,
   Calendar,
   Popover,
@@ -14,7 +15,7 @@ import { isSameDay } from '@time-tracker/utils';
 import { LayoutGrid, List } from 'lucide-react';
 import { TimelineView } from './timeline-types';
 import { getWeekDays } from './timeline-utils';
-import { DayButton } from './DayButton';
+import { DayButtonContent } from './DayButton';
 
 interface TimelineHeaderProps {
   date: Date;
@@ -81,14 +82,25 @@ export function TimelineHeader({
       </div>
 
       <WeekDaySelector onPreviousWeek={onPreviousWeek} onNextWeek={onNextWeek}>
-        {weekDays.map((d, i) => (
-          <DayButton
-            key={i}
-            date={d}
-            isSelected={isSameDay(d, date)}
-            onSelect={() => onSelectDay(d)}
-          />
-        ))}
+        <AnimatedBackground
+          defaultValue={String(weekDays.findIndex((d) => isSameDay(d, date)))}
+          onValueChange={(id) => {
+            if (id != null) onSelectDay(weekDays[Number(id)]);
+          }}
+          className="rounded-lg bg-primary"
+          transition={{ type: 'spring', bounce: 0.2, duration: 0.3 }}
+        >
+          {weekDays.map((d, i) => (
+            <button
+              key={i}
+              data-id={String(i)}
+              type="button"
+              className="group flex flex-col items-center gap-0.5 rounded-lg px-2 py-1 text-xs overflow-hidden transition-colors hover:bg-muted data-[checked=true]:text-primary-foreground data-[checked=true]:hover:bg-transparent"
+            >
+              <DayButtonContent date={d} />
+            </button>
+          ))}
+        </AnimatedBackground>
       </WeekDaySelector>
     </div>
   );
