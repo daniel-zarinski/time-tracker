@@ -2,13 +2,15 @@ import { useState } from 'react';
 import {
   BorderTrail,
   Card,
-  Collapsible,
-  CollapsibleContent,
+  CardContent,
+  EASE_CUBIC,
+  TransitionPanel,
 } from '@time-tracker/ui';
 import { cn } from '@time-tracker/utils';
 import type { JiraIssueWithParent } from '@time-tracker/database';
+import { motion } from 'motion/react';
+import useMeasure from 'react-use-measure';
 import { JiraIssueCardHeader } from './jira-issue-card-header';
-import { JiraIssueCardContent } from './jira-issue-card-content';
 import { JiraIssueCardFooter } from './jira-issue-card-footer';
 
 export interface JiraIssueCardProps {
@@ -21,6 +23,29 @@ export interface JiraIssueCardProps {
   headerAction?: React.ReactNode;
 }
 
+const panelTransition = {
+  x: { duration: 0.3, ease: EASE_CUBIC },
+  opacity: { duration: 0.2, ease: EASE_CUBIC },
+};
+
+const panelVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 64 : -64,
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction < 0 ? 64 : -64,
+    opacity: 0,
+    position: 'absolute' as const,
+    top: 0,
+    width: '100%',
+  }),
+};
+
 export function JiraIssueCard({
   issue,
   defaultExpanded,
@@ -30,61 +55,95 @@ export function JiraIssueCard({
   collapsible = true,
   headerAction,
 }: JiraIssueCardProps) {
-  const [showDetails, setShowDetails] = useState(defaultExpanded ?? false);
+  const [expanded, setExpanded] = useState(defaultExpanded ?? false);
+  const [direction, setDirection] = useState(1);
+  const [measureRef, bounds] = useMeasure();
 
   const parentIssueType = issue.parent?.issueType ?? '';
   const parentLabel =
     parentIssueType === 'Epic'
       ? 'Epic'
       : parentIssueType === 'Story'
-      ? 'Story'
-      : 'Parent';
+        ? 'Story'
+        : 'Parent';
 
-  const contentAndFooter = (
-    <>
-      <JiraIssueCardContent issue={issue} parentLabel={parentLabel} />
+  const isClickable = collapsible;
+  const isExpanded = !collapsible || expanded;
+
+  function handleToggle() {
+    if (!collapsible) return;
+    setDirection(expanded ? -1 : 1);
+    setExpanded((e) => !e);
+  }
+
+  const parentInfo = (
+    <div className="flex flex-col gap-1 items-start mb-2 min-w-0 w-full overflow-hidden">
+      <div className="flex items-center gap-1.5 min-w-0 w-full">
+        <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium shrink-0">
+          Parent {parentLabel}
+        </span>
+        <span className="text-xs text-muted-foreground/80 truncate">
+          {issue.epicKey ?? issue.parent?.key ?? '—'}
+        </span>
+      </div>
+      {issue.parent?.summary && (
+        <span className="text-xs text-muted-foreground/80 truncate w-full min-w-0 block">
+          {issue.parent.summary}
+        </span>
+      )}
+    </div>
+  );
+
+  const expandedContent = (
+    <div ref={measureRef}>
+      <CardContent className="px-3 pt-0 pb-0">
+        {parentInfo}
+      </CardContent>
       <JiraIssueCardFooter
         issueKey={issue.key ?? ''}
         onOpenInJira={onOpenInJira}
         onTrackTime={onTrackTime}
       />
-    </>
+    </div>
   );
-
-  const effectiveHeaderAction =
-    collapsible && !showDetails ? headerAction : undefined;
 
   return (
     <Card
       className={cn(
         'relative transition-all duration-200 border rounded-(--radius) shadow-none overflow-hidden',
         'border-border bg-card/30 hover:bg-card/40 hover:border-primary/20',
-        'py-0',
-        (collapsible ? showDetails : true) && 'border-primary/25 bg-card/45'
+        'py-0 gap-0',
+        isExpanded && 'border-primary/25 bg-card/45',
+        isClickable && 'cursor-pointer'
       )}
+      onClick={isClickable ? handleToggle : undefined}
     >
       {showTrail && <BorderTrail size={80} />}
+      <JiraIssueCardHeader
+        issue={issue}
+        headerAction={isClickable && !expanded ? headerAction : undefined}
+      />
       {collapsible ? (
-        <Collapsible open={showDetails} onOpenChange={setShowDetails}>
-          <JiraIssueCardHeader
-            issue={issue}
-            showChevron
-            expanded={showDetails}
-            headerAction={effectiveHeaderAction}
-            showInlineBadges={!showDetails}
-          />
-          <CollapsibleContent>{contentAndFooter}</CollapsibleContent>
-        </Collapsible>
+        <motion.div
+          initial={false}
+          animate={{ height: bounds.height > 0 ? bounds.height : 0 }}
+          transition={{
+            height: { type: 'spring', stiffness: 300, damping: 30 },
+          }}
+          className="relative overflow-hidden"
+        >
+          <TransitionPanel
+            activeIndex={expanded ? 1 : 0}
+            variants={panelVariants}
+            transition={panelTransition}
+            custom={direction}
+          >
+            <div ref={measureRef} />
+            {expandedContent}
+          </TransitionPanel>
+        </motion.div>
       ) : (
-        <>
-          <JiraIssueCardHeader
-            issue={issue}
-            showChevron={false}
-            headerAction={effectiveHeaderAction}
-            showInlineBadges={false}
-          />
-          {contentAndFooter}
-        </>
+        expandedContent
       )}
     </Card>
   );

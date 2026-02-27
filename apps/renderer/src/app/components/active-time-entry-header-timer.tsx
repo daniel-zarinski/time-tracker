@@ -65,9 +65,9 @@ export function ActiveTimeEntryHeaderTimer() {
         ref={containerRef}
         role="button"
         tabIndex={0}
-        onClick={() => !isOpen && setIsOpen(true)}
+        onClick={() => setIsOpen((prev) => !prev)}
         onKeyDown={(e) =>
-          !isOpen && (e.key === 'Enter' || e.key === ' ') && setIsOpen(true)
+          (e.key === 'Enter' || e.key === ' ') && setIsOpen((prev) => !prev)
         }
         className={cn(
           'rounded-lg border border-border bg-background transition-colors',

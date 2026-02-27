@@ -24,7 +24,10 @@ export function JiraIssueCardFooter({
   }
 
   return (
-    <CardFooter className="flex justify-center px-3 pb-2 gap-6 mt-4">
+    <CardFooter
+      className="flex justify-center px-3 pb-2 gap-6 mt-4"
+      onClick={(e) => e.stopPropagation()}
+    >
       <Button size="sm" onClick={handleTrackTime} className="flex-1">
         <TimerIcon className="h-4 w-4" />
         Track Time
