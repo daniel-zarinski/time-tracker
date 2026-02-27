@@ -1,18 +1,20 @@
-import { cn } from '@time-tracker/utils'
+import { cn } from '@time-tracker/utils';
 import {
   CardAction,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@time-tracker/ui'
-import { JiraIssueKeyBadge } from '../../jira-issue-key-badge'
+  MorphingDialogSubtitle,
+  MorphingDialogTitle,
+} from '@time-tracker/ui';
+import { JiraIssueKeyBadge } from '../../jira-issue-key-badge';
 
 interface TimeEntryCardHeaderProps {
-  issueKey: string
-  summary: string
-  truncate?: boolean
-  className?: string
-  children?: React.ReactNode
+  issueKey: string;
+  summary: string;
+  truncate?: boolean;
+  className?: string;
+  children?: React.ReactNode;
 }
 
 export function TimeEntryCardHeader({
@@ -24,15 +26,17 @@ export function TimeEntryCardHeader({
 }: TimeEntryCardHeaderProps) {
   return (
     <CardHeader className={cn('px-3 py-2.5 gap-0.5', className)}>
-      <CardTitle className="flex items-center gap-1.5">
-        <JiraIssueKeyBadge issueKey={issueKey} />
-      </CardTitle>
-      <CardDescription
-        className={cn('text-xs', truncate && 'truncate')}
-      >
-        {summary}
-      </CardDescription>
+      <MorphingDialogTitle>
+        <CardTitle>
+          <JiraIssueKeyBadge issueKey={issueKey} />
+        </CardTitle>
+      </MorphingDialogTitle>
+      <MorphingDialogSubtitle>
+        <CardDescription className={cn('text-xs', truncate && 'truncate')}>
+          {summary}
+        </CardDescription>
+      </MorphingDialogSubtitle>
       {children && <CardAction>{children}</CardAction>}
     </CardHeader>
-  )
+  );
 }

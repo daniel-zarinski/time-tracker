@@ -1,20 +1,19 @@
-import { cn } from '@time-tracker/utils';
-import type { TimeEntryUpdates } from '@time-tracker/utils';
 import type { TimeEntryWithIssue } from '@time-tracker/database';
 import {
   BorderTrail,
   EditTimeEntryForm,
   MorphingDialog,
-  MorphingDialogTrigger,
   MorphingDialogContainer,
   MorphingDialogContent,
-  MorphingDialogClose,
-  MorphingDialogTitle,
   MorphingDialogSubtitle,
+  MorphingDialogTitle,
+  MorphingDialogTrigger,
   ScrollArea,
   useMorphingDialog,
   type ComboboxSelectItem,
 } from '@time-tracker/ui';
+import type { TimeEntryUpdates } from '@time-tracker/utils';
+import { cn } from '@time-tracker/utils';
 import { TimeEntryCardHeader } from '../../components/cards/time-entry-card-default/time-entry-card-header';
 import { formatEntryTime } from './timeline-utils';
 
@@ -102,14 +101,12 @@ export function TimelineEntryDialog({
           borderRadius: 'var(--radius)',
           ...(totalColumns > 1
             ? {
-                left: `calc(${
-                  (column / totalColumns) * 100
-                }% + ${column === 0 ? '22px' : '0.25rem'})`,
+                left: `calc(${(column / totalColumns) * 100}% + ${
+                  column === 0 ? '22px' : '0.25rem'
+                })`,
                 right: `calc(${
                   ((totalColumns - column - 1) / totalColumns) * 100
-                }% + ${
-                  column === totalColumns - 1 ? '22px' : '0.25rem'
-                })`,
+                }% + ${column === totalColumns - 1 ? '22px' : '0.25rem'})`,
               }
             : undefined),
         }}
@@ -151,7 +148,6 @@ export function TimelineEntryDialog({
               onDelete={onDelete}
             />
           </ScrollArea>
-          <MorphingDialogClose className="text-muted-foreground" />
         </MorphingDialogContent>
       </MorphingDialogContainer>
     </MorphingDialog>
