@@ -1,11 +1,8 @@
-import * as React from 'react';
-import { motion } from 'motion/react';
 import type { TimeEntryWithIssue } from '@time-tracker/database';
 import {
   AnimatedBackground,
   Button,
   Calendar,
-  MotionButton,
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -13,11 +10,13 @@ import {
 } from '@time-tracker/ui';
 import { isSameDay } from '@time-tracker/utils';
 import { LayoutGrid, List } from 'lucide-react';
+import { motion } from 'motion/react';
+import * as React from 'react';
+import { TimeEntryCardActive } from '../../components/cards/time-entry-card-active';
+import { SubHeader } from '../../components/sub-header';
+import { DayButton } from './DayButton';
 import { TimelineView } from './timeline-types';
 import { getWeekDays } from './timeline-utils';
-import { DayButton } from './DayButton';
-import { SubHeader } from '../../components/sub-header';
-import { TimeEntryCardActive } from '../../components/cards/time-entry-card-active';
 
 interface TimelineHeaderProps {
   date: Date;
