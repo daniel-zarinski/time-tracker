@@ -10,6 +10,8 @@ import {
   TransitionPanel,
   type ComboboxSelectItem,
 } from '@time-tracker/ui';
+import { motion } from 'motion/react';
+import useMeasure from 'react-use-measure';
 import { TimeEntryCardActionsDropdown } from './time-entry-card-actions';
 import { TimeEntryCardActionsFooter } from './time-entry-card-actions';
 import { TimeEntryCardHeader } from './time-entry-card-header';
@@ -36,21 +38,6 @@ function syncStatusStyles(status: string) {
   }
 }
 
-const panelVariants = {
-  enter: (direction: number) => ({
-    x: direction > 0 ? 64 : -64,
-    opacity: 0,
-  }),
-  center: {
-    x: 0,
-    opacity: 1,
-  },
-  exit: (direction: number) => ({
-    x: direction < 0 ? 64 : -64,
-    opacity: 0,
-  }),
-};
-
 const panelTransition = {
   x: { type: 'spring' as const, stiffness: 300, damping: 30 },
   opacity: { duration: 0.2 },
@@ -67,6 +54,25 @@ export function TimeEntryCardDefault({
 }: TimeEntryCardDefaultProps) {
   const [state, setState] = useState<'default' | 'edit'>('default');
   const [direction, setDirection] = useState(1);
+  const [measureRef, bounds] = useMeasure();
+
+  const panelVariants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? 64 : -64,
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (direction: number) => ({
+      x: direction < 0 ? 64 : -64,
+      opacity: 0,
+      position: 'absolute' as const,
+      top: 0,
+      width: '100%',
+    }),
+  };
 
   const startDate = new Date(entry.startedAt);
   const duration = entry.timeSpentSeconds ?? 0;
@@ -108,61 +114,67 @@ export function TimeEntryCardDefault({
         value={progressValue}
         className="h-1 rounded-none bg-primary/15"
       />
-      <TransitionPanel
+      <motion.div
+        initial={false}
+        animate={{ height: bounds.height > 0 ? bounds.height : 'auto' }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         className="overflow-hidden"
-        activeIndex={state === 'edit' ? 1 : 0}
-        variants={panelVariants}
-        transition={panelTransition}
-        custom={direction}
       >
-        {/* Panel 0: View mode */}
-        <div>
-          <TimeEntryCardHeader
-            issueKey={issueKey}
-            summary={entry.issue.summary ?? ''}
-            truncate
-            children={
-              <TimeEntryCardActionsDropdown
-                onView={() => onOpenInJira?.(issueKey)}
-                onEdit={handleEdit}
-                onDelete={() => onDelete?.(entry.id)}
-              />
-            }
-          />
-
-          <CardContent className="px-3 pt-0 pb-2.5 max-w-sm mx-auto">
-            <TimeEntryCardSummary
-              startDate={startDate}
-              endDate={endDate}
-              duration={duration}
+        <TransitionPanel
+          activeIndex={state === 'edit' ? 1 : 0}
+          variants={panelVariants}
+          transition={panelTransition}
+          custom={direction}
+        >
+          {/* Panel 0: View mode */}
+          <div ref={measureRef}>
+            <TimeEntryCardHeader
+              issueKey={issueKey}
+              summary={entry.issue.summary ?? ''}
+              truncate
+              children={
+                <TimeEntryCardActionsDropdown
+                  onView={() => onOpenInJira?.(issueKey)}
+                  onEdit={handleEdit}
+                  onDelete={() => onDelete?.(entry.id)}
+                />
+              }
             />
-          </CardContent>
 
-          <TimeEntryCardActionsFooter
-            onResume={onResumeTimer ? () => onResumeTimer(issueKey) : undefined}
-            onView={() => onOpenInJira?.(issueKey)}
-            onEdit={handleEdit}
-            onDelete={() => onDelete?.(entry.id)}
-          />
-        </div>
+            <CardContent className="px-3 pt-0 pb-2.5 max-w-sm mx-auto">
+              <TimeEntryCardSummary
+                startDate={startDate}
+                endDate={endDate}
+                duration={duration}
+              />
+            </CardContent>
 
-        {/* Panel 1: Edit mode */}
-        <div>
-          <TimeEntryCardHeader
-            issueKey={issueKey}
-            summary={entry.issue.summary ?? ''}
-            truncate
-            className="cursor-default"
-          />
-          <EditTimeEntryForm
-            entry={entry}
-            issues={issues}
-            onSave={handleSave}
-            onCancel={handleCancelEdit}
-            onDelete={onDelete}
-          />
-        </div>
-      </TransitionPanel>
+            <TimeEntryCardActionsFooter
+              onResume={onResumeTimer ? () => onResumeTimer(issueKey) : undefined}
+              onView={() => onOpenInJira?.(issueKey)}
+              onEdit={handleEdit}
+              onDelete={() => onDelete?.(entry.id)}
+            />
+          </div>
+
+          {/* Panel 1: Edit mode */}
+          <div ref={measureRef}>
+            <TimeEntryCardHeader
+              issueKey={issueKey}
+              summary={entry.issue.summary ?? ''}
+              truncate
+              className="cursor-default"
+            />
+            <EditTimeEntryForm
+              entry={entry}
+              issues={issues}
+              onSave={handleSave}
+              onCancel={handleCancelEdit}
+              onDelete={onDelete}
+            />
+          </div>
+        </TransitionPanel>
+      </motion.div>
     </Card>
   );
 }
