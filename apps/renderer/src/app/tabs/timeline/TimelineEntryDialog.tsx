@@ -35,7 +35,7 @@ export function TimelineEntryDialog({
 
   const trigger = (
     <>
-      {isActive && <BorderTrail size={100} />}
+      {isActive && <BorderTrail size={100} variant="red" />}
       <div className="truncate text-xs text-primary flex items-center">
         <MorphingDialogTitle className="font-semibold">
           {issueKey}

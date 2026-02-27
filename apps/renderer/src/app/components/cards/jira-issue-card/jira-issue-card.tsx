@@ -150,7 +150,7 @@ export function JiraIssueCard({
       )}
       onClick={isClickable ? handleToggle : undefined}
     >
-      {showTrail && <BorderTrail size={80} />}
+      {showTrail && <BorderTrail size={80} variant="red" />}
       <JiraIssueCardHeader
         issue={issue}
         headerAction={isClickable && !expanded ? headerAction : undefined}
