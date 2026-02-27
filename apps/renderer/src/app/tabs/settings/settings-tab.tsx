@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useJiraConfig, useTempoConfig } from '@time-tracker/hooks';
 import { AnimatedBackground, TransitionPanel } from '@time-tracker/ui';
+import { SubHeader } from '../../components/sub-header';
 import { JiraIntegrationCard } from './jira-integration-card';
 import { TempoIntegrationCard } from './tempo-integration-card';
 import { ManualActionsCard } from './manual-actions-card';
@@ -33,7 +34,7 @@ export function SettingsTab() {
 
   return (
     <div className="flex flex-col">
-      <div className="sticky top-0 z-30 bg-background">
+      <SubHeader>
         <div className="w-full max-w-md mx-auto px-4 pb-2 flex justify-center">
           <div className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-2 text-muted-foreground">
             <AnimatedBackground
@@ -61,7 +62,7 @@ export function SettingsTab() {
             </AnimatedBackground>
           </div>
         </div>
-      </div>
+      </SubHeader>
 
       <TransitionPanel
         activeIndex={activeIndex}

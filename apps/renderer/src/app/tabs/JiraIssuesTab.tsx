@@ -3,15 +3,13 @@ import {
   AnimatedBackground,
   AnimatedGroup,
   Button,
-  ScrollArea,
   Empty,
   EmptyHeader,
   EmptyTitle,
   EmptyDescription,
   EmptyContent,
   EmptyMedia,
-  Tabs,
-  TabsContent,
+  TransitionPanel,
 } from '@time-tracker/ui';
 import {
   useActiveTimeEntry,
@@ -21,11 +19,13 @@ import {
 import { Settings, AlertCircle, Inbox } from 'lucide-react';
 import { useAppStore } from '../store';
 import { JiraIssueCard } from '../components/cards/jira-issue-card';
+import { SubHeader } from '../components/sub-header';
 import { toTabValue } from './jira-issues-utils';
 import { useJiraIssuesData } from './use-jira-issues-data';
 
 export function JiraIssuesTab() {
   const [activeStatus, setActiveStatus] = useState('');
+  const [direction, setDirection] = useState(1);
   const setActiveTab = useAppStore.use.setActiveTab();
   const { syncMyIssues } = useJiraSyncMutations();
   const { startTracking } = useTimeEntryMutations();
@@ -106,6 +106,10 @@ export function JiraIssuesTab() {
     activeStatus && validValues.has(activeStatus)
       ? activeStatus
       : toTabValue(statuses[0]);
+  const activeIndex = Math.max(
+    0,
+    statuses.findIndex((s) => toTabValue(s) === effectiveTab)
+  );
 
   if (issues.length === 0) {
     return (
@@ -132,64 +136,72 @@ export function JiraIssuesTab() {
   }
 
   return (
-    <Tabs
-      value={effectiveTab}
-      onValueChange={setActiveStatus}
-      className="flex flex-col"
-    >
-      <div className="sticky top-0 z-30 bg-background">
-        <ScrollArea
-          className="w-full max-w-2xl mx-auto px-4 pb-2"
-          orientation="horizontal"
-        >
-          <div className="flex min-w-max">
-            <div className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-2 text-muted-foreground">
-              <AnimatedBackground
-                defaultValue={effectiveTab}
-                onValueChange={(id) => {
-                  if (id) setActiveStatus(id);
-                }}
-                className="rounded-md bg-background shadow-sm"
-                transition={{ type: 'spring', bounce: 0.2, duration: 0.3 }}
-              >
-                {statuses.map((status) => (
-                  <button
-                    key={status}
-                    data-id={toTabValue(status)}
-                    type="button"
-                    className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 data-[checked=true]:text-foreground"
-                  >
-                    {status}
-                  </button>
-                ))}
-              </AnimatedBackground>
-            </div>
+    <div className="flex flex-col">
+      <SubHeader>
+        <div className="w-full max-w-md mx-auto px-4 pb-2 flex justify-center">
+          <div className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-2 text-muted-foreground">
+            <AnimatedBackground
+              defaultValue={effectiveTab}
+              onValueChange={(id) => {
+                if (id) {
+                  const newIndex = statuses.findIndex((s) => toTabValue(s) === id);
+                  if (newIndex >= 0) {
+                    setDirection(newIndex > activeIndex ? -1 : 1);
+                    setActiveStatus(id);
+                  }
+                }
+              }}
+              className="rounded-md bg-background shadow-sm"
+              transition={{ type: 'spring', bounce: 0.2, duration: 0.3 }}
+            >
+              {statuses.map((status) => (
+                <button
+                  key={status}
+                  data-id={toTabValue(status)}
+                  type="button"
+                  className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 data-[checked=true]:text-foreground"
+                >
+                  {status}
+                </button>
+              ))}
+            </AnimatedBackground>
           </div>
-        </ScrollArea>
-      </div>
-      {statuses.map((status) => (
-        <TabsContent key={status} value={toTabValue(status)} className="px-4">
-          <AnimatedGroup
-            as="ul"
-            asChild="li"
-            preset="slide"
-            className="flex flex-col gap-2 w-full max-w-2xl mx-auto"
-          >
-            {groupedByStatus[status].map((issue) => (
-              <JiraIssueCard
-                key={issue.id}
-                issue={issue}
-                showTrail={issue.key === activeIssueKey}
-                onOpenInJira={(key) => window.electron.openJiraExternal(key)}
-                onTrackTime={async (key) => {
-                  await startTracking.mutateAsync(key);
-                  setActiveTab('home');
-                }}
-              />
-            ))}
-          </AnimatedGroup>
-        </TabsContent>
-      ))}
-    </Tabs>
+        </div>
+      </SubHeader>
+      <TransitionPanel
+        activeIndex={activeIndex}
+        className="overflow-hidden"
+        transition={{ duration: 0.2, ease: 'easeInOut' }}
+        variants={{
+          enter: { opacity: 0, x: direction * 80, filter: 'blur(4px)' },
+          center: { opacity: 1, x: 0, filter: 'blur(0px)' },
+          exit: { opacity: 0, x: direction * -80, filter: 'blur(4px)' },
+        }}
+      >
+        {statuses.map((status) => (
+          <div key={status} className="px-4">
+            <AnimatedGroup
+              as="ul"
+              asChild="li"
+              preset="slide"
+              className="flex flex-col gap-2 w-full max-w-2xl mx-auto"
+            >
+              {groupedByStatus[status].map((issue) => (
+                <JiraIssueCard
+                  key={issue.id}
+                  issue={issue}
+                  showTrail={issue.key === activeIssueKey}
+                  onOpenInJira={(key) => window.electron.openJiraExternal(key)}
+                  onTrackTime={async (key) => {
+                    await startTracking.mutateAsync(key);
+                    setActiveTab('home');
+                  }}
+                />
+              ))}
+            </AnimatedGroup>
+          </div>
+        ))}
+      </TransitionPanel>
+    </div>
   );
 }

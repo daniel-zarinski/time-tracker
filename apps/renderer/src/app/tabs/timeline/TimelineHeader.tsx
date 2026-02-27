@@ -13,6 +13,7 @@ import { LayoutGrid, List } from 'lucide-react';
 import { TimelineView } from './timeline-types';
 import { getWeekDays } from './timeline-utils';
 import { DayButton } from './DayButton';
+import { SubHeader } from '../../components/sub-header';
 
 interface TimelineHeaderProps {
   date: Date;
@@ -43,7 +44,7 @@ export function TimelineHeader({
   const weekDays = React.useMemo(() => getWeekDays(date), [weekStartKey]);
 
   return (
-    <div className="sticky top-0 z-30 border-b border-border bg-background">
+    <SubHeader>
       <div className="flex items-center justify-between px-4 py-2">
         <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
           <PopoverTrigger asChild>
@@ -112,6 +113,6 @@ export function TimelineHeader({
           ))}
         </AnimatedBackground>
       </WeekDaySelector>
-    </div>
+    </SubHeader>
   );
 }

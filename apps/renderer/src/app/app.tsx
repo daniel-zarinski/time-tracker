@@ -62,6 +62,7 @@ export function App() {
         >
           <TransitionPanel
             activeIndex={activeTabIndex}
+            mode="wait"
             transition={{ duration: 0.2, ease: 'easeInOut' }}
             variants={{
               enter: { opacity: 0 },
