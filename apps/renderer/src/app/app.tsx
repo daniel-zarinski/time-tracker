@@ -63,6 +63,8 @@ export function App() {
         >
           <TransitionPanel
             activeIndex={activeTabIndex}
+            mode="sync"
+            layoutMode="overlay"
             transition={{ duration: 0.2, ease: DEFAULT_TRANSITION.ease }}
             variants={{
               enter: { opacity: 0 },

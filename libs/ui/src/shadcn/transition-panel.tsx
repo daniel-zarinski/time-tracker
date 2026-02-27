@@ -15,6 +15,8 @@ export type TransitionPanelProps = {
   activeIndex: number;
   variants?: { enter: Variant; center: Variant; exit: Variant };
   mode?: 'sync' | 'wait' | 'popLayout';
+  /** When 'overlay', panels use absolute positioning so they stack during sync transitions (avoids layout reflow) */
+  layoutMode?: 'default' | 'overlay';
 } & MotionProps;
 
 export function TransitionPanel({
@@ -24,6 +26,7 @@ export function TransitionPanel({
   variants,
   activeIndex,
   mode = 'popLayout',
+  layoutMode = 'default',
   ...motionProps
 }: TransitionPanelProps) {
   return (
@@ -36,6 +39,7 @@ export function TransitionPanel({
           initial="enter"
           animate="center"
           exit="exit"
+          className={layoutMode === 'overlay' ? 'absolute inset-0 w-full min-h-full overflow-y-auto' : undefined}
           {...motionProps}
         >
           {children[activeIndex]}
