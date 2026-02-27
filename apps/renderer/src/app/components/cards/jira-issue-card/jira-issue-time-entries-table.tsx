@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { useInView } from 'motion/react';
 import {
   AnimatedGroup,
@@ -33,19 +33,12 @@ function AnimatedDurationTotal({ totalSeconds }: { totalSeconds: number }) {
     duration: 2000,
   };
 
-  const formatter = useCallback((seconds: number) => {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-
-    return h > 0 ? `${h}h ${m}m` : `${m}m`;
-  }, []);
-
   return (
     <span ref={ref} className="inline-flex items-baseline tabular-nums">
       <AnimatedNumber
         value={displaySeconds}
         springOptions={springOptions}
-        formatter={formatter}
+        formatter={formatDuration}
       />
     </span>
   );
