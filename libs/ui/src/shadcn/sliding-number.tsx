@@ -2,24 +2,32 @@
 import { useEffect, useId } from 'react';
 import {
   MotionValue,
-  animate,
   motion,
+  useSpring,
   useTransform,
   motionValue,
 } from 'motion/react';
 import useMeasure from 'react-use-measure';
 
+const TRANSITION = {
+  type: 'spring',
+  stiffness: 280,
+  damping: 18,
+  mass: 0.3,
+} as const;
+
 function Digit({ value, place }: { value: number; place: number }) {
   const valueRoundedToPlace = Math.floor(value / place) % 10;
-  const animatedValue = motionValue(valueRoundedToPlace);
+  const initial = motionValue(valueRoundedToPlace);
+  const animatedValue = useSpring(initial, TRANSITION);
 
   useEffect(() => {
-    animate(animatedValue, valueRoundedToPlace);
+    animatedValue.set(valueRoundedToPlace);
   }, [animatedValue, valueRoundedToPlace]);
 
   return (
-    <div className="relative inline-block w-[1ch] overflow-x-visible overflow-y-clip leading-none tabular-nums">
-      <div className="invisible">0</div>
+    <div className='relative inline-block w-[1ch] overflow-x-visible overflow-y-clip leading-none tabular-nums'>
+      <div className='invisible'>0</div>
       {Array.from({ length: 10 }, (_, i) => (
         <Number key={i} mv={animatedValue} number={i} />
       ))}
@@ -47,7 +55,7 @@ function Number({ mv, number }: { mv: MotionValue<number>; number: number }) {
   // don't render the animated number until we know the height
   if (!bounds.height) {
     return (
-      <span ref={ref} className="invisible absolute">
+      <span ref={ref} className='invisible absolute'>
         {number}
       </span>
     );
@@ -57,7 +65,8 @@ function Number({ mv, number }: { mv: MotionValue<number>; number: number }) {
     <motion.span
       style={{ y }}
       layoutId={`${uniqueId}-${number}`}
-      className="absolute inset-0 flex items-center justify-center"
+      className='absolute inset-0 flex items-center justify-center'
+      transition={TRANSITION}
       ref={ref}
     >
       {number}
@@ -87,7 +96,7 @@ export function SlidingNumber({
   );
 
   return (
-    <div className="flex items-center">
+    <div className='flex items-center'>
       {value < 0 && '-'}
       {integerDigits.map((_, index) => (
         <Digit
