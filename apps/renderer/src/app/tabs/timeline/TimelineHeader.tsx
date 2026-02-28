@@ -82,7 +82,7 @@ export function TimelineHeader({
         </Popover>
         <motion.div
           layoutId="sub-header-pill"
-          className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-2 text-muted-foreground"
+          className="inline-flex h-9 items-center justify-center rounded-lg bg-primary/5 p-2 text-muted-foreground"
         >
           <AnimatedBackground
             defaultValue={view}

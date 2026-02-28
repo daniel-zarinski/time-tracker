@@ -66,7 +66,7 @@ export function JiraIssuesTab() {
           <div className="w-full max-w-md mx-auto px-4 pb-2 flex justify-center">
             <motion.div
               layoutId="sub-header-pill"
-              className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-2 text-muted-foreground"
+              className="inline-flex h-9 items-center justify-center rounded-lg bg-primary/5 p-2 text-muted-foreground"
             >
               <AnimatedBackground
                 defaultValue={effectiveTab}
