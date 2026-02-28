@@ -16,6 +16,9 @@ const electronApi: ElectronApi = {
   showItemInFolder: (path: string) =>
     ipcRenderer.invoke('shell:show-item-in-folder', path),
   platform: process.platform,
+  closeWindow: () => ipcRenderer.invoke('window:close'),
+  minimizeWindow: () => ipcRenderer.invoke('window:minimize'),
+  toggleMaximize: () => ipcRenderer.invoke('window:toggle-maximize'),
 };
 
 const databaseApi: DatabaseApi = {

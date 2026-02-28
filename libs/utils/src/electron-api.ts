@@ -104,4 +104,7 @@ export interface ElectronApi {
   openJiraExternal: (issueKey: string) => Promise<void>;
   showItemInFolder: (path: string) => Promise<void>;
   platform: string;
+  closeWindow: () => Promise<void>;
+  minimizeWindow: () => Promise<void>;
+  toggleMaximize: () => Promise<void>;
 }

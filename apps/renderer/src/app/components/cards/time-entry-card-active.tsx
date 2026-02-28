@@ -82,7 +82,7 @@ export function TimeEntryCardActive({
           </span>
         </div>
 
-        <div className="shrink-0 font-bold text-foreground texst-sm font-mono flex items-center">
+        <span className="shrink-0 font-bold text-foreground text-sm font-mono flex items-center">
           <SlidingNumber value={Math.floor(elapsedSeconds / 3600)} padStart />
           <span>:</span>
           <SlidingNumber
@@ -91,7 +91,7 @@ export function TimeEntryCardActive({
           />
           <span>:</span>
           <SlidingNumber value={elapsedSeconds % 60} padStart />
-        </div>
+        </span>
 
         <Button
           variant="destructive"

@@ -12,6 +12,7 @@ import {
 import { useActiveTimeEntry, useJiraIssue, useTimeEntryMutations, useWindowFocus } from '@time-tracker/hooks';
 
 import { ActiveTimeEntryHeaderTimer } from './components/active-time-entry-header-timer';
+import { WindowControls } from './components/window-controls';
 import { SettingsTab, JiraIssuesTab, MainTabList } from './tabs';
 import { useAppStore } from './store';
 import { useAppCommands } from './use-app-commands';
@@ -41,7 +42,9 @@ export function App() {
           className="sticky top-0 z-40 flex items-center justify-between bg-background pt-2"
           style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
         >
-          <div className="flex-1" aria-hidden />
+          <div className="flex min-w-0 flex-1 items-center" aria-hidden>
+            <WindowControls />
+          </div>
           <MainTabList />
           <div className="flex min-w-0 flex-1 items-center justify-end gap-2 pr-2">
             <ActiveTimeEntryHeaderTimer />

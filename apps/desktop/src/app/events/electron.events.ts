@@ -4,6 +4,7 @@
  */
 
 import { app, ipcMain, shell } from 'electron';
+import App from '../app';
 import { environment } from '../../environments/environment';
 import { jiraDomain } from '@time-tracker/schema';
 import {
@@ -64,3 +65,17 @@ ipcMain.handle('store:get-app-theme', () => getAppTheme());
 ipcMain.handle('store:set-app-theme', (_, theme) => setAppTheme(theme));
 ipcMain.handle('store:get-accent-color', () => getAccentColor());
 ipcMain.handle('store:set-accent-color', (_, color) => setAccentColor(color));
+
+// Window controls (for custom title bar on Windows)
+ipcMain.handle('window:close', () => {
+  App.mainWindow?.close();
+});
+ipcMain.handle('window:minimize', () => {
+  App.mainWindow?.minimize();
+});
+ipcMain.handle('window:toggle-maximize', () => {
+  const win = App.mainWindow;
+  if (!win) return;
+  if (win.isMaximized()) win.unmaximize();
+  else win.maximize();
+});
