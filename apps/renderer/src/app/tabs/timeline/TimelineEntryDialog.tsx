@@ -62,8 +62,8 @@ export function TimelineEntryDialog({
       triggerClassName={cn(
         'pointer-events-auto absolute inset-y-0.5 inset-x-[22px] px-2 pt-0 pb-2 text-left transition-colors',
         isActive
-          ? 'border border-primary/30 bg-primary/10 hover:bg-primary/15 hover:border-primary/50'
-          : 'border border-primary/20 bg-primary/5 hover:bg-primary/10 hover:border-primary/50',
+          ? 'border border-primary/30 bg-primary/15 hover:bg-primary/25 hover:border-primary/50'
+          : 'border border-primary/20 bg-primary/10 hover:bg-primary/20 hover:border-primary/50',
         totalColumns > 1 && 'inset-y-0.5'
       )}
       triggerStyle={{
