@@ -1,7 +1,4 @@
 import type { TimeEntryWithIssue } from '@time-tracker/database';
-import { cn, SECONDS_PER_WORKDAY } from '@time-tracker/utils';
-import { SquareIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import {
   Badge,
   Button,
@@ -9,10 +6,10 @@ import {
   CardHeader,
   Progress,
   SlidingNumber,
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
 } from '@time-tracker/ui';
+import { cn, SECONDS_PER_WORKDAY } from '@time-tracker/utils';
+import { SquareIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { JiraIssueKeyBadge } from '../jira-issue-key-badge';
 import { JiraIssueTypeBadge } from '../jira-issue-type-badge';
 
