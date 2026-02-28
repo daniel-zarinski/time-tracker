@@ -6,3 +6,4 @@ export { useThemeConfig } from './use-theme-config';
 export * from './use-mobile';
 export * from './use-system-theme';
 export * from './useClickOutside';
+export * from './use-window-focus';

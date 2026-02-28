@@ -9,7 +9,7 @@ import {
   DialogContent,
   TransitionPanel,
 } from '@time-tracker/ui';
-import { useActiveTimeEntry, useJiraIssue, useTimeEntryMutations } from '@time-tracker/hooks';
+import { useActiveTimeEntry, useJiraIssue, useTimeEntryMutations, useWindowFocus } from '@time-tracker/hooks';
 
 import { ActiveTimeEntryHeaderTimer } from './components/active-time-entry-header-timer';
 import { SettingsTab, JiraIssuesTab, MainTabList } from './tabs';
@@ -25,6 +25,7 @@ export function App() {
   const setSelectedTimeEntry = useAppStore.use.setSelectedTimeEntry();
   const [commandOpen, setCommandOpen] = React.useState(false);
   const { commands } = useAppCommands();
+  useWindowFocus();
 
   const issueQuery = useJiraIssue(selectedIssueKey);
   const { data: activeEntry } = useActiveTimeEntry();
