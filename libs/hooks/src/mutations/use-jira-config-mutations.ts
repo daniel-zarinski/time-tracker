@@ -4,6 +4,20 @@ import { queryKeys } from '../query-keys';
 
 const TOAST_ID = 'jira-settings';
 
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  if (
+    err &&
+    typeof err === 'object' &&
+    'message' in err &&
+    typeof (err as { message?: unknown }).message === 'string'
+  ) {
+    return (err as { message: string }).message;
+  }
+  if (typeof err === 'string') return err;
+  return 'Failed to save Jira settings';
+}
+
 export function useJiraConfigMutations() {
   const queryClient = useQueryClient();
 
@@ -15,9 +29,7 @@ export function useJiraConfigMutations() {
       toast.success('Settings saved', { id: TOAST_ID });
     },
     onError: (err: unknown) => {
-      const message =
-        err instanceof Error ? err.message : 'Failed to save Jira settings';
-      toast.error(message, { id: TOAST_ID });
+      toast.error(getErrorMessage(err), { id: TOAST_ID });
     },
   });
 
@@ -31,8 +43,8 @@ export function useJiraConfigMutations() {
       queryClient.invalidateQueries({ queryKey: queryKeys.jira.config });
       toast.success('Connected', { id: TOAST_ID });
     },
-    onError: () => {
-      toast.error('Connection failed', { id: TOAST_ID });
+    onError: (err: unknown) => {
+      toast.error(getErrorMessage(err) || 'Connection failed', { id: TOAST_ID });
     },
   });
 
