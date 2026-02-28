@@ -45,7 +45,7 @@ export function SettingsTab() {
                   setActiveSubtab(id as SubtabId);
                 }
               }}
-              className="rounded-md bg-background shadow-sm"
+              className="rounded-md bg-primary/10 shadow-sm"
               transition={DEFAULT_TRANSITION}
             >
               {subtabs.map((tab) => (

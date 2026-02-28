@@ -183,13 +183,13 @@ export function TimeEntryCardDefault({
         )}
         {state === 'default' && onResumeTimer && (
           <Button
-            variant="outline"
+            variant="secondary"
             size="xs"
-            className="absolute bottom-2.5 right-3"
+            className="absolute bottom-2.5 right-3 bg-primary/10 text-primary hover:bg-primary/20"
             onClick={() => onResumeTimer(issueKey)}
           >
             <PlayIcon className="size-3" />
-            Resume
+            Start
           </Button>
         )}
       </motion.div>

@@ -89,7 +89,7 @@ export function TimelineHeader({
             onValueChange={(id) => {
               if (id) onViewChange(id as TimelineView);
             }}
-            className="rounded-md bg-background shadow-sm"
+            className="rounded-md bg-primary/10 shadow-sm"
             transition={{ type: 'spring', bounce: 0.2, duration: 0.3 }}
           >
             <button

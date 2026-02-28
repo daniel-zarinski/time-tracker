@@ -86,14 +86,14 @@ export function TimeEntryCardActive({
         </div>
 
         <Tooltip>
-          <TooltipTrigger className="shrink-0 font-bold text-primary text-sm font-mono flex items-center">
+          <TooltipTrigger className="shrink-0 font-medium text-foreground text-sm font-mono flex items-center">
             <SlidingNumber value={Math.floor(elapsedSeconds / 3600)} padStart />
-            <span className="text-foreground/90">:</span>
+            <span>:</span>
             <SlidingNumber
               value={Math.floor((elapsedSeconds % 3600) / 60)}
               padStart
             />
-            <span className="text-foreground/90">:</span>
+            <span>:</span>
             <SlidingNumber value={elapsedSeconds % 60} padStart />
           </TooltipTrigger>
           <TooltipContent side="bottom">

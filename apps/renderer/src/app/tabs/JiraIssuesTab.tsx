@@ -81,7 +81,7 @@ export function JiraIssuesTab() {
                     }
                   }
                 }}
-                className="rounded-md bg-background shadow-sm"
+                className="rounded-md bg-primary/10 shadow-sm"
                 transition={DEFAULT_TRANSITION}
               >
                 {statuses.map((status) => (
