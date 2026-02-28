@@ -4,6 +4,7 @@ import {
   Button,
   Card,
   CardHeader,
+  DEFAULT_TRANSITION,
   Progress,
   SlidingNumber,
 } from '@time-tracker/ui';
@@ -12,6 +13,7 @@ import { SquareIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { JiraIssueKeyBadge } from '../jira-issue-key-badge';
 import { JiraIssueTypeBadge } from '../jira-issue-type-badge';
+import { MotionConfig } from 'motion/react';
 
 interface TimeEntryCardActiveProps {
   entry: TimeEntryWithIssue;
@@ -82,16 +84,19 @@ export function TimeEntryCardActive({
           </span>
         </div>
 
-        <span className="shrink-0 font-bold text-foreground text-sm font-mono flex items-center">
-          <SlidingNumber value={Math.floor(elapsedSeconds / 3600)} padStart />
-          <span>:</span>
-          <SlidingNumber
-            value={Math.floor((elapsedSeconds % 3600) / 60)}
-            padStart
-          />
-          <span>:</span>
-          <SlidingNumber value={elapsedSeconds % 60} padStart />
-        </span>
+        <MotionConfig transition={DEFAULT_TRANSITION}>
+          <span className="shrink-0 font-bold text-foreground text-sm font-mono flex items-center">
+            <SlidingNumber value={Math.floor(elapsedSeconds / 3600)} padStart />
+            <span>:</span>
+            <SlidingNumber
+              value={Math.floor((elapsedSeconds % 3600) / 60)}
+              padStart
+            />
+            <span>:</span>
+            <SlidingNumber value={elapsedSeconds % 60} padStart />
+          </span>
+        </MotionConfig>
+
 
         <Button
           variant="destructive"
