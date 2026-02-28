@@ -22,6 +22,10 @@
     "make": "nx run desktop:make"
   },
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/daniel-zarinski/time-tracker.git"
+  },
   "devDependencies": {
     "@eslint/js": "^9.8.0",
     "@nx/eslint": "22.5.3",
@@ -84,6 +88,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "electron-store": "^11.0.2",
+    "electron-updater": "^6.8.3",
     "lucide-react": "^0.575.0",
     "motion": "^12.34.3",
     "prisma": "^7.4.2",
