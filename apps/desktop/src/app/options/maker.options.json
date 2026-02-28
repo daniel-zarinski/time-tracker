@@ -41,6 +41,9 @@
       }
     ]
   },
+  "nsis": {
+    "artifactName": "${productName}-Setup-${version}.${ext}"
+  },
   "publish": {
     "provider": "github",
     "owner": "daniel-zarinski",
