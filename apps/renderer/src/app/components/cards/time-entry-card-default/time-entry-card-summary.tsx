@@ -21,7 +21,7 @@ export function TimeEntryCardSummary({
       <span className="mx-auto">
         {formatTime(startDate)} → {formatTime(endDate)}
       </span>
-      <span className="font-bold text-foreground">
+      <span>
         {formatDuration(duration)}
       </span>
     </div>
