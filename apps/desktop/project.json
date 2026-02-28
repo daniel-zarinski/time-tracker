@@ -6,7 +6,7 @@
   "targets": {
     "build": {
       "executor": "nx-electron:build",
-      "dependsOn": ["database:generate"],
+      "dependsOn": ["database:generate", "^typecheck"],
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/desktop",
