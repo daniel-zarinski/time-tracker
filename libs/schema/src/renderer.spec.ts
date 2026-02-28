@@ -1,7 +1,7 @@
 import { TabValueSchema, PersistedStateSchema } from './renderer';
 
 describe('TabValueSchema', () => {
-  const validTabs = ['home', 'tasks', 'timeline', 'jira-issues', 'settings'];
+  const validTabs = ['home', 'jira-issues', 'settings'];
 
   it.each(validTabs)('accepts "%s"', (tab) => {
     const result = TabValueSchema.safeParse(tab);
@@ -31,7 +31,7 @@ describe('PersistedStateSchema', () => {
   it('accepts zero elapsed', () => {
     const result = PersistedStateSchema.safeParse({
       elapsed: 0,
-      activeTab: 'tasks',
+      activeTab: 'home',
     });
     expect(result.success).toBe(true);
   });
