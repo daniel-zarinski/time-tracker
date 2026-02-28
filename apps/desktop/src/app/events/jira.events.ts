@@ -43,7 +43,8 @@ export function bootstrapJiraEvents(): void {
           accountId: myself.accountId,
         });
       } catch (err) {
-        throw serializeError(err);
+        const { message } = serializeError(err);
+        throw new Error(message);
       }
     }
   );
@@ -65,7 +66,8 @@ export function bootstrapJiraEvents(): void {
         }
         return myself;
       } catch (err) {
-        throw serializeError(err);
+        const { message } = serializeError(err);
+        throw new Error(message);
       }
     }
   );
@@ -88,7 +90,8 @@ export function bootstrapJiraEvents(): void {
         const service = new JiraService(config);
         return service.fetchIssue(key);
       } catch (err) {
-        throw serializeError(err);
+        const { message } = serializeError(err);
+        throw new Error(message);
       }
     }
   );
@@ -104,7 +107,8 @@ export function bootstrapJiraEvents(): void {
         const service = new JiraService(config);
         return service.fetchIssues(options);
       } catch (err) {
-        throw serializeError(err);
+        const { message } = serializeError(err);
+        throw new Error(message);
       }
     }
   );
@@ -119,7 +123,8 @@ export function bootstrapJiraEvents(): void {
         const service = new JiraService(config);
         return service.fetchMyIssues(normalizedProject);
       } catch (err) {
-        throw serializeError(err);
+        const { message } = serializeError(err);
+        throw new Error(message);
       }
     }
   );
@@ -142,7 +147,8 @@ export function bootstrapJiraEvents(): void {
         const service = new JiraService(config);
         return service.fetchStatusesForKeys(keys);
       } catch (err) {
-        throw serializeError(err);
+        const { message } = serializeError(err);
+        throw new Error(message);
       }
     }
   );
@@ -186,7 +192,8 @@ export function bootstrapJiraEvents(): void {
         const prisma = getClient();
         await updateStatusCategory(prisma, statusId, categoryName);
       } catch (err) {
-        throw serializeError(err);
+        const { message } = serializeError(err);
+        throw new Error(message);
       }
     }
   );
