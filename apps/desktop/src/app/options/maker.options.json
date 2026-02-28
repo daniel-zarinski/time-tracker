@@ -10,10 +10,6 @@
     {
       "from": "dist/apps/desktop/prisma.config.ts",
       "to": "prisma.config.ts"
-    },
-    {
-      "from": "node_modules/@prisma/engines/schema-engine-darwin-arm64",
-      "to": "schema-engine-darwin-arm64"
     }
   ],
   "files": [
@@ -26,7 +22,24 @@
   "mac": {
     "target": ["zip"],
     "icon": "apps/desktop/src/assets/stopwatch.png",
-    "identity": null
+    "identity": null,
+    "extraResources": [
+      {
+        "from": "node_modules/@prisma/engines/schema-engine-darwin-arm64",
+        "to": "schema-engine-darwin-arm64"
+      }
+    ]
+  },
+  "win": {
+    "target": ["nsis"],
+    "icon": "apps/desktop/src/assets/icon.ico",
+    "requestedExecutionLevel": "asInvoker",
+    "extraResources": [
+      {
+        "from": "node_modules/@prisma/engines/schema-engine-windows.exe",
+        "to": "schema-engine-windows.exe"
+      }
+    ]
   },
   "productName": "TimeTracker"
 }
