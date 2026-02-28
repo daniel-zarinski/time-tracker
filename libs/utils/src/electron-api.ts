@@ -44,6 +44,17 @@ export interface DatabaseApi {
   ) => Promise<TimeEntryWithIssue>;
 }
 
+/** Accent color options for UI customization */
+export type AccentColor =
+  | 'blue'
+  | 'purple'
+  | 'pink'
+  | 'red'
+  | 'orange'
+  | 'yellow'
+  | 'green'
+  | 'graphite';
+
 /** Store IPC API exposed to the renderer */
 export interface StoreApi {
   get: (key: string) => Promise<unknown>;
@@ -54,6 +65,8 @@ export interface StoreApi {
   setTempoConfig: (config: TempoConfig) => Promise<void>;
   getAppTheme: () => Promise<'light' | 'dark' | undefined>;
   setAppTheme: (theme: 'light' | 'dark') => Promise<void>;
+  getAccentColor: () => Promise<AccentColor | undefined>;
+  setAccentColor: (color: AccentColor | undefined) => Promise<void>;
 }
 
 /** Jira IPC API exposed to the renderer */
