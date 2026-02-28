@@ -32,8 +32,15 @@ export function bootstrapJiraEvents(): void {
   ipcMain.handle(
     'jira:save-config',
     async (_event, input: JiraConfigInput): Promise<void> => {
-      const config = resolveConfig(input);
+      // Save credentials immediately (like Tempo) — don't require connection test
+      setJiraConfig({
+        company: input.company,
+        email: input.email,
+        token: input.token,
+      });
+      // Optionally validate and populate accountId in background
       try {
+        const config = resolveConfig(input);
         const service = new JiraService(config);
         const myself = await service.testConnection();
         setJiraConfig({
@@ -42,9 +49,8 @@ export function bootstrapJiraEvents(): void {
           token: input.token,
           accountId: myself.accountId,
         });
-      } catch (err) {
-        const { message } = serializeError(err);
-        throw new Error(message);
+      } catch {
+        // Credentials already saved; accountId will be fetched when user tests connection
       }
     }
   );
