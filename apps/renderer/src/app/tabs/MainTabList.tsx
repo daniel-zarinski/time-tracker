@@ -21,7 +21,7 @@ export function MainTabList() {
         onValueChange={(id) => {
           if (id) setActiveTab(id as TabValue);
         }}
-        className="rounded-md bg-background shadow-sm"
+        className="rounded-md bg-primary/10 shadow-sm"
         transition={DEFAULT_TRANSITION}
       >
         {tabs.map((tab) => (

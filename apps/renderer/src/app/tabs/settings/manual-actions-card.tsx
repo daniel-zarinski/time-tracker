@@ -49,7 +49,7 @@ export function ManualActionsCard() {
             </FieldDescription>
             <Field orientation="horizontal" className="flex-wrap gap-2">
               <Button
-                variant="outline"
+                variant="default"
                 type="button"
                 size="sm"
                 onClick={() => fetchAllMyIssues.mutate()}
@@ -61,7 +61,7 @@ export function ManualActionsCard() {
                   : 'Sync all my issues'}
               </Button>
               <Button
-                variant="outline"
+                variant="default"
                 type="button"
                 size="sm"
                 onClick={() => fetchMissingIssues.mutate()}
@@ -73,7 +73,7 @@ export function ManualActionsCard() {
                   : 'Sync missing issues'}
               </Button>
               <Button
-                variant="outline"
+                variant="default"
                 type="button"
                 size="sm"
                 onClick={() => syncStatuses.mutate()}
@@ -95,7 +95,7 @@ export function ManualActionsCard() {
             </FieldDescription>
             <Field orientation="horizontal">
               <Button
-                variant="outline"
+                variant="default"
                 type="button"
                 size="sm"
                 onClick={() => syncWorklogs.mutate()}

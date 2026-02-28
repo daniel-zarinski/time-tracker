@@ -8,7 +8,7 @@ interface JiraIssueKeyBadgeProps {
 }
 
 const baseStyles =
-  'inline-flex items-center justify-center rounded-full border border-border text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-muted-foreground/70 shrink-0 w-fit whitespace-nowrap';
+  'inline-flex items-center justify-center rounded-full border border-primary/25 text-[9px] font-bold tracking-wide px-1.5 py-0 h-4 text-primary/70 shrink-0 w-fit whitespace-nowrap';
 
 const interactiveStyles =
   'cursor-pointer hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:border-ring focus-visible:outline-none transition-[color,box-shadow] bg-transparent';

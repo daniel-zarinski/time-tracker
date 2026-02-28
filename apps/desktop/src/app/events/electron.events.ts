@@ -14,6 +14,8 @@ import {
   setTempoConfig,
   getAppTheme,
   setAppTheme,
+  getAccentColor,
+  setAccentColor,
 } from '../store/config-store';
 
 export default class ElectronEvents {
@@ -60,3 +62,5 @@ ipcMain.handle('store:get-tempo-config', () => getTempoConfig());
 ipcMain.handle('store:set-tempo-config', (_, config) => setTempoConfig(config));
 ipcMain.handle('store:get-app-theme', () => getAppTheme());
 ipcMain.handle('store:set-app-theme', (_, theme) => setAppTheme(theme));
+ipcMain.handle('store:get-accent-color', () => getAccentColor());
+ipcMain.handle('store:set-accent-color', (_, color) => setAccentColor(color));

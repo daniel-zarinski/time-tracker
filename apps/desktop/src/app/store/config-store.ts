@@ -11,6 +11,7 @@ import type { JiraConfigInput, TempoConfig } from '@time-tracker/schema';
 const JIRA_CONFIG_KEY = 'jira.config' as const;
 const TEMPO_CONFIG_KEY = 'tempo.config' as const;
 const APP_THEME_KEY = 'app.theme' as const;
+const APP_ACCENT_KEY = 'app.accent' as const;
 
 export type AppTheme = 'light' | 'dark';
 
@@ -36,6 +37,11 @@ const schema = {
   [APP_THEME_KEY]: {
     type: 'string',
     enum: ['light', 'dark'],
+    default: undefined,
+  },
+  [APP_ACCENT_KEY]: {
+    type: 'string',
+    enum: ['blue', 'purple', 'pink', 'red', 'orange', 'yellow', 'green', 'graphite'],
     default: undefined,
   },
 } as const;
@@ -85,4 +91,22 @@ export function getAppTheme(): AppTheme | undefined {
 
 export function setAppTheme(theme: AppTheme): void {
   configStore.set(APP_THEME_KEY, theme);
+}
+
+const VALID_ACCENTS = new Set([
+  'blue', 'purple', 'pink', 'red', 'orange', 'yellow', 'green', 'graphite',
+]);
+
+export function getAccentColor(): string | undefined {
+  const raw = configStore.get(APP_ACCENT_KEY);
+  if (typeof raw === 'string' && VALID_ACCENTS.has(raw)) return raw;
+  return undefined;
+}
+
+export function setAccentColor(color: string | undefined): void {
+  if (color === undefined) {
+    configStore.delete(APP_ACCENT_KEY);
+  } else {
+    configStore.set(APP_ACCENT_KEY, color);
+  }
 }

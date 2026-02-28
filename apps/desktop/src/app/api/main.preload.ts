@@ -64,6 +64,9 @@ const storeApi: StoreApi = {
   getAppTheme: () => ipcRenderer.invoke('store:get-app-theme'),
   setAppTheme: (theme: 'light' | 'dark') =>
     ipcRenderer.invoke('store:set-app-theme', theme),
+  getAccentColor: () => ipcRenderer.invoke('store:get-accent-color'),
+  setAccentColor: (color) =>
+    ipcRenderer.invoke('store:set-accent-color', color),
 };
 
 const jiraApi: JiraApi = {

@@ -36,18 +36,18 @@ export function TimelineEntryDialog({
   const trigger = (
     <>
       {isActive && <BorderTrail size={100} variant="red" />}
-      <div className="truncate text-xs text-primary flex items-center">
+      <div className="truncate text-xs text-foreground flex items-center">
         <MorphingDialogTitle className="font-semibold">
           {issueKey}
         </MorphingDialogTitle>
         {entry.issue.summary && (
-          <MorphingDialogSubtitle className="ml-1.5 text-primary/60">
+          <MorphingDialogSubtitle className="ml-1.5 text-foreground/60">
             {entry.issue.summary}
           </MorphingDialogSubtitle>
         )}
       </div>
       {gridRowSpan >= 2 && (
-        <p className="mt-0.5 text-[10px] text-primary/60">
+        <p className="mt-0.5 text-[10px] text-foreground/60">
           {formatEntryTime(new Date(entry.startedAt))}
           {entryEnd ? ` - ${formatEntryTime(entryEnd)}` : ''}
         </p>
@@ -62,8 +62,8 @@ export function TimelineEntryDialog({
       triggerClassName={cn(
         'pointer-events-auto absolute inset-y-0.5 inset-x-[22px] px-2 pt-0 pb-2 text-left transition-colors',
         isActive
-          ? 'border border-primary/30 bg-muted/70 hover:bg-card/60 hover:border-primary/50'
-          : 'border border-primary/20 bg-card/50 hover:bg-card/60 hover:border-primary/50',
+          ? 'border border-primary/30 bg-primary/10 hover:bg-primary/15 hover:border-primary/50'
+          : 'border border-primary/20 bg-primary/5 hover:bg-primary/10 hover:border-primary/50',
         totalColumns > 1 && 'inset-y-0.5'
       )}
       triggerStyle={{

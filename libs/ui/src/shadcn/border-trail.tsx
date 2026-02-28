@@ -1,7 +1,14 @@
 'use client';
 import { cn } from '@time-tracker/utils';
-import { motion, Transition } from 'motion/react';
-import { useEffect, useState } from 'react';
+
+let keyframesInjected = false;
+function injectKeyframes() {
+  if (keyframesInjected) return;
+  keyframesInjected = true;
+  const style = document.createElement('style');
+  style.textContent = '@keyframes border-trail{from{offset-distance:0%}to{offset-distance:100%}}';
+  document.head.appendChild(style);
+}
 
 const BORDER_TRAIL_VARIANTS = {
   default: {
@@ -19,8 +26,7 @@ const BORDER_TRAIL_VARIANTS = {
 export type BorderTrailProps = {
   className?: string;
   size?: number;
-  transition?: Transition;
-  onAnimationComplete?: () => void;
+  duration?: number;
   style?: React.CSSProperties;
   variant?: keyof typeof BORDER_TRAIL_VARIANTS;
 };
@@ -28,50 +34,24 @@ export type BorderTrailProps = {
 export function BorderTrail({
   className,
   size = 60,
-  transition,
-  onAnimationComplete,
+  duration = 5,
   style,
   variant = 'default',
 }: BorderTrailProps) {
-  const defaultTransition: Transition = {
-    repeat: Infinity,
-    duration: 5,
-    ease: 'linear',
-  };
-
   const variantConfig = BORDER_TRAIL_VARIANTS[variant];
-  const [key, setKey] = useState(0);
-  useEffect(() => {
-    const h = () => {
-      if (document.visibilityState === 'visible') setKey((k) => k + 1);
-    };
-    document.addEventListener('visibilitychange', h);
-    if (document.visibilityState === 'visible') {
-      requestAnimationFrame(() => setKey((k) => k + 1));
-    }
-    return () => document.removeEventListener('visibilitychange', h);
-  }, []);
+  injectKeyframes();
 
   return (
     <div className="pointer-events-none absolute inset-0 rounded-[inherit] border border-transparent [mask-clip:padding-box,border-box] [mask-composite:intersect] [mask-image:linear-gradient(transparent,transparent),linear-gradient(#000,#000)]">
-      <motion.div
-        key={key}
-        className={cn(
-          'absolute aspect-square',
-          variantConfig.className,
-          className
-        )}
+      <div
+        className={cn('absolute aspect-square', variantConfig.className, className)}
         style={{
           width: size,
           offsetPath: `rect(0 auto auto 0 round ${size}px)`,
           boxShadow: variantConfig.boxShadow,
+          animation: `border-trail ${duration}s linear infinite`,
           ...style,
         }}
-        animate={{
-          offsetDistance: ['0%', '100%'],
-        }}
-        transition={transition || defaultTransition}
-        onAnimationComplete={onAnimationComplete}
       />
     </div>
   );

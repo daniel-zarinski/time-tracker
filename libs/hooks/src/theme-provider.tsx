@@ -4,6 +4,7 @@ import {
   useContext,
   useMemo,
 } from 'react';
+import type { AccentColor } from '@time-tracker/utils';
 import { useThemeConfig } from './use-theme-config';
 
 export type ThemeValue = 'light' | 'dark';
@@ -11,6 +12,8 @@ export type ThemeValue = 'light' | 'dark';
 export interface ThemeConfigContextValue {
   theme: ThemeValue;
   setTheme: (value: ThemeValue) => void;
+  accentColor: AccentColor | undefined;
+  setAccentColor: (color: AccentColor | undefined) => void;
   isLoading: boolean;
 }
 
@@ -23,9 +26,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     () => ({
       theme: config.theme,
       setTheme: config.setTheme,
+      accentColor: config.accentColor,
+      setAccentColor: config.setAccentColor,
       isLoading: config.isLoading,
     }),
-    [config.theme, config.setTheme, config.isLoading]
+    [config.theme, config.setTheme, config.accentColor, config.setAccentColor, config.isLoading]
   );
 
   return (
