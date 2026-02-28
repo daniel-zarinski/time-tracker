@@ -27,6 +27,7 @@
         ],
         "externalDependencies": [
           "electron",
+          "electron-log",
           "electron-updater",
           "@prisma/client",
           ".prisma/client",
