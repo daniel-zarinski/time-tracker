@@ -24,6 +24,10 @@ jobs:
 
       - run: npm ci
 
+      - name: Set version from tag
+        run: npm pkg set version=${GITHUB_REF#refs/tags/v}
+        shell: bash
+
       - run: echo 'DATABASE_URL=file:./database.sqlite3' > .env
 
       - name: Build and package
@@ -36,12 +40,10 @@ jobs:
         with:
           name: ${{ matrix.os }}-build
           path: |
-            dist/executables/**/*.zip
-            dist/executables/**/*.exe
-            dist/executables/**/*.dmg
-            dist/executables/**/*.msi
-            dist/executables/**/*.yml
-            dist/executables/**/*.blockmap
+            dist/executables/*.zip
+            dist/executables/*.exe
+            dist/executables/*.yml
+            dist/executables/*.blockmap
 
   release:
     needs: build
@@ -65,11 +67,9 @@ jobs:
         with:
           generate_release_notes: true
           files: |
-            release-artifacts/**/*.zip
-            release-artifacts/**/*.exe
-            release-artifacts/**/*.dmg
-            release-artifacts/**/*.msi
-            release-artifacts/**/*.yml
-            release-artifacts/**/*.blockmap
+            release-artifacts/dist/executables/*.zip
+            release-artifacts/dist/executables/*.exe
+            release-artifacts/dist/executables/*.yml
+            release-artifacts/dist/executables/*.blockmap
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
