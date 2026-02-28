@@ -18,29 +18,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Apps
 
-| App | Path | Description |
-|-----|------|-------------|
+| App        | Path             | Description                                           |
+| ---------- | ---------------- | ----------------------------------------------------- |
 | `renderer` | `apps/renderer/` | React frontend rendered inside Electron BrowserWindow |
-| `desktop` | `apps/desktop/` | Electron main process — windows, IPC, native APIs |
+| `desktop`  | `apps/desktop/`  | Electron main process — windows, IPC, native APIs     |
 
 ## Nx Commands
 
-| Task | Command |
-|------|---------|
-| Build frontend | `nx build renderer` |
-| Build electron | `nx build desktop` |
-| Test frontend | `nx test renderer` |
-| Lint | `nx lint renderer` / `nx lint desktop` |
-| Package electron | `nx run desktop:package` |
-| Make installer | `nx run desktop:make` |
-| Run affected tests | `nx affected --target=test` |
-| Typecheck all projects | `nx run-many -t typecheck` |
-| Dependency graph | `nx graph` |
-| Generate Prisma client | `nx run database:generate` |
-| Create migration | `nx run database:migrate-dev` |
-| Apply migrations (prod) | `nx run database:migrate-deploy` |
-| Push schema (no migration) | `nx run database:push` |
-| Open Prisma Studio | `nx run database:studio` |
+| Task                       | Command                                |
+| -------------------------- | -------------------------------------- |
+| Build frontend             | `nx build renderer`                    |
+| Build electron             | `nx build desktop`                     |
+| Test frontend              | `nx test renderer`                     |
+| Lint                       | `nx lint renderer` / `nx lint desktop` |
+| Package electron           | `nx run desktop:package`               |
+| Make installer             | `nx run desktop:make`                  |
+| Run affected tests         | `nx affected --target=test`            |
+| Typecheck all projects     | `nx run-many -t typecheck`             |
+| Dependency graph           | `nx graph`                             |
+| Generate Prisma client     | `nx run database:generate`             |
+| Create migration           | `nx run database:migrate-dev`          |
+| Apply migrations (prod)    | `nx run database:migrate-deploy`       |
+| Push schema (no migration) | `nx run database:push`                 |
+| Open Prisma Studio         | `nx run database:studio`               |
 
 **Before packaging:** Build both `renderer` and `desktop` first.
 
@@ -56,6 +56,7 @@ Frontend routing uses `HashRouter` and `baseHref` is set to `"./"` for Electron 
 ### IPC Pattern
 
 Electron's main process and renderer communicate via IPC:
+
 - **Main process** (`desktop`): Uses `ipcMain.handle()` / `ipcMain.on()`
 - **Renderer** (`renderer`): Uses `ipcRenderer.invoke()` / `ipcRenderer.send()` via a preload script
 
@@ -78,7 +79,7 @@ Research documentation lives in `docs/research/<package-name>/`. All research do
 <!-- nx configuration start-->
 <!-- Leave the start & end comments to automatically receive updates. -->
 
-# General Guidelines for working with Nx
+## General Guidelines for working with Nx
 
 - For navigating/exploring the workspace, invoke the `nx-workspace` skill first - it has patterns for querying projects, targets, and dependencies
 - When running tasks (for example build, lint, test, e2e, etc.), always prefer running the task through `nx` (i.e. `nx run`, `nx run-many`, `nx affected`) instead of using the underlying tooling directly
