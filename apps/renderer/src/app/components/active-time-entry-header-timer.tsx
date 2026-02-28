@@ -1,15 +1,16 @@
 import type { RefObject } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { motion, MotionConfig } from 'motion/react';
 import { SquareIcon } from 'lucide-react';
 import { cn } from '@time-tracker/utils';
 import {
   Button,
   DEFAULT_TRANSITION,
-  SlidingNumber,
+  ElapsedTimerDisplay,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
+  useElapsedSeconds,
 } from '@time-tracker/ui';
 import {
   useActiveTimeEntry,
@@ -22,25 +23,16 @@ export function ActiveTimeEntryHeaderTimer() {
   const { stopTracking } = useTimeEntryMutations();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [, setTick] = useState(0);
+  const elapsedSeconds = useElapsedSeconds(
+    entry?.startedAt ?? new Date(),
+    entry?.timeSpentSeconds
+  );
 
   useClickOutside(containerRef as RefObject<HTMLElement>, () => {
     setIsOpen(false);
   });
 
-  useEffect(() => {
-    if (!entry || entry.timeSpentSeconds != null) return;
-    const id = setInterval(() => setTick((t) => t + 1), 1000);
-    return () => clearInterval(id);
-  }, [entry?.timeSpentSeconds, entry]);
-
   if (!entry) return null;
-
-  const elapsedSeconds =
-    entry.timeSpentSeconds ??
-    Math.floor(
-      (new Date().getTime() - new Date(entry.startedAt).getTime()) / 1000
-    );
 
   const issueKey = entry.issue?.key ?? entry.issueKey;
   const startedAtStr = new Date(entry.startedAt).toLocaleTimeString();
@@ -72,19 +64,10 @@ export function ActiveTimeEntryHeaderTimer() {
           <div className="flex items-center gap-1 pl-1.5 pr-0.5 py-1">
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="shrink-0 font-bold text-primary text-sm font-mono flex items-center">
-                  <SlidingNumber
-                    value={Math.floor(elapsedSeconds / 3600)}
-                    padStart
-                  />
-                  <span>:</span>
-                  <SlidingNumber
-                    value={Math.floor((elapsedSeconds % 3600) / 60)}
-                    padStart
-                  />
-                  <span>:</span>
-                  <SlidingNumber value={elapsedSeconds % 60} padStart />
-                </span>
+                <ElapsedTimerDisplay
+                  elapsedSeconds={elapsedSeconds}
+                  className="shrink-0 font-bold text-primary text-sm"
+                />
               </TooltipTrigger>
               <TooltipContent side="left">{tooltipContent}</TooltipContent>
             </Tooltip>

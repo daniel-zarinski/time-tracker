@@ -1,4 +1,5 @@
 export * from './combobox-select';
+export * from './elapsed-timer';
 export * from './command-palette';
 export * from './jira-combobox-utils';
 export * from './constants';
