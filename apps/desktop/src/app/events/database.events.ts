@@ -23,6 +23,18 @@ import { JiraApiError } from '@time-tracker/jira';
 import { resolveConfig } from '../services/jira-service';
 import { destroyTray } from '../tray';
 
+function getSchemaEngineName(): string {
+  if (process.platform === 'win32') return 'schema-engine-windows.exe';
+  if (process.platform === 'darwin') {
+    return process.arch === 'arm64'
+      ? 'schema-engine-darwin-arm64'
+      : 'schema-engine-darwin';
+  }
+  if (process.platform === 'linux')
+    return 'schema-engine-debian-openssl-3.0.x';
+  throw new Error(`Unsupported platform: ${process.platform}`);
+}
+
 async function runMigrations(dbUrl: string): Promise<void> {
   // Schema, config, engine: extraResources in packaged, app path in dev
   const basePath = app.isPackaged ? process.resourcesPath : app.getAppPath();
@@ -50,10 +62,10 @@ async function runMigrations(dbUrl: string): Promise<void> {
     DATABASE_URL: dbUrl,
   };
   if (app.isPackaged) {
-    const platform = process.arch === 'arm64' ? 'darwin-arm64' : 'darwin';
+    const schemaEngineName = getSchemaEngineName();
     env.PRISMA_SCHEMA_ENGINE_BINARY = join(
       process.resourcesPath,
-      `schema-engine-${platform}`
+      schemaEngineName
     );
   }
 
