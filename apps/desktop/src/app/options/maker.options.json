@@ -41,5 +41,10 @@
       }
     ]
   },
+  "publish": {
+    "provider": "github",
+    "owner": "daniel-zarinski",
+    "repo": "time-tracker"
+  },
   "productName": "TimeTracker"
 }
