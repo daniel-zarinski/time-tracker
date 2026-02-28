@@ -58,6 +58,9 @@ jobs:
         with:
           generate_release_notes: true
           files: |
-            **/*
+            **/*.zip
+            **/*.exe
+            **/*.dmg
+            **/*.msi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
