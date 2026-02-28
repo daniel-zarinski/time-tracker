@@ -80,7 +80,7 @@ export function TimeEntryCardActive({
               {entry.issue.status ?? 'Unknown'}
             </Badge>
           </div>
-          <span className="text-sm text-foreground/90 wrap-break-word">
+          <span className="text-sm font-semibold text-foreground wrap-break-word">
             {entry.issue.summary ?? ''}
           </span>
         </div>

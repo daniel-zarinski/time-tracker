@@ -27,7 +27,7 @@ export function TimeEntryCardHeader({
       <CardTitle>
         <JiraIssueKeyBadge issueKey={issueKey} />
       </CardTitle>
-      <CardDescription className={cn('text-xs', truncate && 'truncate')}>
+      <CardDescription className={cn('text-xs font-semibold text-foreground', truncate && 'truncate')}>
         {summary}
       </CardDescription>
       {children && <CardAction>{children}</CardAction>}

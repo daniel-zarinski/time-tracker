@@ -47,7 +47,7 @@ export function ManualActionsCard() {
               issues&quot; to fetch only issues referenced in worklogs but not
               yet in your database.
             </FieldDescription>
-            <Field orientation="horizontal" className="flex-wrap gap-2">
+            <div className="flex flex-col items-start gap-2">
               <Button
                 variant="default"
                 type="button"
@@ -84,7 +84,7 @@ export function ManualActionsCard() {
                   ? 'Syncing…'
                   : 'Sync statuses'}
               </Button>
-            </Field>
+            </div>
           </FieldSet>
           <FieldSet className="gap-3">
             <FieldLegend>Sync Tempo</FieldLegend>

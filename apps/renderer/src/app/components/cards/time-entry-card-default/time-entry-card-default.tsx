@@ -37,7 +37,7 @@ function syncStatusStyles(status: string) {
     case 'ERROR':
       return 'border-destructive/20 bg-destructive/10';
     default:
-      return 'border-border bg-card/20';
+      return 'border-primary/10 bg-card/20';
   }
 }
 
@@ -107,7 +107,7 @@ export function TimeEntryCardDefault({
       className={cn(
         'transition-colors duration-200 border rounded-(--radius) shadow-none',
         syncStatusStyles(entry.syncStatus),
-        'hover:bg-card/70 hover:border-primary/20',
+        'hover:bg-primary/5 hover:border-primary/20',
         'py-0 gap-0',
         state === 'edit' && 'border-primary/25 bg-card/70 hover:bg-card/70',
         className
